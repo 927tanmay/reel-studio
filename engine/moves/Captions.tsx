@@ -6,7 +6,7 @@ import { px } from "../scale";
 import { textStyle, verticalPlacement } from "./text";
 
 /** Which media key's transcript this shot should caption from. */
-const primaryMediaKey = (resolved: ResolvedShot): string | null => {
+export const primaryMediaKey = (resolved: ResolvedShot): string | null => {
   const { shot } = resolved;
   if (typeof shot.src === "string") return shot.src;
   const banded = shot.bands?.regions.find((r) => typeof r.source === "string");
@@ -34,10 +34,17 @@ export const Captions: React.FC<{ spec: ReelSpec; resolved: ResolvedShot }> = ({
   const outSeconds = inSeconds + resolved.durationInFrames / fps;
 
   // Trim to this shot, then rebase onto shot-local time.
+  //
+  // words.json stores each word trimmed, with no leading space (so
+  // transcript.md can join them with its own separator). createTikTokStyleCaptions
+  // detects word boundaries — and decides where a page can break — entirely by
+  // checking whether a token's text starts with a space. Feed it trimmed text
+  // and every word looks like a continuation of the last: no spaces between
+  // rendered words, and no page ever breaks.
   const captions: Caption[] = allWords
     .filter((w) => w.endMs / 1000 > inSeconds && w.startMs / 1000 < outSeconds)
     .map((w) => ({
-      text: w.text,
+      text: ` ${w.text}`,
       startMs: w.startMs - inSeconds * 1000,
       endMs: w.endMs - inSeconds * 1000,
       timestampMs: w.timestampMs === null ? null : w.timestampMs - inSeconds * 1000,

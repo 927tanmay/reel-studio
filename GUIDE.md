@@ -117,7 +117,7 @@ as text, and wait for your approval. Or write it yourself.
 Here is a real one for a talking head plus a screen recording:
 
 ```ts
-import { punch, reel } from "../../../engine/spec";
+import { blend, punch, reel } from "../../../engine/spec";
 import { regionAt } from "../../../engine/scale";
 import { anchors } from "../../../engine/words";
 import tokens from "../../../projects/default/tokens";
@@ -146,15 +146,17 @@ export default reel({
 
   shots: [
     // A word-anchored punch inside one take: split the take at the word.
-    { src: "hook", seconds: at.start("everything"), captions: true },
+    // No `captions: true` needed — the hook clip has a transcript, so it
+    // gets captions on its own.
+    { src: "hook", seconds: at.start("everything") },
     {
       src: "hook",
       in: at.start("everything"),
-      captions: true,
       enter: punch({ to: 1.05, frames: 9 }),
     },
 
     // Screen recording, cropped tight and pushing in. Never scaled alone.
+    // No transcript on this clip, so no captions appear — just the badge.
     {
       src: "screen-demo",
       in: 2.0,
@@ -186,18 +188,20 @@ export default reel({
         ],
         seconds: 4.5,
       },
-      enter: punch({ to: 1.08, frames: 5, hit: "snap" }),
+      // A real cross-dissolve from the screen recording, not a hard cut: this
+      // shot fades in on top of it while both zoom together.
+      enter: blend({ to: 1.1, frames: 8 }),
     },
 
     // Closing line. No seconds, so it runs as long as the take.
-    { src: "cta", captions: true },
+    { src: "cta" },
   ],
 
   bed: { track: "your-track.mp3" },
 });
 ```
 
-Three things worth noticing:
+Four things worth noticing:
 
 - **No `seconds` on the talking-head shots.** Their length comes from the files.
   Never write a duration a script implied.
@@ -205,6 +209,10 @@ Three things worth noticing:
   number like `4.2` is wrong the moment anything upstream changes.
 - **`regionAt`** builds rectangles that already match the delivery aspect, so a
   crop can never distort.
+- **No `captions` field anywhere.** Any shot with a transcript gets captions
+  automatically; the screen recording has none, so it stays silent-on-screen
+  except for its badge. Write `captions: false` only to turn them off somewhere
+  they would otherwise show.
 
 ---
 

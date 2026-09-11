@@ -63,6 +63,8 @@ export type Tokens = {
   safe: { top: number; bottom: number; left: number; right: number };
   /** Named punch presets. Shotlists may use these or pass their own numbers. */
   punches?: Record<string, { to: number; frames: number; hit?: string }>;
+  /** Named blend presets — cross-dissolve overlap length and zoom. */
+  blends?: Record<string, { to: number; frames: number }>;
   mix: {
     /** Bed level while someone is speaking. */
     underSpeech: number;

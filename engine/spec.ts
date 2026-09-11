@@ -33,11 +33,25 @@ export type Cut = { kind: "cut" };
 /** The frame divides into regions, and they slide into place. */
 export type BandsOpen = { kind: "bands"; frames: number; easing?: Easing };
 
-export type Enter = Punch | Cut | BandsOpen;
+/**
+ * A cross-dissolve. The incoming shot starts `frames` before the previous one
+ * would have ended, fading in on top of it while zooming from `to` down to 1 —
+ * both shots visible and moving at once, rather than meeting at a hard edge.
+ *
+ * Pair it with `exit: exitPunch({...})` on the *previous* shot if you also want
+ * the outgoing side to keep pushing in through the overlap; a blend by itself
+ * only animates the incoming side. Using it shortens the reel: total runtime
+ * drops by `frames` for every blend, the same way a crossfade shortens a
+ * timeline in a conventional editor.
+ */
+export type Blend = { kind: "blend"; frames: number; to: number; easing?: Easing };
+
+export type Enter = Punch | Cut | BandsOpen | Blend;
 
 export const punch = (o: Omit<Punch, "kind">): Punch => ({ kind: "punch", ...o });
 export const cut = (): Cut => ({ kind: "cut" });
 export const bandsOpen = (o: Omit<BandsOpen, "kind">): BandsOpen => ({ kind: "bands", ...o });
+export const blend = (o: Omit<Blend, "kind">): Blend => ({ kind: "blend", ...o });
 
 /** An exit ramp on the outgoing shot. Pair with an enter punch for a full swap. */
 export type Exit = { kind: "punch"; to: number; frames: number; easing?: Easing };
@@ -130,7 +144,11 @@ export type Shot = {
   bands?: { divider?: { weight: number; color: string }; regions: BandSpec[] };
   enter?: Enter;
   exit?: Exit;
-  /** Burn the spoken words from words.json over this shot. */
+  /**
+   * Burn the spoken words from words.json over this shot. Defaults to on for
+   * any shot whose primary source has a transcript — set `false` to turn
+   * captions off for a shot that would otherwise get them.
+   */
   captions?: boolean;
   /** Authored text, not from speech. */
   title?: string | { text: string; top?: number; enterFrames?: number };
@@ -234,6 +252,8 @@ export const resolveTimeline = (spec: ReelSpec): Timeline => {
   const hits: ResolvedHit[] = [];
   const shots: ResolvedShot[] = [];
 
+  // Tracks where the *next* shot would start under a plain cut. A blend moves
+  // its own startFrame earlier than this without moving anyone else's.
   let cursor = 0;
 
   spec.shots.forEach((shot, index) => {
@@ -255,17 +275,37 @@ export const resolveTimeline = (spec: ReelSpec): Timeline => {
 
     const durationInFrames = Math.max(1, Math.round(seconds * fps));
 
+    let startFrame = cursor;
+    if (shot.enter?.kind === "blend") {
+      const previous = shots[shots.length - 1];
+      if (!previous) {
+        warnings.push(`Shot 0 has a blend enter, but there is nothing before it to blend from. Rendered as a cut.`);
+      } else {
+        const requested = shot.enter.frames;
+        // A blend can only overlap as much of either neighbour as actually
+        // exists; asking for more just means "as much as this pair allows".
+        const overlap = Math.max(0, Math.min(requested, previous.durationInFrames, durationInFrames));
+        if (overlap < requested) {
+          warnings.push(
+            `Shot ${index}'s blend asked for ${requested} frames of overlap; clamped to ${overlap}, ` +
+              `the shorter of its own length and shot ${previous.index}'s.`,
+          );
+        }
+        startFrame = Math.max(0, cursor - overlap);
+      }
+    }
+
     const key = `${index}-${typeof shot.src === "string" ? shot.src : shot.src.type}`;
-    shots.push({ shot, index, key, startFrame: cursor, durationInFrames });
+    shots.push({ shot, index, key, startFrame, durationInFrames });
 
     if (shot.enter?.kind === "punch" && shot.enter.hit) {
-      hits.push({ frame: cursor, sfx: shot.enter.hit, volume: shot.enter.hitVolume ?? 1 });
+      hits.push({ frame: startFrame, sfx: shot.enter.hit, volume: shot.enter.hitVolume ?? 1 });
     }
     for (const h of shot.hits ?? []) {
-      hits.push({ frame: cursor + Math.round(h.at * fps), sfx: h.sfx, volume: h.volume ?? 1 });
+      hits.push({ frame: startFrame + Math.round(h.at * fps), sfx: h.sfx, volume: h.volume ?? 1 });
     }
 
-    cursor += durationInFrames;
+    cursor = startFrame + durationInFrames;
   });
 
   const totalSeconds = cursor / fps;

@@ -2,8 +2,8 @@ import React from "react";
 import { AbsoluteFill, Audio, OffthreadVideo, staticFile, useCurrentFrame } from "remotion";
 import type { BandSpec, ReelSpec, ResolvedShot, Source } from "./spec";
 import { coverRegion, fullFrame, lerpRect, px } from "./scale";
-import { enterScale, exitScale, ease } from "./moves/punch";
-import { Captions } from "./moves/Captions";
+import { enterScale, enterOpacity, exitScale, ease } from "./moves/punch";
+import { Captions, primaryMediaKey } from "./moves/Captions";
 import { Title } from "./moves/Title";
 import { Badge } from "./moves/Badge";
 import { Generated, generatedSize } from "./generators";
@@ -166,8 +166,19 @@ export const ShotView: React.FC<{ resolved: ResolvedShot; spec: ReelSpec }> = ({
   const scale =
     enterScale(frame, shot.enter) * exitScale(frame, resolved.durationInFrames, shot.exit);
 
+  // A blend fades this whole shot in on top of whatever is still playing
+  // underneath it — the previous shot needs no changes of its own, since
+  // rendering a later shot later in this array already paints it on top.
+  const opacity = enterOpacity(frame, shot.enter);
+
+  // Captions default to on wherever a transcript exists; a shotlist opts out
+  // with `captions: false` rather than opting in.
+  const captionKey = primaryMediaKey(resolved);
+  const hasTranscript = Boolean(captionKey && spec.words?.[captionKey]?.length);
+  const showCaptions = shot.captions !== false && hasTranscript;
+
   return (
-    <AbsoluteFill>
+    <AbsoluteFill style={{ opacity }}>
       <AbsoluteFill style={{ transform: `scale(${scale})`, transformOrigin: "center center" }}>
         {shot.bands ? (
           <Bands spec={spec} resolved={resolved} />
@@ -182,7 +193,7 @@ export const ShotView: React.FC<{ resolved: ResolvedShot; spec: ReelSpec }> = ({
         )}
       </AbsoluteFill>
 
-      {shot.captions ? <Captions spec={spec} resolved={resolved} /> : null}
+      {showCaptions ? <Captions spec={spec} resolved={resolved} /> : null}
       {shot.title ? <Title spec={spec} title={shot.title} /> : null}
       {shot.badge ? <Badge spec={spec} badge={shot.badge} /> : null}
     </AbsoluteFill>

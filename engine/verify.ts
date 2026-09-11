@@ -1,5 +1,13 @@
-import type { ReelSpec, Timeline } from "./spec";
+import type { ReelSpec, ResolvedShot, Timeline } from "./spec";
 import type { TextStyle, Tokens } from "./tokens";
+import { primaryMediaKey } from "./moves/Captions";
+
+/** Mirrors ShotView's own decision, so this gate can't drift from what renders. */
+const willShowCaptions = (spec: ReelSpec, shot: ReelSpec["shots"][number], index: number): boolean => {
+  if (shot.captions === false) return false;
+  const key = primaryMediaKey({ shot, index, key: "", startFrame: 0, durationInFrames: 0 } as ResolvedShot);
+  return Boolean(key && spec.words?.[key]?.length);
+};
 
 /**
  * Gates that can be settled without rendering a frame.
@@ -54,7 +62,7 @@ export const verifySpec = (spec: ReelSpec, timeline: Timeline): Finding[] => {
   const t = spec.style;
 
   const used = {
-    captions: spec.shots.some((s) => s.captions),
+    captions: spec.shots.some((s, i) => willShowCaptions(spec, s, i)),
     title: spec.shots.some((s) => s.title),
     badge: spec.shots.some((s) => s.badge),
   };
@@ -65,8 +73,10 @@ export const verifySpec = (spec: ReelSpec, timeline: Timeline): Finding[] => {
 
   // Captions and badges share the lower third. Two things competing for one
   // zone holds for most of a series and then quietly breaks on one post.
-  for (const shot of spec.shots) {
-    if (shot.captions && shot.badge) {
+  // Captions are on by default wherever a transcript exists, so this has to
+  // check the same way ShotView decides it, not just an explicit `true`.
+  for (const [index, shot] of spec.shots.entries()) {
+    if (willShowCaptions(spec, shot, index) && shot.badge) {
       findings.push({
         level: "fail",
         message:

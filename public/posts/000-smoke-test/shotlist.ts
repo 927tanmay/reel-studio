@@ -1,4 +1,4 @@
-import { punch, reel } from "../../../engine/spec";
+import { blend, exitPunch, punch, reel } from "../../../engine/spec";
 import tokens from "../../../projects/default/tokens";
 import config from "./post.json";
 
@@ -50,6 +50,9 @@ export default reel({
         seconds: 4.5,
       },
       enter: punch({ to: 1.08, frames: 5, hit: "snap" }),
+      // Pairs with the next shot's blend: this one keeps pushing in through
+      // its final frames instead of sitting still while the next fades over it.
+      exit: exitPunch({ to: 1.1, frames: 8 }),
       badge: "steps advance on cue",
       note: "In a real reel these steps would be pinned to spoken words.",
     },
@@ -63,7 +66,7 @@ export default reel({
           "{",
           "  src: 'screen-a',",
           "  reframe: { from: wide, to: tight },",
-          "  enter: punch({ to: 1.08, frames: 5 }),",
+          "  enter: blend({ to: 1.12, frames: 8 }),",
           "  badge: 'the generated file',",
           "}",
         ].join("\n"),
@@ -73,8 +76,10 @@ export default reel({
         ],
         seconds: 4.5,
       },
-      enter: punch({ to: 1.05, frames: 9 }),
-      note: "Typing is a reveal. Set typeSpeed to 0 to show it all at once.",
+      // A real cross-dissolve: starts 8 frames before the diagram would have
+      // ended, fades in on top of it while zooming from 1.12 down to 1.
+      enter: blend({ to: 1.12, frames: 8 }),
+      note: "Blend, not a punch: two shots overlap and zoom together instead of meeting at a hard edge.",
     },
 
     {

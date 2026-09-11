@@ -55,12 +55,16 @@ by hand, and resuming is expected and supported.
    `words.json` is written for the engine, which imports it at build time; as
    something to *read* it costs roughly fifteen times more for no extra
    information. Reading it is the single most expensive mistake available here.
-5. **Text never scales with a punch.** Picture scales, type does not. Scaling
+5. **Captions default to on.** Any shot whose source has a transcript gets
+   captions automatically; a shotlist only needs `captions: false` to opt a
+   shot *out*. Never write `captions: true` — it is a no-op — and never treat
+   "add captions" as something a brief has to ask for.
+6. **Text never scales with a punch.** Picture scales, type does not. Scaling
    type produces soft, wobbling edges.
-6. **Verify the file, not the intention.** `npm run render` always ends in
+7. **Verify the file, not the intention.** `npm run render` always ends in
    `verify`. Do not report a reel as finished on the strength of the render
    succeeding.
-7. **Nothing replaces watching it on a phone.** Say so every time you hand one
+8. **Nothing replaces watching it on a phone.** Say so every time you hand one
    over.
 
 ## What stays human
@@ -79,6 +83,12 @@ size, and final playback. Offer comparisons and measurements; never choose.
 - Prefer captured footage over generated. Prefer generated over stock. Reach for
   a video model last, and say plainly that it cannot render legible code or a
   real interface.
+- When the brief does not name a transition, propose one instead of defaulting
+  everything to a plain cut: `blend` between two B-roll shots that share a
+  subject, `punch` when a talking-head take was split for a jump-cut fix, a
+  plain `cut` at every A-roll-to-B-roll boundary. Show the shotlist with these
+  filled in and let the user override any of them — propose, do not silently
+  decide and hide the choice.
 
 ## Layout
 
@@ -88,7 +98,7 @@ engine/          the moves and the contract — general, never show-specific
   scale.ts       crop-then-scale, and size tokens that survive a frame change
   words.ts       word anchoring
   verify.ts      gates that need no render
-  moves/         punch · captions · title · badge · bed · hits
+  moves/         punch · blend · captions · title · badge · bed · hits
   generators/    diagram · code · terminal · compare · data · callout
 projects/        one look per channel; copy default/ and change everything
 public/posts/    one folder per reel, self-contained

@@ -74,13 +74,21 @@ Good: `On the word "libraries", cut to the screen recording.`
 Bad: `On the word "the", cut to the screen recording.`
 
 The beats you can ask for at a moment are: a plain cut, a sharp punch, a quiet
-punch, a band opening, or a dip in the music. A punch can carry a sound; the
-ones that exist are **snap**, **whoosh** and **tick**. Ask for any other sound
-and someone has to go find it first.
+punch, a **blend** (two shots overlap and zoom together instead of meeting at a
+hard edge — ask for this between two B-roll moments that share a subject), a
+band opening, or a dip in the music. A punch can carry a sound; the ones that
+exist are **snap**, **whoosh** and **tick**. Ask for any other sound and
+someone has to go find it first.
 
 When writing the script, notice which words are distinctive and put your beats
 on those. If a line has no distinctive word where you need a beat, rewrite the
 line. That is cheaper than fixing it in the edit.
+
+**Naming a beat is optional.** If you leave the Moments section thin or empty,
+the reel gets cut anyway — the editor proposes reasonable placements from the
+transcript and shows them for approval before rendering. Name a beat yourself
+only where you actually care which one lands there; the checklist in section 7
+does not require this section to be exhaustive.
 
 ---
 
@@ -145,14 +153,17 @@ Example of a complete diagram request:
 
 ## 6. Name the text on screen
 
-Two kinds, and **they never appear on the same shot** because they share the
-lower third.
+**Captions happen on their own.** Any shot with a transcript gets them
+automatically — you do not need to ask, and there is nothing to specify unless
+you want them turned *off* somewhere they would otherwise appear (rare; note it
+under "Do not" if so).
 
-- **Captions** are the spoken words, burned in. Say which shots have them.
-  Usually every talking-head shot, usually no B-roll shot.
+Two other kinds, and **neither appears alongside captions on the same shot**
+because all three share the lower third.
+
 - **Titles** are authored text, not from speech. Supply the exact copy.
 - **Badges** are small labels naming what is on screen. Supply the exact copy.
-  These belong on B-roll, which is why they do not collide with captions.
+  These belong on B-roll, which is naturally where captions are absent.
 
 Keep title copy short enough to read at phone size in the time it is up. Two
 lines is comfortable; four is not.
@@ -170,8 +181,7 @@ A brief is ready to hand over when every one of these is true.
 - [ ] Every anchor word appears exactly once in its line
 - [ ] Every B-roll moment names its source and its content
 - [ ] Every generated clip is specified in full
-- [ ] Caption, title and badge copy is written out
-- [ ] No shot carries both captions and a badge
+- [ ] Title and badge copy is written out (captions need no copy — automatic)
 - [ ] Music mood is stated, or explicitly none
 
 Anything unticked will come back as a question before the cut starts.
@@ -218,13 +228,12 @@ Nodes: <...>
 Edges: <...>
 Steps: <node set> on the word "<word>", ...
 
-## Moments
+## Moments (optional — unnamed beats are proposed by the editor)
 - On the word "<word>" in hook, cut to screen-demo
 - On the word "<word>" in middle, punch, sharp, with a snap
 - On the word "<word>" in middle, punch, quiet, no sound
 
 ## Text
-Captions: hook, middle, cta
 Title on hook: "<exact copy>"
 Badge on screen-demo: "<exact copy>"
 Badge on diagram-request-path: "<exact copy>"
@@ -284,7 +293,6 @@ Review on "reviewing"
 - On the word "reviewing" in middle, punch, quiet, no sound
 
 ## Text
-Captions: hook, middle, cta
 Title on hook: "Component libraries are finished"
 Badge on screen-demo: "one prompt, one component"
 Badge on diagram-review-loop: "the new loop"

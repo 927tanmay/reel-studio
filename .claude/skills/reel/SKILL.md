@@ -62,13 +62,26 @@ While writing it:
 - Omit `seconds` wherever a duration should be measured.
 - Anchor moments to words with `anchors()`, never to numbers.
 - Crop before scaling. Build rectangles with `regionAt()` so the aspect matches.
-- Keep captions and badges off the same shot; they share the lower third.
+- Leave `captions` unset. It defaults to on for any shot with a transcript;
+  only set `captions: false` to turn it off somewhere it would otherwise show.
+  Never write `captions: true` — it does nothing.
+- Keep badges off any shot that will show captions; they share the lower third.
 - Reach for captured footage first, generated second, stock third, a video model
   last.
+- **When the brief does not name a transition, propose one — do not default
+  everything to a silent cut.** Reach for `blend` between two B-roll shots that
+  share a subject or continue one idea; `punch` (sharp, with a sound) where a
+  talking-head take was split across a boundary that needs energy; `punch`
+  (quiet, no sound) where it was split purely to fix a jump cut; a plain cut at
+  most A-roll-to-B-roll boundaries. Put your reasoning in each shot's `note`
+  field so the choice is visible when the user reads the shotlist, and expect
+  them to override any of it.
 
-If the brief is vague, ask for the concrete version. "Some B-roll here" produces
-filler; "the file tree, cropped tight, pushing in, landing on the word
-*generated*" produces an edit.
+If the brief is vague about *content* — what a shot should show, what a line
+says — ask for the concrete version rather than guessing. "Some B-roll here"
+produces filler; "the file tree, cropped tight, pushing in, landing on the word
+*generated*" produces an edit. Vagueness about *transitions* is different: that
+is exactly the case above, where proposing is the right response, not asking.
 
 ### 7. Preview
 

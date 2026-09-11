@@ -96,6 +96,13 @@ export const tokens: Tokens = {
     soft: { to: 1.05, frames: 9 },
   },
 
+  blends: {
+    /** Quick cross-zoom between two B-roll clips — the default transition. */
+    standard: { to: 1.12, frames: 8 },
+    /** Slower, for a moment that should feel unhurried. */
+    slow: { to: 1.06, frames: 14 },
+  },
+
   mix: {
     underSpeech: 0.28,
     underSilence: 0.45,

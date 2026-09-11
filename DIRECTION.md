@@ -16,24 +16,34 @@ than after.
 
 > A **{length}** **{frame}** reel that **{one-sentence promise}**.
 > Opens on **{hook}**, turns at **{the shift}**, lands on **{payoff}**.
-> Feels **{two adjectives}**. Text is **{captions | titles | both | none}**.
+> Feels **{two adjectives}**. Titles are **{yes, on these shots | none}**.
 > Bed is **{mood}**, **{level under speech}**.
+
+Captions are not a slot here. Any shot with a transcript gets them without
+being asked; say `captions: false` on a specific shot only to turn them off.
 
 ## The shot
 
 > **{source}**, framed **{full | on the region that matters}**,
 > **{holding | pushing | pulling | panning across}**,
-> entering on **{a cut | a punch | a band opening}**,
-> carrying **{caption | title | badge | nothing}**,
+> entering on **{a cut | a punch | a blend | a band opening}**,
+> carrying **{title | badge | nothing}**,
 > for **{measured | n seconds}**.
 
 ## The moment
 
-> On the word **{word}**, **{cut | punch | reveal | dip the bed}**.
+> On the word **{word}**, **{cut | punch | blend | reveal | dip the bed}**.
 
 The third template is the most valuable and the least obvious. Anchor edits to
 spoken words. `at.start("generated")` survives every re-cut, take swap and trim,
 because word timings move with the audio. `4.2` does not.
+
+A moment is optional, not mandatory. If the brief names none, the agent cutting
+the reel proposes reasonable ones from the transcript — a blend where two
+B-roll shots share a subject, a punch where a talking-head take was split —
+and shows them in the shotlist for you to approve or override. Naming a moment
+yourself is how you take that decision back for a specific beat; leaving all of
+them unnamed is a legitimate brief, not an incomplete one.
 
 ---
 
@@ -47,15 +57,20 @@ because word timings move with the audio. `4.2` does not.
 | a cut | nothing; the default |
 | a punch, sharp | `enter: punch({ to: 1.08, frames: 5, hit: "snap" })` |
 | a punch, quiet | `enter: punch({ to: 1.05, frames: 9 })` |
+| a blend | `enter: blend({ to: 1.12, frames: 8 })` — two shots overlap and zoom together instead of meeting at an edge; pair with `exit: exitPunch({...})` on the *previous* shot if it should keep pushing in too |
 | a band opening | `bands: {...}` with `enter: bandsOpen({ frames: 12 })` |
-| caption | `captions: true` |
 | a title card | `title: "…"` |
 | a label | `badge: "…"` |
 | measured | omit `seconds` |
 
-Numbers in that table are examples, not defaults. Both punches are the same
+Captions are not in this table because there is nothing to translate — they
+happen on their own wherever a transcript exists.
+
+Numbers in that table are examples, not defaults. The two punches are the same
 function with different arguments; the difference between a beat and a repair is
-entirely yours to place.
+entirely yours to place. A blend shortens the reel slightly — the incoming shot
+starts before the outgoing one would have ended — the same way a cross-dissolve
+shortens a timeline in a conventional editor.
 
 ---
 
