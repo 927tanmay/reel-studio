@@ -27,7 +27,7 @@ const Missing: React.FC<{ what: string }> = ({ what }) => (
 );
 
 const SourceView: React.FC<{
-  source: Source;
+  source: Source | undefined;
   spec: ReelSpec;
   resolved: ResolvedShot;
   reframe?: { from: ReturnType<typeof fullFrame>; to?: ReturnType<typeof fullFrame> };
@@ -36,6 +36,11 @@ const SourceView: React.FC<{
   const frame = useCurrentFrame();
   const { fps } = spec.frame;
   const progress = resolved.durationInFrames <= 1 ? 0 : frame / (resolved.durationInFrames - 1);
+
+  // A shot with neither `src` nor `bands` is malformed rather than silent —
+  // resolveTimeline already warned about it; this is what that warning looks
+  // like on screen instead of a blank frame nobody notices.
+  if (source === undefined) return <Missing what="(no src or bands set on this shot)" />;
 
   if (typeof source !== "string") {
     const size = generatedSize(source, spec.frame);

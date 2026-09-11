@@ -132,8 +132,12 @@ export type BandSpec = {
 };
 
 export type Shot = {
-  /** A media key from media.json, or an inline generated clip. */
-  src: Source;
+  /**
+   * A media key from media.json, or an inline generated clip. Omit only when
+   * `bands` is set — a banded shot takes its picture from each region's own
+   * `source` instead, and `src` is ignored if present alongside `bands`.
+   */
+  src?: Source;
   /** Skip this many seconds into the source. */
   in?: number;
   /** Explicit length. Omit and the length is measured from the file. */
@@ -233,6 +237,12 @@ export type Timeline = {
 
 const DEFAULT_GEN_SECONDS = 3;
 
+/** A short diagnostic label for a shot — its source, or "bands" when it has none. */
+export const shotLabel = (shot: Shot): string => {
+  if (shot.src === undefined) return shot.bands ? "bands" : "no source";
+  return typeof shot.src === "string" ? shot.src : shot.src.type;
+};
+
 const sourceSeconds = (src: Source, media: MediaManifest | undefined): number | null => {
   if (typeof src === "string") {
     const entry = media?.[src];
@@ -264,7 +274,7 @@ export const resolveTimeline = (spec: ReelSpec): Timeline => {
       const measured = primary === undefined ? null : sourceSeconds(primary, spec.media);
       if (measured === null) {
         warnings.push(
-          `Shot ${index} ("${typeof shot.src === "string" ? shot.src : shot.src.type}") has no measured duration. ` +
+          `Shot ${index} ("${shotLabel(shot)}") has no measured duration. ` +
             `Run "npm run ingest" for this post, or set seconds explicitly.`,
         );
         seconds = DEFAULT_GEN_SECONDS;
@@ -295,7 +305,11 @@ export const resolveTimeline = (spec: ReelSpec): Timeline => {
       }
     }
 
-    const key = `${index}-${typeof shot.src === "string" ? shot.src : shot.src.type}`;
+    const key = `${index}-${shotLabel(shot)}`;
+
+    if (shot.src === undefined && !shot.bands) {
+      warnings.push(`Shot ${index} has neither \`src\` nor \`bands\` — it will render nothing.`);
+    }
     shots.push({ shot, index, key, startFrame, durationInFrames });
 
     if (shot.enter?.kind === "punch" && shot.enter.hit) {

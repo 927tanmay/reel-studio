@@ -1,7 +1,7 @@
 import React from "react";
 import { AbsoluteFill, Sequence } from "remotion";
 import type { ReelSpec } from "./spec";
-import { resolveTimeline } from "./spec";
+import { resolveTimeline, shotLabel } from "./spec";
 import { ShotView } from "./ShotView";
 import { Bed } from "./moves/Bed";
 import { Hits } from "./moves/Hits";
@@ -18,9 +18,7 @@ export const Reel: React.FC<{ spec: ReelSpec }> = ({ spec }) => {
           key={resolved.key}
           from={resolved.startFrame}
           durationInFrames={resolved.durationInFrames}
-          name={`${resolved.index}. ${
-            typeof resolved.shot.src === "string" ? resolved.shot.src : resolved.shot.src.type
-          }`}
+          name={`${resolved.index}. ${shotLabel(resolved.shot)}`}
         >
           <ShotView resolved={resolved} spec={spec} />
         </Sequence>

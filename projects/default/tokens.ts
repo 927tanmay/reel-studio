@@ -42,16 +42,19 @@ export const tokens: Tokens = {
 
   title: {
     fontFamily: '-apple-system, "Helvetica Neue", Arial, sans-serif',
-    size: 68,
+    size: 72,
     weight: 800,
     color: "#FFFFFF",
-    tracking: -0.01,
+    tracking: -0.015,
     lineHeight: 1.1,
     textAlign: "center",
     maxWidth: 0.85,
-    top: 0.28,
+    // Raised from 0.28: a tech-intro headline reads as a kicker near the top
+    // of frame, not a mid-frame caption. 0.14 clears the 0.1 safe-top gate
+    // with room for a two-line block.
+    top: 0.14,
     // Footage brightness varies shot to shot; a shadow is insurance, not decoration.
-    shadow: { color: "rgba(0,0,0,0.5)", blur: 8, y: 2 },
+    shadow: { color: "rgba(0,0,0,0.55)", blur: 10, y: 2 },
   },
 
   caption: {
