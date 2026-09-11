@@ -1,0 +1,30 @@
+{
+  "name": "reel-studio",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A general-purpose short-form video editing workflow driven from Claude Code.",
+  "scripts": {
+    "studio": "remotion studio",
+    "ingest": "node scripts/ingest.mjs",
+    "transcribe": "node scripts/transcribe.mjs",
+    "align": "node scripts/align.mjs",
+    "render": "node scripts/render.mjs",
+    "verify": "node scripts/verify.mjs",
+    "new": "node scripts/new-post.mjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@remotion/captions": "^4.0.523",
+    "@remotion/cli": "^4.0.523",
+    "@remotion/fonts": "^4.0.523",
+    "@remotion/media-utils": "^4.0.523",
+    "@remotion/shapes": "^4.0.523",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "remotion": "^4.0.523"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "typescript": "^5.7.0"
+  }
+}

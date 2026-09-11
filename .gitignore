@@ -1,0 +1,15 @@
+node_modules/
+out/
+.DS_Store
+*.log
+
+# Raw and intermediate media is large and regenerable from the originals you
+# keep elsewhere. Commit shotlists, manifests and word timings, not footage.
+public/posts/*/raw/
+public/posts/*/clean/
+public/posts/*/conformed/
+public/assets/music/*
+!public/assets/music/.gitkeep
+
+# Whisper models are large downloads, not source.
+.whisper/
