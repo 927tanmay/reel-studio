@@ -132,20 +132,24 @@ const Bands: React.FC<{ spec: ReelSpec; resolved: ResolvedShot; bandAudioVolume:
         const top = offsetY;
         offsetY += height + dividerPx;
 
-        const slide =
-          band.from === "top"
-            ? -height * (1 - t)
-            : band.from === "bottom"
-              ? height * (1 - t)
-              : 0;
+        // Each region opens by sliding in from whichever edge it names. Top
+        // and bottom travel by their own height, so a region only ever has
+        // to cross the distance it's actually offset by; left and right
+        // travel the full frame width, since a band spans it edge to edge.
+        let dx = 0;
+        let dy = 0;
+        if (band.from === "top") dy = -height * (1 - t);
+        else if (band.from === "bottom") dy = height * (1 - t);
+        else if (band.from === "left") dx = -spec.frame.w * (1 - t);
+        else if (band.from === "right") dx = spec.frame.w * (1 - t);
 
         return (
           <React.Fragment key={i}>
             <div
               style={{
                 position: "absolute",
-                left: 0,
-                top: top + slide,
+                left: dx,
+                top: top + dy,
                 width: spec.frame.w,
                 height,
                 overflow: "hidden",

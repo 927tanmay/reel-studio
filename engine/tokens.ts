@@ -34,6 +34,16 @@ export type CaptionStyle = TextStyle & {
   fadeFrames: number;
   /** Optional plate behind the text, for legibility over bright footage. */
   plate?: { color: string; padX: number; padY: number; radius: number } | null;
+  /**
+   * The standing treatment for a shot's `emphasis` words — the two or three
+   * words per reel that carry the actual claim, marked deliberately rather
+   * than by which word happens to be mid-utterance. Distinct from
+   * `activeColor`: that's transient and follows speech automatically; this is
+   * an editorial choice that holds regardless of which word is playing.
+   * `scale` multiplies the base caption size (1.3 reads as noticeably larger
+   * without breaking the line).
+   */
+  emphasis?: { color: string; scale: number; weight?: number };
 };
 
 export type BadgeStyle = TextStyle & {

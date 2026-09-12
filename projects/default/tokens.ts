@@ -73,6 +73,11 @@ export const tokens: Tokens = {
     // Captions refresh every few words, so anything noticeable becomes noise.
     fadeFrames: 2,
     plate: null,
+    // A deliberately different color from activeColor: emphasis is a standing
+    // choice about which words carry the claim, not a transient one about
+    // which word is playing right now, and the two should read as distinct
+    // kinds of "marked" rather than melting into each other.
+    emphasis: { color: "#F97583", scale: 1.3, weight: 800 },
   },
 
   badge: {

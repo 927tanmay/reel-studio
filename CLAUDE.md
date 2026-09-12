@@ -69,12 +69,22 @@ by hand, and resuming is expected and supported.
    otherwise seamless is a rough edge nobody names correctly, they just feel
    the cut is "off." This needs nothing from a shotlist — it happens from the
    overlap alone.
-8. **Text never scales with a punch.** Picture scales, type does not. Scaling
+8. **Emphasis is a standing choice, not a transient one.** A shot's
+   `emphasis` list marks the two or three words that actually carry the
+   claim; they render bigger and in a different colour wherever they appear,
+   whether or not that word happens to be mid-utterance. This is different
+   from the karaoke `activeColor`, which follows speech automatically and
+   needs no shotlist input at all. When a brief doesn't name emphasis words,
+   propose them yourself from the transcript — the load-bearing noun, verb or
+   number in each line — the same way you already propose transitions.
+   Verify every entry actually occurs in that shot's spoken range; one that
+   doesn't is silently inert, and `engine/verify.ts` will say so.
+9. **Text never scales with a punch.** Picture scales, type does not. Scaling
    type produces soft, wobbling edges.
-9. **Verify the file, not the intention.** `npm run render` always ends in
+10. **Verify the file, not the intention.** `npm run render` always ends in
    `verify`. Do not report a reel as finished on the strength of the render
    succeeding.
-10. **Nothing replaces watching it on a phone.** Say so every time you hand one
+11. **Nothing replaces watching it on a phone.** Say so every time you hand one
    over.
 
 ## What stays human

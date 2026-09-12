@@ -171,6 +171,14 @@ because all three share the lower third.
 Keep title copy short enough to read at phone size in the time it is up. Two
 lines is comfortable; four is not.
 
+**A fourth thing worth naming: which words carry the reel.** Captions render
+every word the same way except for the one currently being said. Separately
+from that, two or three words across the whole reel — the actual claim, the
+number, the payoff — can be marked to render larger and in a different colour
+wherever they land, as a standing choice rather than a passing one. Name them
+if you know which they are. If you don't, say so and the editor will propose
+candidates from the transcript for you to approve.
+
 ---
 
 ## 7. The checklist
@@ -240,6 +248,7 @@ Steps: <node set> on the word "<word>", ...
 Title on hook: "<exact copy>"
 Badge on screen-demo: "<exact copy>"
 Badge on diagram-request-path: "<exact copy>"
+Emphasis: "<word>", "<word>" — or leave blank for the editor to propose
 
 ## Do not
 <anything specifically unwanted for this reel>
@@ -299,6 +308,7 @@ Review on "reviewing"
 Title on hook: "Component libraries are finished"
 Badge on screen-demo: "one prompt, one component"
 Badge on diagram-review-loop: "the new loop"
+Emphasis: "obsolete" in hook, "reviewing" in middle
 
 ## Do not
 No stock footage. No generated video.

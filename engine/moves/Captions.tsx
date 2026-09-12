@@ -2,6 +2,7 @@ import React from "react";
 import { createTikTokStyleCaptions, type Caption } from "@remotion/captions";
 import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
 import type { ReelSpec, ResolvedShot } from "../spec";
+import { normalise } from "../words";
 import { px } from "../scale";
 import { textStyle, verticalPlacement } from "./text";
 
@@ -76,6 +77,14 @@ export const Captions: React.FC<{ spec: ReelSpec; resolved: ResolvedShot }> = ({
   const base = textStyle(spec.style, spec.frame, style);
   const plate = style.plate;
 
+  // Emphasis is a standing choice, not a transient one — it applies wherever
+  // a marked word appears in this shot, independent of which word happens to
+  // be mid-utterance right now. It takes priority over the active-word color:
+  // a word the editor deliberately marked stays marked even while it's being
+  // spoken, rather than flashing to the ordinary highlight and back.
+  const emphasisSet = new Set((resolved.shot.emphasis ?? []).map(normalise));
+  const emphasis = style.emphasis;
+
   return (
     <AbsoluteFill
       style={{
@@ -112,8 +121,23 @@ export const Captions: React.FC<{ spec: ReelSpec; resolved: ResolvedShot }> = ({
         >
           {page.tokens.map((token, i) => {
             const active = nowMs >= token.fromMs && nowMs < token.toMs;
+            const marked = emphasisSet.size > 0 && emphasisSet.has(normalise(token.text));
+
+            const color = marked && emphasis ? emphasis.color : active ? style.activeColor : style.color;
+
             return (
-              <span key={i} style={{ color: active ? style.activeColor : style.color }}>
+              <span
+                key={i}
+                style={
+                  marked && emphasis
+                    ? {
+                        color,
+                        fontSize: `${emphasis.scale}em`,
+                        fontWeight: emphasis.weight ?? base.fontWeight,
+                      }
+                    : { color }
+                }
+              >
                 {token.text}
               </span>
             );

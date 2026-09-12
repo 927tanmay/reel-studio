@@ -1,6 +1,7 @@
 import type { ReelSpec, ResolvedShot, Timeline } from "./spec";
 import type { TextStyle, Tokens } from "./tokens";
 import { primaryMediaKey } from "./moves/Captions";
+import { normalise } from "./words";
 
 /** Mirrors ShotView's own decision, so this gate can't drift from what renders. */
 const willShowCaptions = (spec: ReelSpec, shot: ReelSpec["shots"][number], index: number): boolean => {
@@ -84,6 +85,39 @@ export const verifySpec = (spec: ReelSpec, timeline: Timeline): Finding[] => {
           `give one of them a different position or drop it from this shot.`,
       });
       break;
+    }
+  }
+
+  // An emphasis word that never actually occurs in this shot's spoken range
+  // is silently inert — nothing renders differently, and nothing else would
+  // ever tell you. That's a worse failure mode than an error, so it gets a
+  // warning instead of staying quiet.
+  for (const [index, shot] of spec.shots.entries()) {
+    if (!shot.emphasis || shot.emphasis.length === 0) continue;
+    if (!willShowCaptions(spec, shot, index)) continue;
+
+    const key = primaryMediaKey({ shot, index, key: "", startFrame: 0, durationInFrames: 0 } as ResolvedShot);
+    const allWords = key ? spec.words?.[key] : undefined;
+    const resolvedShot = timeline.shots[index];
+    if (!allWords || !resolvedShot) continue;
+
+    const inSeconds = shot.in ?? 0;
+    const outSeconds = inSeconds + resolvedShot.durationInFrames / spec.frame.fps;
+    const spoken = new Set(
+      allWords
+        .filter((w) => w.endMs / 1000 > inSeconds && w.startMs / 1000 < outSeconds)
+        .map((w) => normalise(w.text)),
+    );
+
+    for (const word of shot.emphasis) {
+      if (!spoken.has(normalise(word))) {
+        findings.push({
+          level: "warn",
+          message:
+            `Shot ${index} marks "${word}" for emphasis, but it is not spoken in this ` +
+            `shot's range. Check the spelling, or that it belongs on a different shot.`,
+        });
+      }
     }
   }
 

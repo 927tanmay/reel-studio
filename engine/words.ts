@@ -23,7 +23,8 @@ export type WordsFile = {
   words: Word[];
 };
 
-const normalise = (s: string) => s.toLowerCase().replace(/[^a-z0-9']/g, "");
+/** Case- and punctuation-insensitive matching, shared with caption emphasis. */
+export const normalise = (s: string) => s.toLowerCase().replace(/[^a-z0-9']/g, "");
 
 export class MissingWordError extends Error {}
 

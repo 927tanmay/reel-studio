@@ -70,18 +70,27 @@ While writing it:
   last.
 - **When the brief does not name a transition, propose one — do not default
   everything to a silent cut.** Reach for `blend` between two B-roll shots that
-  share a subject or continue one idea; `punch` (sharp, with a sound) where a
-  talking-head take was split across a boundary that needs energy; `punch`
-  (quiet, no sound) where it was split purely to fix a jump cut; a plain cut at
-  most A-roll-to-B-roll boundaries. Put your reasoning in each shot's `note`
-  field so the choice is visible when the user reads the shotlist, and expect
-  them to override any of it.
+  share a subject or continue one idea; `push` between two that are more
+  clearly separate beats; `punch` (sharp, with a sound) where a talking-head
+  take was split across a boundary that needs energy; `punch` (quiet, no
+  sound) where it was split purely to fix a jump cut; a plain cut at most
+  A-roll-to-B-roll boundaries. Put your reasoning in each shot's `note` field
+  so the choice is visible when the user reads the shotlist, and expect them
+  to override any of it.
+- **When the brief does not name emphasis words, propose two or three from the
+  transcript** — read `transcript.md`, find the word each line's claim
+  actually turns on (a number, a name, the verb doing the work), and set
+  `emphasis` on that shot. Do not mark more than a handful across the whole
+  reel; if everything is emphasized, nothing is. This is exactly the same
+  proposing-not-asking judgment as a transition — show it in the shotlist,
+  let the user keep or drop any of it.
 
 If the brief is vague about *content* — what a shot should show, what a line
 says — ask for the concrete version rather than guessing. "Some B-roll here"
 produces filler; "the file tree, cropped tight, pushing in, landing on the word
-*generated*" produces an edit. Vagueness about *transitions* is different: that
-is exactly the case above, where proposing is the right response, not asking.
+*generated*" produces an edit. Vagueness about *transitions and emphasis* is
+different: that is exactly the case above, where proposing is the right
+response, not asking.
 
 ### 7. Preview
 

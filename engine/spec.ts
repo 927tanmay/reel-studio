@@ -171,6 +171,17 @@ export type Shot = {
    * captions off for a shot that would otherwise get them.
    */
   captions?: boolean;
+  /**
+   * Words that read as the point of the sentence, given the look's
+   * `caption.emphasis` treatment wherever they appear in this shot's
+   * captions — matched the same case- and punctuation-insensitive way
+   * `anchors()` matches. A standing editorial choice: which two or three
+   * words in the whole reel actually carry the claim, not which word is
+   * currently being said. Every entry should actually occur in this shot's
+   * spoken range; one that never matches is silently inert, which is worth
+   * checking for, not assuming.
+   */
+  emphasis?: string[];
   /** Authored text, not from speech. */
   title?: string | { text: string; top?: number; enterFrames?: number };
   /** A small persistent label. */

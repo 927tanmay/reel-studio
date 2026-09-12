@@ -17,10 +17,19 @@ than after.
 > A **{length}** **{frame}** reel that **{one-sentence promise}**.
 > Opens on **{hook}**, turns at **{the shift}**, lands on **{payoff}**.
 > Feels **{two adjectives}**. Titles are **{yes, on these shots | none}**.
+> The words that carry it are **{word, word, word}**.
 > Bed is **{mood}**, **{level under speech}**.
 
 Captions are not a slot here. Any shot with a transcript gets them without
 being asked; say `captions: false` on a specific shot only to turn them off.
+
+"The words that carry it" is a slot, though, and worth taking seriously. Two
+or three words across the whole reel — the ones a viewer would remember if
+they remembered nothing else — get marked and render larger and in a
+different colour wherever they appear, independent of the moment-to-moment
+karaoke highlight every word already gets. Leaving this slot empty is a
+legitimate answer, not a shortcut: the editor proposes candidates from the
+transcript, the same way it proposes transitions when none are named.
 
 ## The shot
 
@@ -68,10 +77,14 @@ them unnamed is a legitimate brief, not an incomplete one.
 | a band opening | `bands: {...}` with `enter: bandsOpen({ frames: 12 })` |
 | a title card | `title: "…"` |
 | a label | `badge: "…"` |
+| the words that carry it | `emphasis: ["word", "word"]` — those words render bigger and in a different colour wherever they land in this shot, as a standing choice, not a transient one |
 | measured | omit `seconds` |
 
 Captions are not in this table because there is nothing to translate — they
-happen on their own wherever a transcript exists.
+happen on their own wherever a transcript exists. Emphasis is different: it
+needs the actual words named, because unlike a transition there's no sensible
+mechanical default — which two words matter most is a judgment call, even
+when that judgment defaults to the editor proposing rather than you naming it.
 
 Numbers in that table are examples, not defaults. The two punches are the same
 function with different arguments; the difference between a beat and a repair is
