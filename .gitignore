@@ -13,3 +13,9 @@ public/assets/music/*
 
 # Whisper models are large downloads, not source.
 .whisper/
+
+# A specific personal reel, kept out of the shared repo entirely by choice —
+# unlike the general rule above, this excludes the whole post, not just its
+# footage. posts.ts's own registration of it is a real local edit that stays
+# uncommitted alongside this for the same reason.
+public/posts/001-my-reel/
