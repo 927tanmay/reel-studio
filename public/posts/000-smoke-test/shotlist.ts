@@ -1,4 +1,4 @@
-import { blend, exitPunch, punch, reel } from "../../../engine/spec";
+import { blend, exitPunch, push, punch, reel } from "../../../engine/spec";
 import tokens from "../../../projects/default/tokens";
 import config from "./post.json";
 
@@ -90,7 +90,11 @@ export default reel({
         wipeAt: 1.6,
         seconds: 4,
       },
-      enter: punch({ to: 1.08, frames: 5 }),
+      // No `exit` on the code shot above — this proves the default. The
+      // engine mirrors this blend's own zoom onto the outgoing side on its
+      // own, so both shots move even though only one line of code asked for it.
+      enter: blend({ to: 1.06, frames: 8 }),
+      note: "Unpaired blend: the previous shot gets its zoom-out for free, not because anyone wrote it.",
     },
 
     {
@@ -103,7 +107,9 @@ export default reel({
         ],
         seconds: 4,
       },
-      enter: punch({ to: 1.05, frames: 9 }),
+      // A slide, not a zoom: this shot sweeps in from the right and covers
+      // the compare shot as it crosses, no cross-dissolve, no scale change.
+      enter: push({ direction: "left", frames: 10 }),
       badge: "1080x1920 · 30fps",
     },
   ],

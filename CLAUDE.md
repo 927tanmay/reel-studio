@@ -59,12 +59,22 @@ by hand, and resuming is expected and supported.
    captions automatically; a shotlist only needs `captions: false` to opt a
    shot *out*. Never write `captions: true` — it is a no-op — and never treat
    "add captions" as something a brief has to ask for.
-6. **Text never scales with a punch.** Picture scales, type does not. Scaling
+6. **A blend defaults its own exit.** Write `enter: blend(...)` on the
+   incoming shot alone and the outgoing shot automatically mirrors the same
+   zoom, unless it already has its own `exit`, which always wins. Only add an
+   explicit `exit` on the outgoing shot when you want it to move *differently*
+   from the blend, not merely to make it move at all.
+7. **Audio always crossfades across a blend or push, regardless of the
+   picture.** Two clips' sound clashing under a visual transition that's
+   otherwise seamless is a rough edge nobody names correctly, they just feel
+   the cut is "off." This needs nothing from a shotlist — it happens from the
+   overlap alone.
+8. **Text never scales with a punch.** Picture scales, type does not. Scaling
    type produces soft, wobbling edges.
-7. **Verify the file, not the intention.** `npm run render` always ends in
+9. **Verify the file, not the intention.** `npm run render` always ends in
    `verify`. Do not report a reel as finished on the strength of the render
    succeeding.
-8. **Nothing replaces watching it on a phone.** Say so every time you hand one
+10. **Nothing replaces watching it on a phone.** Say so every time you hand one
    over.
 
 ## What stays human
@@ -85,10 +95,11 @@ size, and final playback. Offer comparisons and measurements; never choose.
   real interface.
 - When the brief does not name a transition, propose one instead of defaulting
   everything to a plain cut: `blend` between two B-roll shots that share a
-  subject, `punch` when a talking-head take was split for a jump-cut fix, a
-  plain `cut` at every A-roll-to-B-roll boundary. Show the shotlist with these
-  filled in and let the user override any of them — propose, do not silently
-  decide and hide the choice.
+  subject and should feel like one continuous idea, `push` between two that
+  are more clearly separate beats, `punch` when a talking-head take was split
+  for a jump-cut fix, a plain `cut` at every A-roll-to-B-roll boundary. Show
+  the shotlist with these filled in and let the user override any of them —
+  propose, do not silently decide and hide the choice.
 
 ## Layout
 
@@ -98,7 +109,7 @@ engine/          the moves and the contract — general, never show-specific
   scale.ts       crop-then-scale, and size tokens that survive a frame change
   words.ts       word anchoring
   verify.ts      gates that need no render
-  moves/         punch · blend · captions · title · badge · bed · hits
+  moves/         punch · blend · push · captions · title · badge · bed · hits
   generators/    diagram · code · terminal · compare · data · callout
 projects/        one look per channel; copy default/ and change everything
 public/posts/    one folder per reel, self-contained

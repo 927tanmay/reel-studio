@@ -25,14 +25,20 @@ being asked; say `captions: false` on a specific shot only to turn them off.
 ## The shot
 
 > **{source}**, framed **{full | on the region that matters}**,
-> **{holding | pushing | pulling | panning across}**,
-> entering on **{a cut | a punch | a blend | a band opening}**,
+> **{holding | pushing in | pulling back | panning across}**,
+> entering on **{a cut | a punch | a blend | a slide | a band opening}**,
 > carrying **{title | badge | nothing}**,
 > for **{measured | n seconds}**.
 
+Two different things share the word "push" here, and they don't mean the same
+thing. "Pushing in" is a camera move — a slow zoom toward the subject within
+one shot, built from `reframe`. "A slide" is what happens *between* two shots —
+one crosses in and covers the other, no zoom. Say "slide," not "push," when you
+mean the transition, to keep the two apart.
+
 ## The moment
 
-> On the word **{word}**, **{cut | punch | blend | reveal | dip the bed}**.
+> On the word **{word}**, **{cut | punch | blend | slide | reveal | dip the bed}**.
 
 The third template is the most valuable and the least obvious. Anchor edits to
 spoken words. `at.start("generated")` survives every re-cut, take swap and trim,
@@ -57,7 +63,8 @@ them unnamed is a legitimate brief, not an incomplete one.
 | a cut | nothing; the default |
 | a punch, sharp | `enter: punch({ to: 1.08, frames: 5, hit: "snap" })` |
 | a punch, quiet | `enter: punch({ to: 1.05, frames: 9 })` |
-| a blend | `enter: blend({ to: 1.12, frames: 8 })` — two shots overlap and zoom together instead of meeting at an edge; pair with `exit: exitPunch({...})` on the *previous* shot if it should keep pushing in too |
+| a blend | `enter: blend({ to: 1.12, frames: 8 })` — two shots overlap and zoom together instead of meeting at an edge. Both sides move and the audio crossfades on their own; add an explicit `exit` on the *previous* shot only to make it move *differently* from the blend, not merely to make it move at all |
+| a slide | `enter: push({ direction: 'left', frames: 10 })` — the incoming shot sweeps in from off-frame and covers the previous one; no zoom, no dissolve, a clean directional sweep. Audio still crossfades even though the picture doesn't |
 | a band opening | `bands: {...}` with `enter: bandsOpen({ frames: 12 })` |
 | a title card | `title: "…"` |
 | a label | `badge: "…"` |
@@ -68,9 +75,9 @@ happen on their own wherever a transcript exists.
 
 Numbers in that table are examples, not defaults. The two punches are the same
 function with different arguments; the difference between a beat and a repair is
-entirely yours to place. A blend shortens the reel slightly — the incoming shot
-starts before the outgoing one would have ended — the same way a cross-dissolve
-shortens a timeline in a conventional editor.
+entirely yours to place. A blend or a slide both shorten the reel slightly —
+the incoming shot starts before the outgoing one would have ended — the same
+way a cross-dissolve shortens a timeline in a conventional editor.
 
 ---
 

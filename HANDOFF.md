@@ -75,10 +75,13 @@ Bad: `On the word "the", cut to the screen recording.`
 
 The beats you can ask for at a moment are: a plain cut, a sharp punch, a quiet
 punch, a **blend** (two shots overlap and zoom together instead of meeting at a
-hard edge — ask for this between two B-roll moments that share a subject), a
-band opening, or a dip in the music. A punch can carry a sound; the ones that
-exist are **snap**, **whoosh** and **tick**. Ask for any other sound and
-someone has to go find it first.
+hard edge — ask for this between two B-roll moments that share a subject and
+should feel like one continuous idea), a **slide** (one shot sweeps in and
+covers the other, no zoom — ask for this between two moments that are more
+clearly separate beats), a band opening, or a dip in the music. Both blend and
+slide crossfade their own audio automatically, even if the picture doesn't. A
+punch can carry a sound; the ones that exist are **snap**, **whoosh** and
+**tick**. Ask for any other sound and someone has to go find it first.
 
 When writing the script, notice which words are distinctive and put your beats
 on those. If a line has no distinctive word where you need a beat, rewrite the

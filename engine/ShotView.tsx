@@ -2,7 +2,15 @@ import React from "react";
 import { AbsoluteFill, Audio, OffthreadVideo, staticFile, useCurrentFrame } from "remotion";
 import type { BandSpec, ReelSpec, ResolvedShot, Source } from "./spec";
 import { coverRegion, fullFrame, lerpRect, px } from "./scale";
-import { enterScale, enterOpacity, exitScale, ease } from "./moves/punch";
+import {
+  enterScale,
+  enterOpacity,
+  enterTranslate,
+  enterAudioFade,
+  exitScale,
+  exitAudioFade,
+  ease,
+} from "./moves/punch";
 import { Captions, primaryMediaKey } from "./moves/Captions";
 import { Title } from "./moves/Title";
 import { Badge } from "./moves/Badge";
@@ -32,7 +40,9 @@ const SourceView: React.FC<{
   resolved: ResolvedShot;
   reframe?: { from: ReturnType<typeof fullFrame>; to?: ReturnType<typeof fullFrame> };
   inSeconds: number;
-}> = ({ source, spec, resolved, reframe, inSeconds }) => {
+  /** Crossfades this shot's own audio across a blend or push overlap. */
+  audioVolume: number;
+}> = ({ source, spec, resolved, reframe, inSeconds, audioVolume }) => {
   const frame = useCurrentFrame();
   const { fps } = spec.frame;
   const progress = resolved.durationInFrames <= 1 ? 0 : frame / (resolved.durationInFrames - 1);
@@ -67,6 +77,7 @@ const SourceView: React.FC<{
   const box = coverRegion(entry.width, entry.height, region, spec.frame);
   const trimFrames = Math.round(inSeconds * fps);
   const useCleanAudio = Boolean(entry.cleanAudio);
+  const playbackRate = resolved.shot.speed ?? 1;
 
   return (
     <AbsoluteFill style={{ overflow: "hidden" }}>
@@ -74,6 +85,8 @@ const SourceView: React.FC<{
         src={staticFile(entry.file)}
         trimBefore={trimFrames > 0 ? trimFrames : undefined}
         muted={useCleanAudio || !entry.hasAudio}
+        playbackRate={playbackRate}
+        volume={audioVolume}
         style={{
           position: "absolute",
           width: box.width,
@@ -89,13 +102,19 @@ const SourceView: React.FC<{
             0,
             Math.round((inSeconds + (entry.audioOffset ?? 0)) * fps),
           )}
+          playbackRate={playbackRate}
+          volume={audioVolume}
         />
       ) : null}
     </AbsoluteFill>
   );
 };
 
-const Bands: React.FC<{ spec: ReelSpec; resolved: ResolvedShot }> = ({ spec, resolved }) => {
+const Bands: React.FC<{ spec: ReelSpec; resolved: ResolvedShot; bandAudioVolume: number }> = ({
+  spec,
+  resolved,
+  bandAudioVolume,
+}) => {
   const frame = useCurrentFrame();
   const bands = resolved.shot.bands;
   if (!bands) return null;
@@ -138,6 +157,7 @@ const Bands: React.FC<{ spec: ReelSpec; resolved: ResolvedShot }> = ({ spec, res
                 resolved={resolved}
                 reframe={band.reframe}
                 inSeconds={0}
+                audioVolume={bandAudioVolume}
               />
             </div>
             {bands.divider && i < bands.regions.length - 1 ? (
@@ -168,13 +188,27 @@ export const ShotView: React.FC<{ resolved: ResolvedShot; spec: ReelSpec }> = ({
   const { shot } = resolved;
 
   // Picture scales; text does not. Scaling type produces soft, wobbling edges.
+  // Exit reads `effectiveExit`, not `shot.exit` directly — a blend defaults
+  // one in when the shotlist didn't set its own, so a plain `enter: blend()`
+  // on the next shot alone is enough to animate both sides of the cut.
   const scale =
-    enterScale(frame, shot.enter) * exitScale(frame, resolved.durationInFrames, shot.exit);
+    enterScale(frame, shot.enter) * exitScale(frame, resolved.durationInFrames, resolved.effectiveExit);
 
   // A blend fades this whole shot in on top of whatever is still playing
   // underneath it — the previous shot needs no changes of its own, since
-  // rendering a later shot later in this array already paints it on top.
+  // rendering a later shot later in this array already paints it on top. A
+  // push stays fully opaque throughout; it reveals by sliding, not fading.
   const opacity = enterOpacity(frame, shot.enter);
+
+  const translate = enterTranslate(frame, shot.enter, spec.frame.w, spec.frame.h);
+
+  // Audio crossfades independently of picture: this shot's own sound fades
+  // in across an incoming blend or push, and fades back out across its own
+  // final frames if the *next* shot overlaps it the same way — regardless of
+  // whether either side's picture also fades.
+  const audioVolume =
+    enterAudioFade(frame, shot.enter) *
+    exitAudioFade(frame, resolved.durationInFrames, resolved.audioFadeOutFrames);
 
   // Captions default to on wherever a transcript exists; a shotlist opts out
   // with `captions: false` rather than opting in.
@@ -183,10 +217,10 @@ export const ShotView: React.FC<{ resolved: ResolvedShot; spec: ReelSpec }> = ({
   const showCaptions = shot.captions !== false && hasTranscript;
 
   return (
-    <AbsoluteFill style={{ opacity }}>
+    <AbsoluteFill style={{ opacity, transform: `translate(${translate.x}px, ${translate.y}px)` }}>
       <AbsoluteFill style={{ transform: `scale(${scale})`, transformOrigin: "center center" }}>
         {shot.bands ? (
-          <Bands spec={spec} resolved={resolved} />
+          <Bands spec={spec} resolved={resolved} bandAudioVolume={audioVolume} />
         ) : (
           <SourceView
             source={shot.src}
@@ -194,6 +228,7 @@ export const ShotView: React.FC<{ resolved: ResolvedShot; spec: ReelSpec }> = ({
             resolved={resolved}
             reframe={shot.reframe}
             inSeconds={shot.in ?? 0}
+            audioVolume={audioVolume}
           />
         )}
       </AbsoluteFill>

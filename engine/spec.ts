@@ -46,12 +46,21 @@ export type BandsOpen = { kind: "bands"; frames: number; easing?: Easing };
  */
 export type Blend = { kind: "blend"; frames: number; to: number; easing?: Easing };
 
-export type Enter = Punch | Cut | BandsOpen | Blend;
+/**
+ * A slide. The incoming shot enters fully opaque from off-frame and covers
+ * the previous one as it crosses in — a different read from `blend`: no
+ * zoom, no cross-dissolve, a clean directional sweep. Like `blend`, it
+ * overlaps the previous shot's tail rather than waiting for a cut.
+ */
+export type Push = { kind: "push"; frames: number; direction: "left" | "right" | "up" | "down"; easing?: Easing };
+
+export type Enter = Punch | Cut | BandsOpen | Blend | Push;
 
 export const punch = (o: Omit<Punch, "kind">): Punch => ({ kind: "punch", ...o });
 export const cut = (): Cut => ({ kind: "cut" });
 export const bandsOpen = (o: Omit<BandsOpen, "kind">): BandsOpen => ({ kind: "bands", ...o });
 export const blend = (o: Omit<Blend, "kind">): Blend => ({ kind: "blend", ...o });
+export const push = (o: Omit<Push, "kind">): Push => ({ kind: "push", ...o });
 
 /** An exit ramp on the outgoing shot. Pair with an enter punch for a full swap. */
 export type Exit = { kind: "punch"; to: number; frames: number; easing?: Easing };
@@ -144,6 +153,14 @@ export type Shot = {
   seconds?: number;
   /** Crop a region of the source and scale it to fill. Never scales alone. */
   reframe?: { from: Rect; to?: Rect };
+  /**
+   * Playback rate for a video source. 1 is native. `seconds` is still the
+   * on-screen duration you author explicitly — raising `speed` compresses
+   * more of the source's timeline into that same on-screen time, which is
+   * how a shot covers its full source window in less runtime without
+   * cutting any of it away. Has no effect on a generated source.
+   */
+  speed?: number;
   /** Divide the frame. When present, `src` is ignored. */
   bands?: { divider?: { weight: number; color: string }; regions: BandSpec[] };
   enter?: Enter;
@@ -224,6 +241,21 @@ export type ResolvedShot = {
   key: string;
   startFrame: number;
   durationInFrames: number;
+  /**
+   * This shot's exit, defaulted from the *next* shot's blend when this shot
+   * didn't declare its own. Read this instead of `shot.exit` — an explicit
+   * exit always wins, so this only ever fills a gap, never overrides one.
+   * Without it, a plain `enter: blend(...)` on the next shot only animates
+   * the incoming side, which looks lopsided rather than like one motion.
+   */
+  effectiveExit?: Exit;
+  /**
+   * How many of this shot's own final frames the next shot's blend or push
+   * covers. Used to fade this shot's own audio out in step with the overlap,
+   * so two clips that both carry sound don't clash or double up underneath
+   * a visual transition that's otherwise seamless.
+   */
+  audioFadeOutFrames?: number;
 };
 
 export type ResolvedHit = { frame: number; sfx: string; volume: number };
@@ -286,22 +318,44 @@ export const resolveTimeline = (spec: ReelSpec): Timeline => {
     const durationInFrames = Math.max(1, Math.round(seconds * fps));
 
     let startFrame = cursor;
-    if (shot.enter?.kind === "blend") {
+    if (shot.enter?.kind === "blend" || shot.enter?.kind === "push") {
+      const overlapping = shot.enter;
       const previous = shots[shots.length - 1];
       if (!previous) {
-        warnings.push(`Shot 0 has a blend enter, but there is nothing before it to blend from. Rendered as a cut.`);
+        warnings.push(
+          `Shot 0 has a ${overlapping.kind} enter, but there is nothing before it to ${overlapping.kind} from. Rendered as a cut.`,
+        );
       } else {
-        const requested = shot.enter.frames;
-        // A blend can only overlap as much of either neighbour as actually
-        // exists; asking for more just means "as much as this pair allows".
+        const requested = overlapping.frames;
+        // Either move can only overlap as much of either neighbour as
+        // actually exists; asking for more just means "as much as this pair
+        // allows".
         const overlap = Math.max(0, Math.min(requested, previous.durationInFrames, durationInFrames));
         if (overlap < requested) {
           warnings.push(
-            `Shot ${index}'s blend asked for ${requested} frames of overlap; clamped to ${overlap}, ` +
+            `Shot ${index}'s ${overlapping.kind} asked for ${requested} frames of overlap; clamped to ${overlap}, ` +
               `the shorter of its own length and shot ${previous.index}'s.`,
           );
         }
         startFrame = Math.max(0, cursor - overlap);
+
+        // A blend with no exit on the shot it blends over only animates the
+        // incoming side — technically correct, visually lopsided. Default the
+        // outgoing side to mirror the same zoom, unless it already has its
+        // own exit, which always wins.
+        if (overlapping.kind === "blend" && previous.effectiveExit === undefined) {
+          previous.effectiveExit = exitPunch({
+            to: overlapping.to,
+            frames: overlap,
+            easing: overlapping.easing,
+          });
+        }
+
+        // Audio crossfades across the overlap regardless of whether the
+        // picture does — two clips' sound clashing underneath a visual
+        // transition that's otherwise seamless is the kind of rough edge
+        // that reads as amateur even when nobody can say exactly what's wrong.
+        previous.audioFadeOutFrames = overlap;
       }
     }
 
@@ -310,7 +364,7 @@ export const resolveTimeline = (spec: ReelSpec): Timeline => {
     if (shot.src === undefined && !shot.bands) {
       warnings.push(`Shot ${index} has neither \`src\` nor \`bands\` — it will render nothing.`);
     }
-    shots.push({ shot, index, key, startFrame, durationInFrames });
+    shots.push({ shot, index, key, startFrame, durationInFrames, effectiveExit: shot.exit });
 
     if (shot.enter?.kind === "punch" && shot.enter.hit) {
       hits.push({ frame: startFrame, sfx: shot.enter.hit, volume: shot.enter.hitVolume ?? 1 });

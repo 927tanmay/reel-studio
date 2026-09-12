@@ -61,3 +61,63 @@ export const exitScale = (frame: number, durationInFrames: number, exit?: Exit):
     easing: curve(exit.easing),
   });
 };
+
+/**
+ * Pixel offset for a `push` — starts fully off-frame in `direction` and
+ * settles to (0, 0). Zero for every other enter kind, so this is always safe
+ * to add to a shot's position.
+ */
+export const enterTranslate = (
+  frame: number,
+  enter: Enter | undefined,
+  frameW: number,
+  frameH: number,
+): { x: number; y: number } => {
+  if (!enter || enter.kind !== "push") return { x: 0, y: 0 };
+
+  const distance = enter.direction === "left" || enter.direction === "right" ? frameW : frameH;
+  // "left" reads as "the new shot arrives moving left" — so it enters from
+  // the right (a positive starting offset that eases down to zero).
+  const sign = enter.direction === "left" || enter.direction === "up" ? 1 : -1;
+
+  const t = interpolate(frame, [0, enter.frames], [1, 0], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: curve(enter.easing),
+  });
+
+  const offset = sign * distance * t;
+  const horizontal = enter.direction === "left" || enter.direction === "right";
+  return horizontal ? { x: offset, y: 0 } : { x: 0, y: offset };
+};
+
+/**
+ * Audio crossfade across an overlap — 0 to 1 on the way in for both `blend`
+ * and `push`. Kept separate from `enterOpacity`, which stays visual-only and
+ * blend-specific: a push's picture is a hard sweep with no fade, but its
+ * audio still crossfades, the same way a professional cut often carries a
+ * quick audio crossfade under a hard visual cut to avoid a pop.
+ */
+export const enterAudioFade = (frame: number, enter?: Enter): number => {
+  if (!enter || (enter.kind !== "blend" && enter.kind !== "push")) return 1;
+  return interpolate(frame, [0, enter.frames], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: curve(enter.easing),
+  });
+};
+
+/**
+ * The mirror of `enterAudioFade`, applied to the shot being overlapped rather
+ * than the one doing the overlapping — 1 down to 0 across its own final
+ * `fadeFrames`, driven by `ResolvedShot.audioFadeOutFrames` rather than
+ * anything the shot declared itself.
+ */
+export const exitAudioFade = (frame: number, durationInFrames: number, fadeFrames?: number): number => {
+  if (!fadeFrames) return 1;
+  const start = Math.max(0, durationInFrames - fadeFrames);
+  return interpolate(frame, [start, durationInFrames], [1, 0], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+};
