@@ -6,6 +6,7 @@
   "scripts": {
     "studio": "remotion studio",
     "ingest": "node scripts/ingest.mjs",
+    "grade": "node scripts/grade.mjs",
     "transcribe": "node scripts/transcribe.mjs",
     "tighten": "node --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/tighten.mjs",
     "align": "node scripts/align.mjs",

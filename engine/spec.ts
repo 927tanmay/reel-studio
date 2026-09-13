@@ -191,6 +191,29 @@ export type Gap = { from: number; to: number };
 /** See `Shot.audio`. A split edit's `n` is in frames, like every other move. */
 export type ShotAudio = "hold" | { trail: number } | { lead: number };
 
+/**
+ * A colour correction on a shot's picture. Every field is a multiplier, and
+ * 1 means untouched, so a partly-specified grade only does what it names.
+ *
+ * Text is never graded — a caption is not part of the photograph, and dimming
+ * one to match a dark take makes it harder to read for no reason.
+ */
+export type Grade = {
+  /** Overall brightness. */
+  exposure?: number;
+  contrast?: number;
+  saturation?: number;
+  /**
+   * Per-channel gain — white balance. This is the one that actually makes a
+   * phone take and a screen recording look like they belong in the same reel;
+   * exposure alone leaves one of them blue.
+   */
+  gain?: { r: number; g: number; b: number };
+};
+
+/** Mean channel levels across a clip, 0–255. Measured by scripts/grade.mjs. */
+export type Colour = { r: number; g: number; b: number };
+
 export type Shot = {
   /**
    * A media key from media.json, or an inline generated clip. Omit only when
@@ -221,6 +244,18 @@ export type Shot = {
   drop?: Gap[];
   /** Crop a region of the source and scale it to fill. Never scales alone. */
   reframe?: { from: Rect; to?: Rect };
+  /**
+   * Colour correction on this shot's picture, and only its picture.
+   *
+   * Footage shot on a phone and a recording taken off a screen are lit by
+   * different things and encoded by different software; cut together
+   * untouched, they read as two different videos rather than two parts of
+   * one. Build this with `matchGrade()` from `colour.ts` after running
+   * `npm run grade <post>`, which measures every clip and says how far apart
+   * they actually are, or set the multipliers directly when you know what
+   * you want.
+   */
+  grade?: Grade;
   /**
    * Playback rate for a video source. 1 is native. `seconds` is still the
    * on-screen duration you author explicitly — raising `speed` compresses
@@ -335,6 +370,8 @@ export type MediaEntry = {
   cleanAudio?: string;
   /** Seconds to shift the clean audio by, measured by scripts/align.mjs. */
   audioOffset?: number;
+  /** Mean channel levels, written by scripts/grade.mjs. Feeds `matchGrade()`. */
+  colour?: Colour;
 };
 
 export type MediaManifest = Record<string, MediaEntry>;

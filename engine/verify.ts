@@ -158,6 +158,35 @@ export const verifySpec = (spec: ReelSpec, timeline: Timeline): Finding[] => {
     });
   }
 
+  // A grade is meant to reconcile how two clips were rendered, not what they
+  // are pictures of. Past a certain size it stops being a correction and
+  // starts being a look — which is fine if it was chosen, and is usually a
+  // sign of matching a dark screen recording to a lit face at full strength,
+  // which grades the content away rather than the mismatch.
+  for (const shot of spec.shots) {
+    const g = shot.grade;
+    if (!g) continue;
+
+    const extremes = [
+      ["exposure", g.exposure],
+      ["contrast", g.contrast],
+      ["saturation", g.saturation],
+      ["red gain", g.gain?.r],
+      ["green gain", g.gain?.g],
+      ["blue gain", g.gain?.b],
+    ].filter(([, v]) => typeof v === "number" && (v < 0.6 || v > 1.6));
+
+    for (const [name, value] of extremes) {
+      findings.push({
+        level: "warn",
+        message:
+          `A shot grades ${name} to ${(value as number).toFixed(2)}. That is a look rather than a ` +
+          `match — check it against the ungraded frame, and lower the strength on matchGrade() ` +
+          `if the two clips are pictures of different things.`,
+      });
+    }
+  }
+
   // Cropping is correctness, not taste: enlarging a region past what was
   // captured invents detail, and scaling without cropping first distorts.
   for (const shot of spec.shots) {

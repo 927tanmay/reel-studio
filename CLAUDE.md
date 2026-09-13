@@ -28,6 +28,7 @@ Never put a colour, a size, a duration or a structural assumption into
 | # | Stage | Command | Writes |
 |---|-------|---------|--------|
 | 01 | Ingest | `npm run ingest <post>` | `media.json` |
+| 01b | Colour measurement (optional) | `npm run grade <post>` | `media.json` |
 | 02 | Choose | human | — |
 | 03 | Clean | human, external | `clean/*.wav` |
 | 04 | Align | `npm run align <post>` | `media.json` |
@@ -114,6 +115,16 @@ by hand, and resuming is expected and supported.
    sound locked to its own picture; only the switch moves. Propose one at
    dialogue cuts the same way you propose transitions, and remember `lead`
    needs `in` to be at least `n` frames into the source.
+15. **Match colour, do not correct content.** Phone footage and a screen
+   recording are lit and encoded by different things, and cut together
+   untouched they read as two videos rather than one. `npm run grade <post>`
+   measures every clip and says how far apart they are; `matchGrade()` from
+   `colour.ts` turns two measurements into a `Shot.grade`. Its strength
+   defaults to 0.5 and should stay low across a cut between different
+   *subjects* — a dark editor matched to a lit face at full strength grades
+   the editor grey, which is correcting the content, not the colour. Raise it
+   only between takes of the same thing. Grading touches the picture only;
+   text is never graded.
 
 ## What stays human
 
@@ -153,7 +164,8 @@ size, and final playback. Offer comparisons and measurements; never choose.
 engine/          the moves and the contract — general, never show-specific
   spec.ts        the shotlist contract and timeline resolution
   scale.ts       crop-then-scale, and size tokens that survive a frame change
-  words.ts       word anchoring
+  words.ts       word anchoring, and the pauses/fillers a cut removes
+  colour.ts      matching one clip's colour to another's
   verify.ts      gates that need no render
   moves/         punch · blend · push · captions · title · badge · bed · hits
   generators/    diagram · code · terminal · compare · data · callout
@@ -161,7 +173,8 @@ projects/        one look per channel; copy default/ and change everything
 public/posts/    one folder per reel, self-contained
 public/assets/   fonts, sound effects, music — committed, so renders are offline
 scripts/         ingest · transcribe · align · render · verify · new-post ·
-                 tighten (reports what a tightening pass would remove) ·
+                 grade (measures colour) · tighten (reports what a
+                 tightening pass would remove) ·
                  export-timeline (writes an EDL; dump-timeline.ts and
                  ts-resolve-hook.mjs are its own internals, not run directly)
 posts.ts         the register; every reel needs a line here
@@ -173,6 +186,7 @@ out/             renders, not committed
 ```bash
 npm run new 001-my-reel      # scaffold and register a post
 npm run ingest 001-my-reel   # measure and conform
+npm run grade 001-my-reel    # how far apart the clips look
 npm run transcribe 001-my-reel
 npm run tighten 001-my-reel  # what dead air and fillers a pass would remove
 npm run align 001-my-reel    # only if clean/ has repaired audio

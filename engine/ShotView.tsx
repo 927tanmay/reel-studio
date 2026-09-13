@@ -17,6 +17,7 @@ import { Title } from "./moves/Title";
 import { Badge } from "./moves/Badge";
 import { Ribbon } from "./moves/Ribbon";
 import { Generated, generatedSize } from "./generators";
+import { gradeFilter, needsMatrix } from "./colour";
 
 /** Shown instead of a black hole when a shotlist names media that is not there. */
 const Missing: React.FC<{ what: string }> = ({ what }) => (
@@ -298,6 +299,13 @@ export const ShotView: React.FC<{ resolved: ResolvedShot; spec: ReelSpec }> = ({
   const only = resolved.sounds.length === 1 ? resolved.sounds[0] : undefined;
   const carryAudio = Boolean(only?.own && only.segments[0]?.startFrame === 0);
 
+  // Grading sits on the picture layer, inside the scale and outside the
+  // overlays, so a correction that darkens a bright screen recording cannot
+  // also dim the caption sitting on top of it.
+  const matrixId = `grade-${resolved.key}`;
+  const filter = gradeFilter(shot.grade, matrixId);
+  const gain = shot.grade?.gain;
+
   // Captions default to on wherever a transcript exists; a shotlist opts out
   // with `captions: false` rather than opting in.
   const captionKey = primaryMediaKey(resolved);
@@ -306,7 +314,22 @@ export const ShotView: React.FC<{ resolved: ResolvedShot; spec: ReelSpec }> = ({
 
   return (
     <AbsoluteFill style={{ opacity, transform: `translate(${translate.x}px, ${translate.y}px)` }}>
-      <AbsoluteFill style={{ transform: `scale(${scale})`, transformOrigin: "center center" }}>
+      {needsMatrix(shot.grade) && gain ? (
+        <svg width={0} height={0} style={{ position: "absolute" }}>
+          <defs>
+            <filter id={matrixId} colorInterpolationFilters="sRGB">
+              {/* Diagonal gains: each channel scaled on its own, which is what
+                  white balance is and what no CSS filter function can express. */}
+              <feColorMatrix
+                type="matrix"
+                values={`${gain.r} 0 0 0 0  0 ${gain.g} 0 0 0  0 0 ${gain.b} 0 0  0 0 0 1 0`}
+              />
+            </filter>
+          </defs>
+        </svg>
+      ) : null}
+
+      <AbsoluteFill style={{ transform: `scale(${scale})`, transformOrigin: "center center", filter }}>
         {shot.bands ? (
           <Bands spec={spec} resolved={resolved} bandAudioVolume={audioVolume} />
         ) : (
