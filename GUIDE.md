@@ -287,6 +287,28 @@ every reel pointed at it inherits changes.
 npm run render 001-first -- --still 3.2
 ```
 
+**Manual tweaks in a real editor.** Some things are just faster by hand — a
+frame trimmed by eye, a shot dropped, a quick color pass. After rendering:
+
+```bash
+npm run export-timeline 001-first
+```
+
+This writes `out/001-first/timeline.edl`. Open DaVinci Resolve (free — the
+best option that doesn't gate export behind a paid tier), put `reel.mp4` in
+the same folder as the `.edl` first, then File → Import → Timeline and pick
+it. Every shot lands as its own clip: select, trim, delete, reorder, or grade
+any one of them without touching the rest.
+
+This first version keeps things simple on purpose: every clip is a slice of
+the already-rendered `reel.mp4`, not the original raw footage, so you can
+rearrange and trim the cuts that exist but not yet reveal more of a take than
+the shotlist chose to show. Once you export from Resolve, that new file is
+just a video like any other — `npm run ingest` on it as a new post's raw
+footage, and it re-enters the pipeline from there. Nothing about round-
+tripping through a manual pass requires the shotlist to have been perfect the
+first time.
+
 ---
 
 ## The second reel onward

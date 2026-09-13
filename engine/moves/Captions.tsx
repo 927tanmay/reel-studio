@@ -2,12 +2,22 @@ import React from "react";
 import { createTikTokStyleCaptions, type Caption } from "@remotion/captions";
 import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
 import type { ReelSpec, ResolvedShot } from "../spec";
+import { dominantSound, wordsInShot } from "../spec";
 import { normalise } from "../words";
 import { px } from "../scale";
 import { textStyle, verticalPlacement } from "./text";
 
-/** Which media key's transcript this shot should caption from. */
+/**
+ * Which media key's transcript this shot should caption from.
+ *
+ * Whatever is audible, which is not always what is visible: a shot holding the
+ * previous take's voice under B-roll keeps captioning that take, because the
+ * captions belong to the speech and the speech has not stopped.
+ */
 export const primaryMediaKey = (resolved: ResolvedShot): string | null => {
+  const sound = dominantSound(resolved);
+  if (sound) return sound.key;
+
   const { shot } = resolved;
   if (typeof shot.src === "string") return shot.src;
   const banded = shot.bands?.regions.find((r) => typeof r.source === "string");
@@ -31,10 +41,9 @@ export const Captions: React.FC<{ spec: ReelSpec; resolved: ResolvedShot }> = ({
   const allWords = key ? spec.words?.[key] : undefined;
   if (!allWords || allWords.length === 0) return null;
 
-  const inSeconds = resolved.shot.in ?? 0;
-  const outSeconds = inSeconds + resolved.durationInFrames / fps;
-
-  // Trim to this shot, then rebase onto shot-local time.
+  // Trim to this shot and rebase onto shot-local time, through whatever the
+  // shot actually plays — so a tightened take's captions close up exactly as
+  // its audio does, and a word removed with its pause is removed here too.
   //
   // words.json stores each word trimmed, with no leading space (so
   // transcript.md can join them with its own separator). createTikTokStyleCaptions
@@ -42,15 +51,13 @@ export const Captions: React.FC<{ spec: ReelSpec; resolved: ResolvedShot }> = ({
   // checking whether a token's text starts with a space. Feed it trimmed text
   // and every word looks like a continuation of the last: no spaces between
   // rendered words, and no page ever breaks.
-  const captions: Caption[] = allWords
-    .filter((w) => w.endMs / 1000 > inSeconds && w.startMs / 1000 < outSeconds)
-    .map((w) => ({
-      text: ` ${w.text}`,
-      startMs: w.startMs - inSeconds * 1000,
-      endMs: w.endMs - inSeconds * 1000,
-      timestampMs: w.timestampMs === null ? null : w.timestampMs - inSeconds * 1000,
-      confidence: w.confidence,
-    }));
+  const captions: Caption[] = wordsInShot(resolved, fps, allWords).map((w) => ({
+    text: ` ${w.text}`,
+    startMs: w.startMs,
+    endMs: w.endMs,
+    timestampMs: w.timestampMs,
+    confidence: w.confidence,
+  }));
 
   if (captions.length === 0) return null;
 

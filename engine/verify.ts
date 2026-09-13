@@ -1,12 +1,13 @@
 import type { ReelSpec, ResolvedShot, Timeline } from "./spec";
+import { wordsInShot } from "./spec";
 import type { TextStyle, Tokens } from "./tokens";
 import { primaryMediaKey } from "./moves/Captions";
 import { normalise } from "./words";
 
 /** Mirrors ShotView's own decision, so this gate can't drift from what renders. */
-const willShowCaptions = (spec: ReelSpec, shot: ReelSpec["shots"][number], index: number): boolean => {
-  if (shot.captions === false) return false;
-  const key = primaryMediaKey({ shot, index, key: "", startFrame: 0, durationInFrames: 0 } as ResolvedShot);
+const willShowCaptions = (spec: ReelSpec, resolved: ResolvedShot): boolean => {
+  if (resolved.shot.captions === false) return false;
+  const key = primaryMediaKey(resolved);
   return Boolean(key && spec.words?.[key]?.length);
 };
 
@@ -63,21 +64,39 @@ export const verifySpec = (spec: ReelSpec, timeline: Timeline): Finding[] => {
   const t = spec.style;
 
   const used = {
-    captions: spec.shots.some((s, i) => willShowCaptions(spec, s, i)),
+    captions: timeline.shots.some((r) => willShowCaptions(spec, r)),
     title: spec.shots.some((s) => s.title),
     badge: spec.shots.some((s) => s.badge),
+    ribbon: spec.shots.some((s) => s.ribbon),
   };
 
   if (used.title) findings.push(...checkSafe("Title", t.title, t));
   if (used.captions) findings.push(...checkSafe("Captions", t.caption, t));
   if (used.badge) findings.push(...checkSafe("Badge", t.badge, t));
 
+  // A ribbon settles wherever the shot puts it, so each one is checked where
+  // it actually lands rather than at the look's default.
+  for (const shot of spec.shots) {
+    if (!shot.ribbon) continue;
+    const fromTop = (shot.ribbon.from ?? "top") === "top";
+    const offset = shot.ribbon.offset ?? (fromTop ? t.ribbon.top : t.ribbon.bottom);
+    findings.push(
+      ...checkSafe(
+        "Ribbon",
+        fromTop
+          ? { ...t.ribbon, top: offset, bottom: undefined }
+          : { ...t.ribbon, bottom: offset, top: undefined },
+        t,
+      ),
+    );
+  }
+
   // Captions and badges share the lower third. Two things competing for one
   // zone holds for most of a series and then quietly breaks on one post.
   // Captions are on by default wherever a transcript exists, so this has to
   // check the same way ShotView decides it, not just an explicit `true`.
-  for (const [index, shot] of spec.shots.entries()) {
-    if (willShowCaptions(spec, shot, index) && shot.badge) {
+  for (const resolved of timeline.shots) {
+    if (willShowCaptions(spec, resolved) && resolved.shot.badge) {
       findings.push({
         level: "fail",
         message:
@@ -92,21 +111,20 @@ export const verifySpec = (spec: ReelSpec, timeline: Timeline): Finding[] => {
   // is silently inert — nothing renders differently, and nothing else would
   // ever tell you. That's a worse failure mode than an error, so it gets a
   // warning instead of staying quiet.
-  for (const [index, shot] of spec.shots.entries()) {
+  for (const resolvedShot of timeline.shots) {
+    const { shot, index } = resolvedShot;
     if (!shot.emphasis || shot.emphasis.length === 0) continue;
-    if (!willShowCaptions(spec, shot, index)) continue;
+    if (!willShowCaptions(spec, resolvedShot)) continue;
 
-    const key = primaryMediaKey({ shot, index, key: "", startFrame: 0, durationInFrames: 0 } as ResolvedShot);
+    const key = primaryMediaKey(resolvedShot);
     const allWords = key ? spec.words?.[key] : undefined;
-    const resolvedShot = timeline.shots[index];
-    if (!allWords || !resolvedShot) continue;
+    if (!allWords) continue;
 
-    const inSeconds = shot.in ?? 0;
-    const outSeconds = inSeconds + resolvedShot.durationInFrames / spec.frame.fps;
+    // Through the segments, not the shot's raw window: a word that a
+    // tightening pass removed is no longer spoken here, and marking it for
+    // emphasis is exactly as inert as misspelling it.
     const spoken = new Set(
-      allWords
-        .filter((w) => w.endMs / 1000 > inSeconds && w.startMs / 1000 < outSeconds)
-        .map((w) => normalise(w.text)),
+      wordsInShot(resolvedShot, spec.frame.fps, allWords).map((w) => normalise(w.text)),
     );
 
     for (const word of shot.emphasis) {
@@ -119,6 +137,25 @@ export const verifySpec = (spec: ReelSpec, timeline: Timeline): Finding[] => {
         });
       }
     }
+  }
+
+  // Tightening too hard leaves slivers. A stretch of picture a few frames
+  // long between two cuts does not read as a tight edit, it reads as a
+  // glitch — and it is invisible in a shotlist, because nothing there says
+  // how long any one surviving piece turned out to be.
+  const STUTTER_FRAMES = 6;
+  for (const resolvedShot of timeline.shots) {
+    if (resolvedShot.segments.length < 2) continue;
+    const slivers = resolvedShot.segments.filter((s) => s.frames < STUTTER_FRAMES);
+    if (slivers.length === 0) continue;
+
+    findings.push({
+      level: "warn",
+      message:
+        `Shot ${resolvedShot.index} keeps ${slivers.length} stretch(es) shorter than ` +
+        `${STUTTER_FRAMES} frames after dropping ${resolvedShot.segments.length - 1} range(s). ` +
+        `Raise \`longerThan\`, or widen \`pad\`, so the cuts land further apart.`,
+    });
   }
 
   // Cropping is correctness, not taste: enlarging a region past what was

@@ -32,9 +32,11 @@ Never put a colour, a size, a duration or a structural assumption into
 | 03 | Clean | human, external | `clean/*.wav` |
 | 04 | Align | `npm run align <post>` | `media.json` |
 | 05 | Word timings | `npm run transcribe <post>` | `words.json`, `transcript.md` |
+| 05b | Tightening report (optional) | `npm run tighten <post>` | — |
 | 06 | Shotlist | you, with the user | `shotlist.ts` |
 | 07 | Compose | `npm run studio` | — |
 | 08 | Render and verify | `npm run render <post>` | `out/<post>/reel.mp4` |
+| 09 | Export timeline (optional) | `npm run export-timeline <post>` | `out/<post>/timeline.edl` |
 
 Each stage writes a file the next one reads. Stopping after any of them, editing
 by hand, and resuming is expected and supported.
@@ -86,6 +88,32 @@ by hand, and resuming is expected and supported.
    succeeding.
 11. **Nothing replaces watching it on a phone.** Say so every time you hand one
    over.
+12. **A take plays as recorded until something cuts it.** `drop` removes
+   ranges of a source and closes the gap — dead air, an "um", a false start.
+   Build the ranges with `pauses()`, `fillers()` or `tighten()` from
+   `words.ts`, never by hand: they are derived from the same word timings the
+   cuts are anchored to, so they survive a re-transcribe. Run
+   `npm run tighten <post>` first to see what a threshold would actually
+   remove, and propose it the way you propose transitions. Captions follow on
+   their own.
+13. **B-roll goes *on* a sentence, not after it.** A shot with `audio: "hold"`
+   keeps the previous take's voice running underneath it, continuing from
+   exactly where it left off, at its own rate whatever `speed` is doing to the
+   picture. Captions follow the voice, not the picture. Without it, cutting to
+   a silent screen recording stops the speaker dead — which is a choice worth
+   making deliberately as a montage break, and a mistake everywhere else.
+   Check for a badge on the same shot: captions now arrive there too, and the
+   two share the lower third.
+14. **The sound does not have to change where the picture does.** `audio:
+   { trail: n }` keeps the outgoing sound for this shot's first `n` frames
+   (an L-cut); `audio: { lead: n }` starts this shot's sound `n` frames early,
+   over the tail of the one before (a J-cut). Six to twelve frames is the
+   usual range — enough to stop a cut landing flat, not enough to notice as
+   an effect. A J-cut is the stronger of the two, because hearing where you
+   are going before you see it is what makes a cut feel motivated. Both keep
+   sound locked to its own picture; only the switch moves. Propose one at
+   dialogue cuts the same way you propose transitions, and remember `lead`
+   needs `in` to be at least `n` frames into the source.
 
 ## What stays human
 
@@ -110,6 +138,14 @@ size, and final playback. Offer comparisons and measurements; never choose.
   for a jump-cut fix, a plain `cut` at every A-roll-to-B-roll boundary. Show
   the shotlist with these filled in and let the user override any of them —
   propose, do not silently decide and hide the choice.
+- Manual tweaks after a render are real and expected, not a failure of the
+  shotlist. Two paths, and they're not mutually exclusive: `npm run
+  export-timeline <post>` turns the render into a DaVinci Resolve EDL where
+  every shot is its own clip to trim, delete, reorder or grade by hand; or the
+  user hands back whatever they exported from there (or from anywhere else)
+  as a new raw file, which re-enters this pipeline exactly like any other
+  footage — `npm run ingest` on it, and go again. Neither path needs the
+  shotlist to have gotten everything right the first time.
 
 ## Layout
 
@@ -124,7 +160,10 @@ engine/          the moves and the contract — general, never show-specific
 projects/        one look per channel; copy default/ and change everything
 public/posts/    one folder per reel, self-contained
 public/assets/   fonts, sound effects, music — committed, so renders are offline
-scripts/         ingest · transcribe · align · render · verify · new-post
+scripts/         ingest · transcribe · align · render · verify · new-post ·
+                 tighten (reports what a tightening pass would remove) ·
+                 export-timeline (writes an EDL; dump-timeline.ts and
+                 ts-resolve-hook.mjs are its own internals, not run directly)
 posts.ts         the register; every reel needs a line here
 out/             renders, not committed
 ```
@@ -135,6 +174,7 @@ out/             renders, not committed
 npm run new 001-my-reel      # scaffold and register a post
 npm run ingest 001-my-reel   # measure and conform
 npm run transcribe 001-my-reel
+npm run tighten 001-my-reel  # what dead air and fillers a pass would remove
 npm run align 001-my-reel    # only if clean/ has repaired audio
 npm run studio               # live preview
 npm run render 001-my-reel   # render, normalise, verify

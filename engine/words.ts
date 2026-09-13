@@ -9,6 +9,8 @@
  * The shape matches @remotion/captions so the same file drives captions too.
  */
 
+import type { Gap } from "./spec";
+
 export type Word = {
   text: string;
   startMs: number;
@@ -77,3 +79,98 @@ export const anchors = (file: WordsFile | Word[]) => {
 /** Words that fall inside a time range, for per-shot captioning. */
 export const wordsBetween = (words: Word[], startSeconds: number, endSeconds: number): Word[] =>
   words.filter((w) => w.endMs / 1000 > startSeconds && w.startMs / 1000 < endSeconds);
+
+// ---------------------------------------------------------------------------
+// Tightening
+// ---------------------------------------------------------------------------
+
+/**
+ * Sounds that carry no meaning, only hesitation.
+ *
+ * Deliberately short. "like", "so", "actually" and "right" are filler often
+ * enough that every commercial tool removes them by default, and they are
+ * also ordinary words doing ordinary work often enough that removing them
+ * blindly mangles a sentence. Pass your own list when you want them gone —
+ * having looked at where they actually fall in the transcript.
+ */
+export const FILLERS = ["um", "uh", "uhh", "umm", "er", "erm", "ah", "mm", "mmm", "hmm"];
+
+/**
+ * The dead air between words, as ranges to remove.
+ *
+ * A take with its pauses left in plays as a recording. The same take with
+ * them closed up plays as an edit, and it is the single largest difference
+ * between footage and a cut — worth more than any transition.
+ *
+ * `pad` is what stops it sounding clipped: the drop stops short of the words
+ * on either side, so a breath's worth of room survives and consonants keep
+ * their attack. A gap is only removed if it is still longer than nothing once
+ * both pads are taken off it.
+ *
+ * Ranges come back in the source's own seconds, ready for `Shot.drop`.
+ */
+export const pauses = (
+  words: Word[],
+  options: { longerThan?: number; pad?: number } = {},
+): Gap[] => {
+  const longerThan = options.longerThan ?? 0.4;
+  const pad = options.pad ?? 0.08;
+  const out: Gap[] = [];
+
+  for (let i = 0; i < words.length - 1; i++) {
+    const from = words[i].endMs / 1000;
+    const to = words[i + 1].startMs / 1000;
+    if (to - from <= longerThan) continue;
+
+    const padded = { from: from + pad, to: to - pad };
+    if (padded.to > padded.from) out.push(padded);
+  }
+
+  return out;
+};
+
+/**
+ * Filler words, as ranges to remove.
+ *
+ * Padding runs the opposite way to `pauses`: outward, to take the small
+ * silence that surrounds a hesitation along with it, since leaving that
+ * behind is what makes a removed "um" still sound like a removed "um". It
+ * never reaches past the neighbouring words, so nothing real is clipped.
+ */
+export const fillers = (
+  words: Word[],
+  options: { list?: string[]; pad?: number } = {},
+): Gap[] => {
+  const list = new Set((options.list ?? FILLERS).map(normalise));
+  const pad = options.pad ?? 0.06;
+  const out: Gap[] = [];
+
+  words.forEach((w, i) => {
+    if (!list.has(normalise(w.text))) return;
+
+    const previousEnd = i > 0 ? words[i - 1].endMs / 1000 : -Infinity;
+    const nextStart = i < words.length - 1 ? words[i + 1].startMs / 1000 : Infinity;
+
+    out.push({
+      from: Math.max(w.startMs / 1000 - pad, previousEnd),
+      to: Math.min(w.endMs / 1000 + pad, nextStart),
+    });
+  });
+
+  return out;
+};
+
+/**
+ * Both of the above, for the common case.
+ *
+ * `drop: tighten(words.hook)` is the whole tightening pass for a shot. Reach
+ * for `pauses` and `fillers` separately when one of them needs its own
+ * threshold, or when you want only one of the two.
+ */
+export const tighten = (
+  words: Word[],
+  options: { longerThan?: number; pad?: number; fillers?: string[] } = {},
+): Gap[] => [
+  ...pauses(words, { longerThan: options.longerThan, pad: options.pad }),
+  ...fillers(words, { list: options.fillers }),
+];

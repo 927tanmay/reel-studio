@@ -121,3 +121,25 @@ export const exitAudioFade = (frame: number, durationInFrames: number, fadeFrame
     extrapolateRight: "clamp",
   });
 };
+
+/**
+ * Whether this shot's own captions/title/badge/ribbon should still be drawn,
+ * given `ResolvedShot.overlayFadeOutFrames`.
+ *
+ * This is a hard cut, not a ramp, and that's deliberate rather than a
+ * simplification. `exitAudioFade`'s interpolation always reaches 0 exactly at
+ * `durationInFrames` — it cannot finish earlier, because that's what makes it
+ * line up with the picture dissolve ending at the same instant. But the
+ * incoming shot's own title starts rising from its first frame, at the same
+ * instant this shot's overlap window begins. Any gradual fade on this side is
+ * therefore guaranteed to overlap a rising fade on the other side — there is
+ * no window length that avoids it, only different amounts of it. Cutting
+ * instead of fading means the outgoing text is gone at the exact frame the
+ * incoming text starts from zero, so there is never a frame where both are
+ * legible. The picture keeps dissolving underneath regardless; only the text
+ * needs this.
+ */
+export const exitOverlayVisible = (frame: number, durationInFrames: number, cutFrames?: number): boolean => {
+  if (!cutFrames) return true;
+  return frame < durationInFrames - cutFrames;
+};

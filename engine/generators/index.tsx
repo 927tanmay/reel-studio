@@ -6,6 +6,7 @@ import { Terminal } from "./Terminal";
 import { Compare } from "./Compare";
 import { Data } from "./Data";
 import { Callout } from "./Callout";
+import { ImageGen } from "./Image";
 
 /**
  * Generated clips are sources, not a special case. They render at the delivery
@@ -42,6 +43,8 @@ export const Generated: React.FC<GenProps> = ({ spec, reel, durationInFrames }) 
       return <Data spec={spec} reel={reel} durationInFrames={durationInFrames} />;
     case "callout":
       return <Callout spec={spec} reel={reel} durationInFrames={durationInFrames} />;
+    case "image":
+      return <ImageGen spec={spec} reel={reel} durationInFrames={durationInFrames} />;
   }
 };
 

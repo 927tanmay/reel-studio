@@ -50,6 +50,24 @@ export type BadgeStyle = TextStyle & {
   plate: { color: string; padX: number; padY: number; radius: number };
 };
 
+/**
+ * The look of a `ribbon` — a banner that travels in and lands, rather than
+ * fading in place like a title. The spring is part of the look, not the
+ * engine: overshoot and settle are exactly the numbers that decide whether a
+ * graphic reads as designed or as a box that moved, so they live here with
+ * every other decision.
+ */
+export type RibbonStyle = TextStyle & {
+  plate: { color: string; padX: number; padY: number; radius: number };
+  /** Frames the fly-in takes when a shot doesn't name its own. */
+  frames: number;
+  spring: { damping: number; stiffness: number; mass: number };
+  /** The rule that draws under the text once the plate lands. */
+  accent: { color: string; weight: number; inset: number };
+  /** The second line, when a ribbon carries one. */
+  sub: { color: string; size: number; weight: number; tracking?: number };
+};
+
 export type Tokens = {
   name: string;
   /** The width these pixel sizes were designed against. Everything scales from it. */
@@ -66,6 +84,7 @@ export type Tokens = {
   title: TextStyle;
   caption: CaptionStyle;
   badge: BadgeStyle;
+  ribbon: RibbonStyle;
   /**
    * Regions the platform interface covers, as fractions of frame height.
    * Nothing readable is allowed to land inside them; verify.ts enforces it.

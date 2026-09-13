@@ -53,8 +53,10 @@ export const tokens: Tokens = {
     // of frame, not a mid-frame caption. 0.14 clears the 0.1 safe-top gate
     // with room for a two-line block.
     top: 0.14,
-    // Footage brightness varies shot to shot; a shadow is insurance, not decoration.
-    shadow: { color: "rgba(0,0,0,0.55)", blur: 10, y: 2 },
+    // Footage brightness varies shot to shot; a shadow is insurance, not
+    // decoration. Deepened from blur:10/0.55 — against the paler wall and
+    // curtain highlights in this footage the old value read as barely there.
+    shadow: { color: "rgba(0,0,0,0.7)", blur: 16, y: 3 },
   },
 
   caption: {
@@ -68,7 +70,10 @@ export const tokens: Tokens = {
     maxWidth: 0.8,
     bottom: 0.2,
     shadow: { color: "rgba(0,0,0,0.55)", blur: 10, y: 2 },
-    activeColor: "#4FD1C5",
+    // The word being spoken pops in a bright yellow rather than the palette's
+    // teal accent — teal barely lifts off white caption text, yellow reads as
+    // a highlight at a glance instead of a subtle recolor.
+    activeColor: "#FFD60A",
     windowMs: 900,
     // Captions refresh every few words, so anything noticeable becomes noise.
     fadeFrames: 2,
@@ -82,16 +87,50 @@ export const tokens: Tokens = {
 
   badge: {
     fontFamily: 'ui-monospace, "SF Mono", Menlo, monospace',
-    size: 28,
+    // 28 was legible on a desktop preview and small on a phone, which is the
+    // only screen that counts. The plate grows with it so the padding stays
+    // proportional rather than shrink-wrapping bigger type.
+    size: 38,
     weight: 600,
     color: "#FFFFFF",
     tracking: 0.02,
+    lineHeight: 1.15,
     textAlign: "center",
     maxWidth: 0.8,
-    bottom: 0.18,
+    // One shared position for every badge in a reel, deliberately — a badge
+    // that jumps around the frame from shot to shot reads as unplanned even
+    // when each individual placement was reasoned about on its own.
+    bottom: 0.12,
     uppercase: false,
     shadow: null,
-    plate: { color: "rgba(0,0,0,0.55)", padX: 22, padY: 12, radius: 10 },
+    // Slightly denser than 0.55: these badges sit over bright screen
+    // recordings as often as dark ones, and the plate is the only thing
+    // holding the type off a busy background.
+    plate: { color: "rgba(0,0,0,0.62)", padX: 26, padY: 14, radius: 12 },
+  },
+
+  ribbon: {
+    fontFamily: '-apple-system, "Helvetica Neue", Arial, sans-serif',
+    size: 56,
+    weight: 800,
+    color: "#FFFFFF",
+    tracking: -0.01,
+    lineHeight: 1.1,
+    textAlign: "center",
+    maxWidth: 0.8,
+    top: 0.12,
+    bottom: 0.22,
+    // The plate is the primary contrast device, but a shadow still adds
+    // depth to the glyphs themselves rather than leaving them looking flat
+    // and pasted-on against a solid card.
+    shadow: { color: "rgba(0,0,0,0.5)", blur: 8, y: 2 },
+    plate: { color: "rgba(10,14,18,0.82)", padX: 34, padY: 20, radius: 18 },
+    frames: 18,
+    // Underdamped on purpose: the overshoot on arrival is what reads as a
+    // graphic landing rather than a box sliding to a stop.
+    spring: { damping: 13, stiffness: 140, mass: 0.9 },
+    accent: { color: "#4FD1C5", weight: 6, inset: 64 },
+    sub: { color: "#C9D3DD", size: 30, weight: 600, tracking: 0.01 },
   },
 
   // Fractions of the frame the platform interface covers. Verified, not trusted.
