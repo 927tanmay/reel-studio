@@ -72,6 +72,13 @@ by hand, and resuming is expected and supported.
    otherwise seamless is a rough edge nobody names correctly, they just feel
    the cut is "off." This needs nothing from a shotlist — it happens from the
    overlap alone.
+7b. **A push always carries motion blur, on the incoming picture, along its
+   own direction of travel.** Same reasoning as the rule above: a sweep that
+   snaps sharp on every frame reads as a slideshow rather than a camera move.
+   Sized to the picture's actual speed each instant, not a fixed amount, so
+   it's strongest mid-slide and gone at rest. Needs nothing from a shotlist;
+   set `blur: 0` on the push only where the incoming shot carries legible
+   text or UI that has to stay readable mid-slide.
 8. **Emphasis is a standing choice, not a transient one.** A shot's
    `emphasis` list marks the two or three words that actually carry the
    claim; they render bigger and in a different colour wherever they appear,

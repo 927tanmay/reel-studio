@@ -52,7 +52,23 @@ export type Blend = { kind: "blend"; frames: number; to: number; easing?: Easing
  * zoom, no cross-dissolve, a clean directional sweep. Like `blend`, it
  * overlaps the previous shot's tail rather than waiting for a cut.
  */
-export type Push = { kind: "push"; frames: number; direction: "left" | "right" | "up" | "down"; easing?: Easing };
+export type Push = {
+  kind: "push";
+  frames: number;
+  direction: "left" | "right" | "up" | "down";
+  easing?: Easing;
+  /**
+   * Motion blur on the incoming picture, along its direction of travel.
+   * On by default and needing nothing from a shotlist — the same way an
+   * audio crossfade needs nothing from a shotlist wherever a blend or push
+   * overlaps (rule 7). A sweep that snaps into focus at every frame reads as
+   * a slideshow rather than a camera move; smearing it slightly the way a
+   * real shutter would is what sells the motion. 1 is the engine's own
+   * calibration; 0 turns it off, for a push carrying legible text or a UI
+   * that has to stay readable mid-slide; anything else scales it.
+   */
+  blur?: number;
+};
 
 export type Enter = Punch | Cut | BandsOpen | Blend | Push;
 

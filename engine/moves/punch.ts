@@ -1,5 +1,5 @@
 import { Easing as RemotionEasing, interpolate } from "remotion";
-import type { Easing, Enter, Exit } from "../spec";
+import type { Easing, Enter, Exit, Push } from "../spec";
 
 const curve = (name?: Easing) => {
   switch (name) {
@@ -63,6 +63,32 @@ export const exitScale = (frame: number, durationInFrames: number, exit?: Exit):
 };
 
 /**
+ * A push's signed pixel offset at a given frame — shared by `enterTranslate`,
+ * which reads its position, and `pushMotionBlur`, which reads how fast that
+ * position is changing. Both need to agree on the exact same curve, or the
+ * blur would smear a path the picture was not actually following.
+ *
+ * `frame` is not rounded to an integer on purpose: the blur samples this half
+ * a frame either side of where the picture actually is, and `interpolate`
+ * accepts a fractional input the same as it accepts frame numbers, evaluating
+ * the eased curve continuously rather than only at whole frames.
+ */
+const pushOffset = (frame: number, enter: Push, frameW: number, frameH: number): number => {
+  const distance = enter.direction === "left" || enter.direction === "right" ? frameW : frameH;
+  // "left" reads as "the new shot arrives moving left" — so it enters from
+  // the right (a positive starting offset that eases down to zero).
+  const sign = enter.direction === "left" || enter.direction === "up" ? 1 : -1;
+
+  const t = interpolate(frame, [0, enter.frames], [1, 0], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: curve(enter.easing),
+  });
+
+  return sign * distance * t;
+};
+
+/**
  * Pixel offset for a `push` — starts fully off-frame in `direction` and
  * settles to (0, 0). Zero for every other enter kind, so this is always safe
  * to add to a shot's position.
@@ -75,20 +101,51 @@ export const enterTranslate = (
 ): { x: number; y: number } => {
   if (!enter || enter.kind !== "push") return { x: 0, y: 0 };
 
-  const distance = enter.direction === "left" || enter.direction === "right" ? frameW : frameH;
-  // "left" reads as "the new shot arrives moving left" — so it enters from
-  // the right (a positive starting offset that eases down to zero).
-  const sign = enter.direction === "left" || enter.direction === "up" ? 1 : -1;
-
-  const t = interpolate(frame, [0, enter.frames], [1, 0], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-    easing: curve(enter.easing),
-  });
-
-  const offset = sign * distance * t;
+  const offset = pushOffset(frame, enter, frameW, frameH);
   const horizontal = enter.direction === "left" || enter.direction === "right";
   return horizontal ? { x: offset, y: 0 } : { x: 0, y: offset };
+};
+
+/**
+ * Motion blur for a `push`, sized to how fast the picture is moving at this
+ * exact instant rather than a fixed amount for the whole transition. An eased
+ * push moves fastest partway through and comes to rest at the end; a constant
+ * blur would either be too weak mid-slide or still visible on a frame that
+ * has already stopped.
+ *
+ * Only the incoming shot ever has a `push` enter — the outgoing shot beneath
+ * it stays static and fully sharp, which is correct: a push is a hard sweep
+ * revealing a new picture, not two pictures both in motion.
+ *
+ * Returns a stdDeviation pair for an SVG `feGaussianBlur`: nonzero along the
+ * axis of travel, zero across it, so a left/right push blurs horizontally
+ * without softening vertical edges it never crossed, and a wipe up/down does
+ * the reverse.
+ */
+export const pushMotionBlur = (
+  frame: number,
+  enter: Enter | undefined,
+  frameW: number,
+  frameH: number,
+): { x: number; y: number } => {
+  if (!enter || enter.kind !== "push" || enter.blur === 0) return { x: 0, y: 0 };
+  const strength = enter.blur ?? 1;
+
+  // Central difference over one frame, sampled half a frame either side of
+  // now: the picture's speed at this instant, in pixels per frame.
+  const before = pushOffset(frame - 0.5, enter, frameW, frameH);
+  const after = pushOffset(frame + 0.5, enter, frameW, frameH);
+  const speed = Math.abs(after - before);
+
+  // A 180-degree shutter — the cinema default — exposes for half of each
+  // frame's duration, so what it captures blurs across roughly half the
+  // distance travelled in that frame. Capped well short of a full smear: a
+  // push crosses the whole frame in a handful of frames, and blurring the
+  // full distance covered would read as a streak rather than a fast move.
+  const radius = Math.min(48, speed * 0.5 * strength);
+
+  const horizontal = enter.direction === "left" || enter.direction === "right";
+  return horizontal ? { x: radius, y: 0 } : { x: 0, y: radius };
 };
 
 /**

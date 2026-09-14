@@ -10,6 +10,7 @@ import {
   exitScale,
   exitAudioFade,
   exitOverlayVisible,
+  pushMotionBlur,
   ease,
 } from "./moves/punch";
 import { Captions, primaryMediaKey } from "./moves/Captions";
@@ -299,12 +300,20 @@ export const ShotView: React.FC<{ resolved: ResolvedShot; spec: ReelSpec }> = ({
   const only = resolved.sounds.length === 1 ? resolved.sounds[0] : undefined;
   const carryAudio = Boolean(only?.own && only.segments[0]?.startFrame === 0);
 
-  // Grading sits on the picture layer, inside the scale and outside the
-  // overlays, so a correction that darkens a bright screen recording cannot
-  // also dim the caption sitting on top of it.
+  // Grading and push motion blur both sit on the picture layer, inside the
+  // scale and outside the overlays — a correction or a blur that touched a
+  // caption sitting on top of the picture would make it harder to read for
+  // no reason. Two independent SVG filters, combined into one CSS `filter`
+  // list, each skipped when it has nothing to do.
   const matrixId = `grade-${resolved.key}`;
-  const filter = gradeFilter(shot.grade, matrixId);
+  const gradeFilterValue = gradeFilter(shot.grade, matrixId);
   const gain = shot.grade?.gain;
+
+  const blurId = `blur-${resolved.key}`;
+  const blur = pushMotionBlur(frame, shot.enter, spec.frame.w, spec.frame.h);
+  const hasBlur = blur.x > 0.5 || blur.y > 0.5;
+
+  const filter = [gradeFilterValue, hasBlur ? `url(#${blurId})` : null].filter(Boolean).join(" ") || undefined;
 
   // Captions default to on wherever a transcript exists; a shotlist opts out
   // with `captions: false` rather than opting in.
@@ -324,6 +333,19 @@ export const ShotView: React.FC<{ resolved: ResolvedShot; spec: ReelSpec }> = ({
                 type="matrix"
                 values={`${gain.r} 0 0 0 0  0 ${gain.g} 0 0 0  0 0 ${gain.b} 0 0  0 0 0 1 0`}
               />
+            </filter>
+          </defs>
+        </svg>
+      ) : null}
+
+      {hasBlur ? (
+        <svg width={0} height={0} style={{ position: "absolute" }}>
+          <defs>
+            {/* A generous filter region: the default clips at ~10% past the
+                element's own box, which cuts off a blur wide enough to matter
+                right as a full-frame push needs it most. */}
+            <filter id={blurId} x="-50%" y="-50%" width="200%" height="200%" colorInterpolationFilters="sRGB">
+              <feGaussianBlur stdDeviation={`${blur.x} ${blur.y}`} />
             </filter>
           </defs>
         </svg>
