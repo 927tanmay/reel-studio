@@ -10,13 +10,20 @@
  */
 import path from "node:path";
 import { existsSync } from "node:fs";
-import { mkdir, rename, rm } from "node:fs/promises";
+import { copyFile, mkdir, readdir, rename, rm, stat } from "node:fs/promises";
 import { spawn } from "node:child_process";
-import { ROOT, fmt, postDir, probe, readJson, requireFfmpeg, requirePost, run } from "./lib.mjs";
+import { ROOT, fmt, postDir, probe, readJson, requireFfmpeg, requirePost, run, writeJson } from "./lib.mjs";
 
 const id = requirePost(process.argv[2]);
 const args = process.argv.slice(3);
 const stillAt = args.includes("--still") ? Number(args[args.indexOf("--still") + 1]) : null;
+
+// Consumed here, not forwarded to `remotion render` — a label for this take,
+// for when `npm run takes` lists ten of them and "3" alone doesn't say which
+// one mattered.
+const noteIndex = args.indexOf("--note");
+const note = noteIndex > -1 ? (args[noteIndex + 1] ?? null) : null;
+const forwardArgs = args.filter((_, i) => i !== noteIndex && i !== noteIndex + 1);
 
 await requireFfmpeg();
 
@@ -46,7 +53,7 @@ const raw = path.join(outDir, "reel.raw.mp4");
 const final = path.join(outDir, "reel.mp4");
 
 fmt.head(`Rendering ${id}`);
-await shell("npx", ["remotion", "render", id, raw, ...args]);
+await shell("npx", ["remotion", "render", id, raw, ...forwardArgs]);
 
 const info = await probe(raw);
 
@@ -97,6 +104,37 @@ try {
 if (existsSync(final)) {
   console.log(`\n  ${path.relative(ROOT, final)}`);
   console.log("  Watch it on a phone before you post. No gate replaces that.");
+
+  // A render overwrites reel.mp4 the same way it always has — nothing about
+  // that changes — but every one of them is also kept here, so an edit that
+  // turns out to be a mistake is a `--restore` away, not gone the moment the
+  // next render finishes. Nothing under takes/ is ever deleted by this
+  // script; pruning is `npm run takes <post> -- --forget <n>`, asked for.
+  const takesDir = path.join(outDir, "takes");
+  await mkdir(takesDir, { recursive: true });
+  const existing = (await readdir(takesDir, { withFileTypes: true }))
+    .filter((e) => e.isDirectory() && /^\d+$/.test(e.name))
+    .map((e) => Number(e.name));
+  const number = existing.length > 0 ? Math.max(...existing) + 1 : 1;
+  const takeDir = path.join(takesDir, String(number));
+  await mkdir(takeDir, { recursive: true });
+
+  await copyFile(final, path.join(takeDir, "reel.mp4"));
+  const shotlistSrc = path.join(postDir(id), "shotlist.ts");
+  if (existsSync(shotlistSrc)) await copyFile(shotlistSrc, path.join(takeDir, "shotlist.ts"));
+
+  const finalInfo = await probe(final);
+  const bytes = (await stat(final)).size;
+  await writeJson(path.join(takeDir, "meta.json"), {
+    number,
+    createdAt: new Date().toISOString(),
+    seconds: finalInfo.seconds,
+    bytes,
+    gatesPassed,
+    note,
+  });
+
+  fmt.ok(`Saved as take ${number} (${path.relative(ROOT, takeDir)}) — npm run takes ${id}`);
 }
 
 if (!gatesPassed) {

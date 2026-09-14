@@ -12,6 +12,7 @@
     "align": "node scripts/align.mjs",
     "render": "node scripts/render.mjs",
     "verify": "node scripts/verify.mjs",
+    "takes": "node scripts/takes.mjs",
     "export-timeline": "node scripts/export-timeline.mjs",
     "new": "node scripts/new-post.mjs",
     "typecheck": "tsc --noEmit"

@@ -36,7 +36,7 @@ Never put a colour, a size, a duration or a structural assumption into
 | 05b | Tightening report (optional) | `npm run tighten <post>` | — |
 | 06 | Shotlist | you, with the user | `shotlist.ts` |
 | 07 | Compose | `npm run studio` | — |
-| 08 | Render and verify | `npm run render <post>` | `out/<post>/reel.mp4` |
+| 08 | Render and verify | `npm run render <post>` | `out/<post>/reel.mp4`, a take |
 | 09 | Export timeline (optional) | `npm run export-timeline <post>` | `out/<post>/timeline.edl` |
 
 Each stage writes a file the next one reads. Stopping after any of them, editing
@@ -132,7 +132,17 @@ by hand, and resuming is expected and supported.
    voice should keep running under that B-roll, `audio: "hold"` with
    `captions: false` gives exactly this: speech continuing, one title on
    screen, nothing in the lower third.
-16. **Match colour, do not correct content.** Phone footage and a screen
+16. **A render never destroys the one before it.** Every `npm run render`
+   also saves a take — the file, the shotlist that produced it, its
+   runtime and gate result — into `out/<post>/takes/<n>/`, automatically,
+   needing nothing from you. `npm run takes <post>` lists them;
+   `--restore <n>` brings that take's shotlist back as the current one
+   (rescuing whatever was there first if it was never itself a take);
+   `--diff <a> <b>` shows exactly what changed; `--forget <n>` deletes one,
+   which is the only way anything here is ever actually lost. Whether a
+   draft survives is the user's decision, not a side effect of the next
+   render finishing.
+17. **Match colour, do not correct content.** Phone footage and a screen
    recording are lit and encoded by different things, and cut together
    untouched they read as two videos rather than one. `npm run grade <post>`
    measures every clip and says how far apart they are; `matchGrade()` from
@@ -190,12 +200,14 @@ projects/        one look per channel; copy default/ and change everything
 public/posts/    one folder per reel, self-contained
 public/assets/   fonts, sound effects, music — committed, so renders are offline
 scripts/         ingest · transcribe · align · render · verify · new-post ·
+                 takes (lists, restores, diffs and forgets past renders) ·
                  grade (measures colour) · tighten (reports what a
                  tightening pass would remove) ·
                  export-timeline (writes an EDL; dump-timeline.ts and
                  ts-resolve-hook.mjs are its own internals, not run directly)
 posts.ts         the register; every reel needs a line here
 out/             renders, not committed
+out/<post>/takes/  every past render, kept until you say to forget it
 ```
 
 ## Commands
@@ -208,7 +220,8 @@ npm run transcribe 001-my-reel
 npm run tighten 001-my-reel  # what dead air and fillers a pass would remove
 npm run align 001-my-reel    # only if clean/ has repaired audio
 npm run studio               # live preview
-npm run render 001-my-reel   # render, normalise, verify
+npm run render 001-my-reel   # render, normalise, verify — auto-saves a take
+npm run takes 001-my-reel    # list, restore, diff or forget past takes
 npm run typecheck
 node scripts/make-sfx.mjs    # regenerate the default sound effects
 ```
