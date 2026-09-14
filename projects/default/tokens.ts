@@ -100,7 +100,19 @@ export const tokens: Tokens = {
     // One shared position for every badge in a reel, deliberately — a badge
     // that jumps around the frame from shot to shot reads as unplanned even
     // when each individual placement was reasoned about on its own.
-    bottom: 0.12,
+    //
+    // Captions occupy 0.20–0.25, and the bottom 15% is under the platform's
+    // own interface. A badge inside either is wrong in a different way: down
+    // in the interface it is partly hidden, and inside the caption band it
+    // reads as a caption that slipped, which looks like a mistake rather than
+    // a choice.
+    //
+    // 0.27 puts its lower edge about 2% of frame height above the caption
+    // band — close enough to belong to the same corner of the frame, far
+    // enough that the two never read as one element. Sitting immediately
+    // above is the point; clearing the band by a wide margin would make a
+    // B-roll label float mid-frame instead of anchoring to the bottom.
+    bottom: 0.27,
     uppercase: false,
     shadow: null,
     // Slightly denser than 0.55: these badges sit over bright screen

@@ -158,6 +158,28 @@ export const verifySpec = (spec: ReelSpec, timeline: Timeline): Finding[] => {
     });
   }
 
+  // Captions and badges never share a shot — the check above sees to that —
+  // but they do share a reel, and a viewer watching one shot after another
+  // reads them as the same kind of thing if they land in the same place. A
+  // B-roll label sitting where captions sit on the next shot does not look
+  // like a label, it looks like a caption that failed to change.
+  if (used.captions && used.badge) {
+    const caption = extent(t.caption);
+    const badge = extent(t.badge);
+    const overlap = Math.min(caption.bottom, badge.bottom) - Math.max(caption.top, badge.top);
+
+    if (overlap > 0) {
+      findings.push({
+        level: "warn",
+        message:
+          `This reel uses both captions and badges, and they occupy the same band ` +
+          `(${(badge.top * 100).toFixed(0)}–${(badge.bottom * 100).toFixed(0)}% against ` +
+          `${(caption.top * 100).toFixed(0)}–${(caption.bottom * 100).toFixed(0)}% from the top). ` +
+          `Shot to shot they will read as the same element. Move the badge clear of the caption band.`,
+      });
+    }
+  }
+
   // A grade is meant to reconcile how two clips were rendered, not what they
   // are pictures of. Past a certain size it stops being a correction and
   // starts being a look — which is fine if it was chosen, and is usually a

@@ -115,7 +115,17 @@ by hand, and resuming is expected and supported.
    sound locked to its own picture; only the switch moves. Propose one at
    dialogue cuts the same way you propose transitions, and remember `lead`
    needs `in` to be at least `n` frames into the source.
-15. **Match colour, do not correct content.** Phone footage and a screen
+15. **Three text roles, and each has one place.** Captions are automatic and
+   live at the bottom. Titles are authored and live at the top, *because*
+   the bottom is spoken for. B-roll carries a title and nothing else. That
+   is the whole layout: there is no fourth position, and a shot needing one
+   is a shot trying to say two things at once. It follows that a `badge` has
+   nowhere to go — the bottom belongs to captions and `verify.ts` fails any
+   shot holding both — so label B-roll with `title`, not `badge`. Where the
+   voice should keep running under that B-roll, `audio: "hold"` with
+   `captions: false` gives exactly this: speech continuing, one title on
+   screen, nothing in the lower third.
+16. **Match colour, do not correct content.** Phone footage and a screen
    recording are lit and encoded by different things, and cut together
    untouched they read as two videos rather than one. `npm run grade <post>`
    measures every clip and says how far apart they are; `matchGrade()` from
