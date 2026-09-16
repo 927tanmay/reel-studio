@@ -229,8 +229,17 @@ const Bands: React.FC<{ spec: ReelSpec; resolved: ResolvedShot; bandAudioVolume:
                 // Each region plays its own source from its own start, so a
                 // banded shot has no single timeline to drop ranges out of —
                 // resolveTimeline says the same thing by refusing to segment
-                // one, and warns if a shotlist asks it to.
-                segments={[{ sourceStart: 0, startFrame: 0, frames: resolved.durationInFrames }]}
+                // one, and warns if a shotlist asks it to. All regions share
+                // the shot's own `in`, the same offset resolveTimeline already
+                // used to build `resolved.segments` — a generated region
+                // ignores it (it has no source-time concept), and a video
+                // region picks up mid-clip instead of always restarting at
+                // its own frame 0, which is what lets a band show the same
+                // take that's still talking, continuing from where a
+                // preceding full-frame shot on that take left off.
+                segments={[
+                  { sourceStart: resolved.shot.in ?? 0, startFrame: 0, frames: resolved.durationInFrames },
+                ]}
                 carryAudio
                 audioVolume={bandAudioVolume}
               />

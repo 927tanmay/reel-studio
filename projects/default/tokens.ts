@@ -57,6 +57,11 @@ export const tokens: Tokens = {
     // decoration. Deepened from blur:10/0.55 — against the paler wall and
     // curtain highlights in this footage the old value read as barely there.
     shadow: { color: "rgba(0,0,0,0.7)", blur: 16, y: 3 },
+    // A short mark that sweeps in under every headline, trailing the text by
+    // a couple of frames — the same accent colour the ribbon uses, so a
+    // viewer reads it as one recurring graphic device across the reel rather
+    // than two unrelated flourishes.
+    accent: { color: "#4FD1C5", weight: 4, width: 0.22 },
   },
 
   caption: {

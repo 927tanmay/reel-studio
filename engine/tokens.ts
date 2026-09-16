@@ -50,6 +50,18 @@ export type BadgeStyle = TextStyle & {
   plate: { color: string; padX: number; padY: number; radius: number };
 };
 
+export type TitleStyle = TextStyle & {
+  /**
+   * A short rule that sweeps in under the headline once it lands, trailing
+   * it by a few frames. Optional — a title with no `accent` behaves exactly
+   * as before. `width` is a fraction of frame width, independent of the
+   * text's own length: a fixed-width mark under a two-line headline reads as
+   * a designed flourish, whereas underlining the text's actual (variable)
+   * width would look like a literal underline that happens to not quite fit.
+   */
+  accent?: { color: string; weight: number; width: number };
+};
+
 /**
  * The look of a `ribbon` — a banner that travels in and lands, rather than
  * fading in place like a title. The spring is part of the look, not the
@@ -81,7 +93,7 @@ export type Tokens = {
     /** Optional local .woff2 files under public/assets/fonts, loaded at startup. */
     files?: { family: string; file: string; weight?: string; style?: string }[];
   };
-  title: TextStyle;
+  title: TitleStyle;
   caption: CaptionStyle;
   badge: BadgeStyle;
   ribbon: RibbonStyle;

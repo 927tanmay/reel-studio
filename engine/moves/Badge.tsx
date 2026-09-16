@@ -15,10 +15,13 @@ export const Badge: React.FC<{ spec: ReelSpec; badge: NonNullable<Shot["badge"]>
   const text = typeof badge === "string" ? badge : badge.text;
   const bottom = typeof badge === "string" ? style.bottom : (badge.bottom ?? style.bottom);
 
-  const opacity = interpolate(frame, [0, 4], [0, 1], {
+  const opacity = interpolate(frame, [0, 6], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
+  // A small rise-in to match Title's — a badge that just appears reads as a
+  // label; one that settles into place reads as a graphic.
+  const lift = (1 - opacity) * spec.frame.h * 0.008;
 
   return (
     <AbsoluteFill style={{ pointerEvents: "none" }}>
@@ -30,6 +33,7 @@ export const Badge: React.FC<{ spec: ReelSpec; badge: NonNullable<Shot["badge"]>
           display: "flex",
           justifyContent: "center",
           opacity,
+          transform: `translateY(${lift}px)`,
         }}
       >
         <span
