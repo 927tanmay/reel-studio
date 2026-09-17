@@ -93,9 +93,11 @@ export const tokens: Tokens = {
   badge: {
     fontFamily: 'ui-monospace, "SF Mono", Menlo, monospace',
     // 28 was legible on a desktop preview and small on a phone, which is the
-    // only screen that counts. The plate grows with it so the padding stays
-    // proportional rather than shrink-wrapping bigger type.
-    size: 38,
+    // only screen that counts; raised to 38, then 44, then here again after
+    // it still read as small on the B-roll flashes specifically. The plate
+    // grows with it so the padding stays proportional rather than
+    // shrink-wrapping bigger type.
+    size: 50,
     weight: 600,
     color: "#FFFFFF",
     tracking: 0.02,
@@ -124,6 +126,10 @@ export const tokens: Tokens = {
     // recordings as often as dark ones, and the plate is the only thing
     // holding the type off a busy background.
     plate: { color: "rgba(0,0,0,0.62)", padX: 26, padY: 14, radius: 12 },
+    // The same accent colour the title and ribbon already use, so a viewer
+    // reads this as the same recurring graphic device across the whole reel
+    // rather than a third, unrelated flourish for B-roll specifically.
+    accent: { color: "#4FD1C5", weight: 4 },
   },
 
   ribbon: {

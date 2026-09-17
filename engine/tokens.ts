@@ -48,6 +48,17 @@ export type CaptionStyle = TextStyle & {
 
 export type BadgeStyle = TextStyle & {
   plate: { color: string; padX: number; padY: number; radius: number };
+  /**
+   * The same sweep-in rule Title uses, so a B-roll label reads as the same
+   * graphic language as an A-roll headline rather than a plainer style of
+   * its own. Optional — a badge with no `accent` behaves exactly as before.
+   * Unlike Title's, this has no `width`: it's drawn inside the plate (Badge
+   * has one, Title doesn't) at a fixed proportion of the plate's own content
+   * width rather than the frame's, because badge text length varies far more
+   * than a title's does — a frame-relative bar would look arbitrary against
+   * a tightly-wrapped plate.
+   */
+  accent?: { color: string; weight: number };
 };
 
 export type TitleStyle = TextStyle & {
