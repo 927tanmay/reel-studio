@@ -12,6 +12,24 @@ Deliver one file per reel: `brief.md`. The template is at the bottom.
 
 ---
 
+## 0. Frame size is a real choice, not a default
+
+`1080x1920` is the usual pick, not a ceiling. The editor renders whatever
+frame you state — vertical, square, a different aspect, or a higher
+resolution — with no extra work. What decides whether a higher resolution is
+worth asking for is your **footage's own native resolution**, not the
+platform: state it if you know it (`ffprobe` on the raw file, or just note
+"shot on an iPhone 15" and let the editor check). Talking-head footage shot
+on a recent phone is often native 4K vertical and has real headroom above
+1080p; a screen recording is whatever the screen actually was, and asking
+for a delivery frame bigger than that source makes it softer, not sharper.
+Most platforms re-encode down to roughly 1080x1920 regardless of what you
+upload, so a bigger frame mainly pays off if the master gets reused
+somewhere else, not for how it looks once posted — say so if that's the
+goal.
+
+---
+
 ## 1. Budget the words, not the seconds
 
 Speaking pace is the single thing scripts get wrong. Measure your own once, then
@@ -36,6 +54,12 @@ speaking seconds  ×  (your wpm ÷ 60)       =  your word ceiling
 
 Write to that number. Going over is not a rounding error; it is the most common
 reason a reel has to be re-planned after recording.
+
+**Dead air and fillers get removed automatically — don't budget around them.**
+A real pause, an "um", a false start: the editor measures these from the
+actual recording and tightens them without being asked. Record naturally
+rather than trying to speak without pausing; the edit will read as tighter
+than the take did.
 
 ---
 
@@ -75,13 +99,32 @@ Bad: `On the word "the", cut to the screen recording.`
 
 The beats you can ask for at a moment are: a plain cut, a sharp punch, a quiet
 punch, a **blend** (two shots overlap and zoom together instead of meeting at a
-hard edge — ask for this between two B-roll moments that share a subject and
-should feel like one continuous idea), a **slide** (one shot sweeps in and
-covers the other, no zoom — ask for this between two moments that are more
-clearly separate beats), a band opening, or a dip in the music. Both blend and
-slide crossfade their own audio automatically, even if the picture doesn't. A
-punch can carry a sound; the ones that exist are **snap**, **whoosh** and
-**tick**. Ask for any other sound and someone has to go find it first.
+hard edge), a **slide** (one shot sweeps in and covers the other, no zoom), a
+band opening, or a dip in the music. Both blend and slide crossfade their own
+audio automatically, even if the picture doesn't. A punch can carry a sound;
+the ones that exist are **snap**, **whoosh** and **tick**. Ask for any other
+sound and someone has to go find it first.
+
+**Blend is for B-roll, not for two takes of you talking.** Ask for it between
+two B-roll moments that share a subject and should feel like one continuous
+idea — two screenshots, two states of the same UI. Between two different
+takes of a person (hook cutting to middle, say), a blend overlaps two moving
+faces mid-motion and the overlap reads as a literal double exposure, however
+brief. If you want two A-roll takes to feel smooth into each other, ask for
+**matched zoom** instead: the outgoing take zooms in a little over its last
+stretch, the incoming take starts at that same zoomed level and eases back to
+normal — no overlap, so nothing to ghost. Slide is the right default between
+two *clearly separate* B-roll beats — the sweep itself signals "new idea."
+
+**A split edit** — the sound changes a few frames before or after the
+picture, instead of both cutting at once — is worth asking for at a dialogue
+cut specifically, when you want the cut to feel motivated rather than
+abrupt: *hearing where you're going before you see it.* Say which side leads:
+"lead the sound into screen-demo a few frames early" (you hear it starting
+before the picture cuts) or "let the hook audio trail a beat into the next
+shot" (the picture's already changed, the old sound hasn't caught up yet).
+Six to twelve frames is the usual range; more than that stops reading as a
+seam and starts reading as its own effect.
 
 When writing the script, notice which words are distinctive and put your beats
 on those. If a line has no distinctive word where you need a beat, rewrite the
@@ -115,14 +158,39 @@ Capture notes worth including:
 - Do not pre-crop screen recordings to vertical. Leave them at native size so
   there is room to crop and pan in the edit.
 
+**A sentence can keep running underneath B-roll that fills the whole frame.**
+A cutaway to a screen recording or a generated clip doesn't have to stop you
+mid-thought — say "keep the voice from hook going under this" and your voice
+continues, uninterrupted, while the picture is entirely the B-roll, for as
+long as that shot runs. This is the default worth reaching for: write your
+sentence at its natural length and let the B-roll cover as much of it as it
+needs to, rather than cramming the line into a pause so it fits before a
+cutaway. Only decide separately whether captions should still show during
+that stretch — usually yes; say to drop them if the B-roll itself already
+displays the words (a code snippet, a terminal output) and repeating them as
+captions would be redundant.
+
+**A stronger, rarer version: keep you visibly talking *and* show a generated
+graphic at the same time**, split across the frame — you in the bottom band,
+the graphic in the top, advancing on your words. Ask for this specifically
+when the viewer needs to see your face *and* the graphic together, not just
+hear you over it; the plain version above is the right default otherwise,
+since it puts the picture fully on the B-roll instead of splitting it. Say
+which take continues under it and roughly what fraction of the frame the
+graphic should get; the rest works the same as any other generated clip
+(section 5).
+
 ---
 
 ## 5. Write generated clips out in full
 
-Six kinds of clip can be generated. If you ask for one, supply all of its
+Seven kinds of clip can be generated. If you ask for one, supply all of its
 content. Half a diagram is a question, not a brief.
 
-**diagram** — nodes that assemble and pan
+**diagram** — nodes that assemble and pan. The one worth reaching for
+proactively: if a line in your script is literally a list — two or three
+named things — say so and ask for a diagram rather than leaving it as another
+few seconds of talking head.
 > Nodes, each with a label and optional sub-label. Which nodes connect. Which
 > nodes are visible at each step, and the word each step lands on.
 
@@ -141,8 +209,18 @@ content. Half a diagram is a question, not a brief.
 > Each figure: its value, its label, an optional suffix. Say whether you want
 > plain counters or bars.
 
-**callout** — attention on a still
-> Which image, which region to highlight, and the label.
+**callout** — attention on a still, with a focus box and everything else
+dimmed
+> Which image, which region to highlight, and the label. Ask for this when
+> the viewer's eye needs directing to one part of a busier image.
+
+**image** — a plain still, full-bleed, no focus box or dimming
+> Which image (or which frame of which take, by timestamp). Use this instead
+> of callout when the picture itself is the point and any added emphasis
+> would just be in the way — most commonly a freeze-frame closing a reel
+> instead of cutting to black or holding on a title card. Ask for this
+> explicitly as a closing option; the default without it is the reel simply
+> ending on the last word.
 
 Example of a complete diagram request:
 
@@ -166,7 +244,9 @@ because all three share the lower third.
 
 - **Titles** are authored text, not from speech. Supply the exact copy.
 - **Badges** are small labels naming what is on screen. Supply the exact copy.
-  These belong on B-roll, which is naturally where captions are absent.
+  These belong on B-roll, which is naturally where captions are absent. Every
+  badge in a reel sits in the same spot automatically — you name the copy per
+  shot, not the position.
 
 Keep title copy short enough to read at phone size in the time it is up. Two
 lines is comfortable; four is not.
@@ -194,6 +274,8 @@ A brief is ready to hand over when every one of these is true.
 - [ ] Every generated clip is specified in full
 - [ ] Title and badge copy is written out (captions need no copy — automatic)
 - [ ] Music mood is stated, or explicitly none
+- [ ] The ending is decided: freeze on the last frame, a generated close, or
+      just ending on the last word (the default if you don't say)
 
 Anything unticked will come back as a question before the cut starts.
 
@@ -216,6 +298,7 @@ Turn: <where it shifts>
 Payoff: <where it lands>
 Feels: <two adjectives>
 Music: <mood, or none>
+Ending: <freeze on the last frame / a generated close / leave blank to just end on the last word>
 
 ## Script
 Word count: <n> / <budget>
@@ -273,6 +356,7 @@ Turn: Show the generated component appearing.
 Payoff: Name what the job becomes instead.
 Feels: certain, unhurried
 Music: sustained tension, no drop
+Ending: freeze on the last frame of cta.mov instead of cutting to black
 
 ## Script
 Word count: 64 / 68
