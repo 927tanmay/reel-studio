@@ -19,12 +19,13 @@ export const Diagram: React.FC<GenProps<DiagramSpec>> = ({ spec, reel }) => {
   const seconds = frame / fps;
   const tokens = reel.style;
   const P = tokens.palette;
+  const g = tokens.generators?.textScale ?? 1;
 
   const column = spec.layout === "column";
   const windowSize = spec.window ?? (column ? 3 : 2);
 
   const cardW = column ? reel.frame.w * 0.76 : reel.frame.w * (0.78 / windowSize) * 1.15;
-  const cardH = column ? reel.frame.h * (0.5 / windowSize) : reel.frame.h * 0.17;
+  const cardH = column ? reel.frame.h * (0.5 / windowSize) : reel.frame.h * 0.17 * g;
   const gap = column ? cardH * 0.42 : cardW * 0.3;
 
   const position = (i: number) => i * ((column ? cardH : cardW) + gap);
@@ -39,10 +40,12 @@ export const Diagram: React.FC<GenProps<DiagramSpec>> = ({ spec, reel }) => {
   const shownIndexes = spec.nodes
     .map((n, i) => (shown.has(n.id) ? i : -1))
     .filter((i) => i >= 0);
+  const wholeStrip = (spec.nodes.length - 1) / 2;
+  const panning = spec.pan !== false;
   const focus =
-    shownIndexes.length > 0
+    panning && shownIndexes.length > 0
       ? shownIndexes.reduce((a, b) => a + b, 0) / shownIndexes.length
-      : (spec.nodes.length - 1) / 2;
+      : wholeStrip;
 
   const glide = spring({
     frame: frame - (stepIndex >= 0 ? (steps[stepIndex].at ?? 0) * fps : 0),
@@ -52,7 +55,7 @@ export const Diagram: React.FC<GenProps<DiagramSpec>> = ({ spec, reel }) => {
   });
 
   const previousFocus =
-    stepIndex > 0
+    panning && stepIndex > 0
       ? (() => {
           const prev = steps[stepIndex - 1].show;
           const idx = spec.nodes.map((n, i) => (prev.includes(n.id) ? i : -1)).filter((i) => i >= 0);
@@ -143,7 +146,7 @@ export const Diagram: React.FC<GenProps<DiagramSpec>> = ({ spec, reel }) => {
                   style={{
                     fontFamily: tokens.fonts.display,
                     fontWeight: 700,
-                    fontSize: px(tokens, reel.frame, 44),
+                    fontSize: px(tokens, reel.frame, 44 * g),
                     color: node.color ?? tokens.title.color,
                     lineHeight: 1.1,
                   }}
@@ -154,7 +157,7 @@ export const Diagram: React.FC<GenProps<DiagramSpec>> = ({ spec, reel }) => {
                   <div
                     style={{
                       fontFamily: tokens.fonts.mono,
-                      fontSize: px(tokens, reel.frame, 26),
+                      fontSize: px(tokens, reel.frame, 26 * g),
                       color: P.muted ?? "#9aa",
                     }}
                   >

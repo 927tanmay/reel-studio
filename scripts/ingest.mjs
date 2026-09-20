@@ -32,6 +32,22 @@ const frame = config.frame;
  */
 const MAX_WIDTH = frame.w * 2;
 
+/**
+ * Optional per-post override in post.json:
+ *
+ *   "conform": { "width": 1440, "keys": ["hook-1", "cta-1"] }
+ *
+ * Brings the named clips (all of them if `keys` is omitted) down to `width`,
+ * for footage that carries far more resolution than a crop will ever use — a
+ * 4K HEVC phone take costs a great deal to decode for headroom nobody sees.
+ * Everything else keeps the default limit above.
+ */
+const limitFor = (key) => {
+  const c = config.conform;
+  if (!c?.width) return MAX_WIDTH;
+  return !c.keys || c.keys.includes(key) ? c.width : MAX_WIDTH;
+};
+
 const rawDir = path.join(dir, "raw");
 const outDir = path.join(dir, "conformed");
 await mkdir(outDir, { recursive: true });
@@ -52,13 +68,14 @@ for (const file of videos) {
   const info = await probe(file);
   let use = file;
 
-  if (info.width > MAX_WIDTH) {
+  const limit = limitFor(key);
+  if (info.width > limit) {
     const target = path.join(outDir, `${key}.mp4`);
     if (!existsSync(target)) {
-      fmt.ok(`${key}: ${info.width}px is oversized, conforming to ${MAX_WIDTH}px`);
+      fmt.ok(`${key}: ${info.width}px is oversized, conforming to ${limit}px`);
       await run("ffmpeg", [
         "-y", "-i", file,
-        "-vf", `scale=${MAX_WIDTH}:-2:flags=lanczos`,
+        "-vf", `scale=${limit}:-2:flags=lanczos`,
         "-c:v", "libx264", "-crf", "18", "-preset", "fast", "-pix_fmt", "yuv420p",
         "-c:a", "aac", "-b:a", "192k",
         target,

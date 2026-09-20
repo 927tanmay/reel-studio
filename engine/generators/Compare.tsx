@@ -12,6 +12,7 @@ export const Compare: React.FC<GenProps<CompareSpec>> = ({ spec, reel, durationI
   const { fps } = useVideoConfig();
   const tokens = reel.style;
   const P = tokens.palette;
+  const g = tokens.generators?.textScale ?? 1;
 
   const wipeFrame = (spec.wipeAt ?? durationInFrames / fps / 2) * fps;
   const wipe = interpolate(frame, [wipeFrame, wipeFrame + fps * 0.35], [0, 1], {
@@ -38,7 +39,7 @@ export const Compare: React.FC<GenProps<CompareSpec>> = ({ spec, reel, durationI
         style={{
           fontFamily: tokens.fonts.display,
           fontWeight: 700,
-          fontSize: px(tokens, reel.frame, 46),
+          fontSize: px(tokens, reel.frame, 46 * g),
           color: accent,
         }}
       >
@@ -49,7 +50,7 @@ export const Compare: React.FC<GenProps<CompareSpec>> = ({ spec, reel, durationI
           key={i}
           style={{
             fontFamily: tokens.fonts.mono,
-            fontSize: px(tokens, reel.frame, 30),
+            fontSize: px(tokens, reel.frame, 30 * g),
             color: P.muted ?? "#9aa4ae",
             lineHeight: 1.4,
           }}
@@ -67,6 +68,9 @@ export const Compare: React.FC<GenProps<CompareSpec>> = ({ spec, reel, durationI
         flexDirection: "column",
         justifyContent: "center",
         alignItems: "stretch",
+        // The lower third belongs to the badge (and captions), so the two
+        // states are centred in the space above it rather than in the frame.
+        paddingBottom: reel.frame.h * (tokens.badge.bottom ?? 0),
       }}
     >
       {panel(spec.left, P.muted ?? "#9aa4ae", 1 - wipe * 0.5)}

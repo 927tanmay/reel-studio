@@ -79,7 +79,11 @@ if (info.hasAudio && targetLufs !== null) {
     "-y", "-i", raw,
     "-af", filter,
     "-c:v", "copy",
-    "-c:a", "aac", "-b:a", "192k", "-ar", "44100",
+    // Tag the stream as BT.709 in full (primaries, transfer, matrix). A copy
+    // keeps whatever Remotion wrote, which is only the matrix.
+    "-bsf:v", "h264_metadata=colour_primaries=1:transfer_characteristics=1:matrix_coefficients=1",
+    "-c:a", "aac", "-b:a", "256k", "-ar", "48000",
+    "-movflags", "+faststart",
     final,
   ]);
   await rm(raw, { force: true });

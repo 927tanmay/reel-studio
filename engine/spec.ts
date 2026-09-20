@@ -129,6 +129,12 @@ export type GenSpec =
       steps?: Step[];
       /** Keep this many nodes in frame at once; the rest are panned to. */
       window?: number;
+      /**
+       * Set false to hold the frame still on the whole strip instead of gliding
+       * to whichever nodes the current step shows — for two alternatives side
+       * by side, which arrive without the picture moving.
+       */
+      pan?: boolean;
       seconds?: number;
     }
   | {
@@ -156,7 +162,18 @@ export type GenSpec =
     }
   | {
       type: "data";
-      items: { label: string; value: number; suffix?: string; color?: string }[];
+      items: {
+        label: string;
+        value: number;
+        suffix?: string;
+        color?: string;
+        /**
+         * Seconds into the shot when this figure starts to grow. Omit and
+         * items start together, staggered slightly. Pin it to a word with
+         * `at.start("hundred") - shotStart` to land a number on the word.
+         */
+        at?: number;
+      }[];
       style?: "counter" | "bars";
       seconds?: number;
     }
@@ -205,7 +222,11 @@ export type BandSpec = {
 export type Gap = { from: number; to: number };
 
 /** See `Shot.audio`. A split edit's `n` is in frames, like every other move. */
-export type ShotAudio = "hold" | { trail: number } | { lead: number };
+export type ShotAudio =
+  | "hold"
+  | { trail: number }
+  | { lead: number }
+  | { from: string };
 
 /**
  * A colour correction on a shot's picture. Every field is a multiplier, and
@@ -300,6 +321,13 @@ export type Shot = {
    *   picture does, which is the one that makes a cut feel motivated rather
    *   than abrupt: you hear where you are going before you see it.
    *
+   * - `{ from }` — a different clip's sound under this whole shot, read off
+   *   this shot's own `in`, `seconds` and `drop` as if that clip were its
+   *   source. For B-roll that *opens* a take: `hold` continues whatever played
+   *   last, which is the wrong voice when the next line's picture is a graphic
+   *   that starts before its speaker does. Later shots that `hold` continue
+   *   from wherever this one stops.
+   *
    * Both split edits keep sound locked to its own picture — only the moment
    * of the switch moves — so a J-cut needs `in` to be at least `n` frames
    * into its source, since that is the material it plays early.
@@ -338,6 +366,14 @@ export type Shot = {
   ribbon?: Ribbon;
   /** Extra sound effects at offsets within this shot, in seconds. */
   hits?: { at: number; sfx: string; volume?: number }[];
+  /**
+   * Duck the music bed to near-silence for `frames` frames, `at` seconds into
+   * this shot. A `hit` already ducks the bed for a moment as a side effect;
+   * this is the dip on its own, with no sound effect, for a beat that wants
+   * the music out of the way for as long as a word takes to land. `to`
+   * overrides the look's `mix.dipTo`.
+   */
+  dips?: { at: number; frames: number; to?: number }[];
   /** Anything you want to read back later. Ignored by the engine. */
   note?: string;
 };
@@ -500,6 +536,7 @@ export type ResolvedShot = {
 };
 
 export type ResolvedHit = { frame: number; sfx: string; volume: number };
+export type ResolvedDip = { frame: number; frames: number; to?: number };
 
 /** The source-time range one segment plays, in the source's own seconds. */
 export const segmentSource = (segment: Segment, fps: number, speed = 1): Gap => ({
@@ -584,6 +621,7 @@ export type Timeline = {
   shots: ResolvedShot[];
   durationInFrames: number;
   hits: ResolvedHit[];
+  dips: ResolvedDip[];
   warnings: string[];
 };
 
@@ -649,6 +687,7 @@ export const resolveTimeline = (spec: ReelSpec): Timeline => {
   const { fps } = spec.frame;
   const warnings: string[] = [];
   const hits: ResolvedHit[] = [];
+  const dips: ResolvedDip[] = [];
   const shots: ResolvedShot[] = [];
 
   // Tracks where the *next* shot would start under a plain cut. A blend moves
@@ -778,6 +817,8 @@ export const resolveTimeline = (spec: ReelSpec): Timeline => {
       }
     }
 
+    const overlapFrames = Math.max(0, cursor - startFrame);
+
     const key = `${index}-${shotLabel(shot)}`;
 
     if (shot.src === undefined && !shot.bands) {
@@ -792,11 +833,19 @@ export const resolveTimeline = (spec: ReelSpec): Timeline => {
       typeof shot.src === "string" && spec.media?.[shot.src]?.hasAudio ? shot.src : null;
 
     /** Plays the running source onward from where it stopped, for `frames`. */
-    const carryOn = (frames: number, why: string): Sound | null => {
+    const carryOn = (asked: number, why: string): Sound | null => {
       if (!audible) {
         warnings.push(`Shot ${index} asks to ${why}, but nothing has played yet.`);
         return null;
       }
+      // Under a blend or push this shot's picture starts `overlapFrames` early,
+      // on top of the previous shot, whose sound is still playing those frames.
+      // Carried sound is the same take continuing, so it begins where the
+      // previous shot's sound *ends*, not where this shot's picture does —
+      // otherwise the overlap plays that stretch of speech twice.
+      const offset = Math.min(overlapFrames, asked);
+      const frames = asked - offset;
+      if (frames <= 0) return null;
       const wanted = frames / fps;
       const total = spec.media?.[audible.key]?.seconds;
       const left = total === undefined ? wanted : Math.max(0, total - audible.sourceEnd);
@@ -814,7 +863,7 @@ export const resolveTimeline = (spec: ReelSpec): Timeline => {
       const sound: Sound = {
         key: audible.key,
         own: false,
-        segments: [{ sourceStart: audible.sourceEnd, startFrame: 0, frames: playable }],
+        segments: [{ sourceStart: audible.sourceEnd, startFrame: offset, frames: playable }],
       };
       audible = { key: audible.key, sourceEnd: audible.sourceEnd + playable / fps };
       return sound;
@@ -830,6 +879,19 @@ export const resolveTimeline = (spec: ReelSpec): Timeline => {
     if (trail > 0) {
       const carried = carryOn(trail, shot.audio === "hold" ? "hold the previous sound" : "trail the previous sound");
       if (carried) sounds.push(carried);
+    }
+
+    // Another clip's voice under this whole shot, on this shot's own timeline —
+    // so a tightening pass on the shot tightens the voice with it.
+    if (shot.audio && typeof shot.audio === "object" && "from" in shot.audio) {
+      const from = shot.audio.from;
+      if (!spec.media?.[from]?.hasAudio) {
+        warnings.push(`Shot ${index} plays the sound of "${from}", which has none or is not in media.json.`);
+      } else {
+        sounds.push({ key: from, own: false, segments });
+        const last = segments[segments.length - 1];
+        audible = { key: from, sourceEnd: last.sourceStart + (last.frames / fps) * speed };
+      }
     }
 
     // This shot's own sound picks up wherever the carried sound left off —
@@ -900,6 +962,9 @@ export const resolveTimeline = (spec: ReelSpec): Timeline => {
     for (const h of shot.hits ?? []) {
       hits.push({ frame: startFrame + Math.round(h.at * fps), sfx: h.sfx, volume: h.volume ?? 1 });
     }
+    for (const d of shot.dips ?? []) {
+      dips.push({ frame: startFrame + Math.round(d.at * fps), frames: d.frames, to: d.to });
+    }
 
     cursor = startFrame + durationInFrames;
   });
@@ -915,5 +980,5 @@ export const resolveTimeline = (spec: ReelSpec): Timeline => {
     warnings.push(`Runtime is ${totalSeconds.toFixed(1)}s, under the floor of ${spec.target.minSeconds}s.`);
   }
 
-  return { shots, durationInFrames: Math.max(1, cursor), hits, warnings };
+  return { shots, durationInFrames: Math.max(1, cursor), hits, dips, warnings };
 };

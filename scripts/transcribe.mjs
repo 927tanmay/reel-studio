@@ -36,6 +36,15 @@ if (!media) {
   process.exit(1);
 }
 
+// Proper nouns and jargon Whisper would otherwise hear as something common
+// ("Vercel" as "Varsal", "skill" as "kill"). Listed in post.json as
+// `"vocabulary": ["Vercel", "AGENTS.md"]` and passed as Whisper's initial
+// prompt, so the fix survives every re-transcribe instead of being hand-edited
+// into words.json and lost.
+const config = (await readJson(path.join(dir, "post.json"), null)) ?? {};
+const vocabulary = Array.isArray(config.vocabulary) ? config.vocabulary : [];
+const initialPrompt = vocabulary.length > 0 ? `Vocabulary: ${vocabulary.join(", ")}.` : null;
+
 const work = path.join(dir, ".transcribe");
 await mkdir(work, { recursive: true });
 
@@ -63,6 +72,7 @@ for (const entry of Object.values(media)) {
     "--output-format", "json",
     "--output-dir", work,
     "--verbose", "False",
+    ...(initialPrompt ? ["--initial-prompt", initialPrompt] : []),
   ]);
 
   const produced = path.join(work, `${entry.key}.json`);
@@ -77,6 +87,18 @@ for (const entry of Object.values(media)) {
     for (const w of segment.words ?? []) {
       const text = String(w.word ?? "").trim();
       if (!text) continue;
+
+      // Whisper hears "agents dot md" as two words, "AGENTS" and ".md", and a
+      // caption would print them with a space between. A token that starts
+      // with a dot and a letter is an extension: rejoin it to the word before.
+      const previous = words[words.length - 1];
+      if (previous && /^\.[a-z]/i.test(text) && /[a-z0-9]$/i.test(previous.text)) {
+        previous.text += text;
+        previous.endMs = Math.round(w.end * 1000);
+        previous.timestampMs = Math.round((previous.startMs + previous.endMs) / 2);
+        continue;
+      }
+
       words.push({
         text,
         startMs: Math.round(w.start * 1000),

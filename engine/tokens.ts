@@ -113,6 +113,15 @@ export type Tokens = {
    * Nothing readable is allowed to land inside them; verify.ts enforces it.
    */
   safe: { top: number; bottom: number; left: number; right: number };
+  /**
+   * Generated clips (diagram, compare, data). Optional: absent, every generator
+   * keeps its built-in proportions, which were drawn for a full frame and read
+   * small on a phone once a clip sits in a band or carries little text.
+   */
+  generators?: {
+    /** Multiplies the type in diagram, compare and data clips. 1 is unchanged. */
+    textScale?: number;
+  };
   /** Named punch presets. Shotlists may use these or pass their own numbers. */
   punches?: Record<string, { to: number; frames: number; hit?: string }>;
   /** Named blend presets — cross-dissolve overlap length and zoom. */

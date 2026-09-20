@@ -39,6 +39,21 @@ export const Bed: React.FC<{ spec: ReelSpec; timeline: Timeline }> = ({ spec, ti
       }
     }
 
+    // A named dip is longer than a hit's, so it ramps in and out rather than
+    // stepping, which would click on a sustained track.
+    for (const dip of timeline.dips) {
+      if (frame < dip.frame || frame >= dip.frame + dip.frames) continue;
+      const ramp = Math.max(1, Math.min(mix.dipFrames + 3, Math.floor(dip.frames / 2)));
+      const depth = interpolate(
+        frame,
+        [dip.frame, dip.frame + ramp, dip.frame + dip.frames - ramp, dip.frame + dip.frames],
+        [0, 1, 1, 0],
+        { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
+      );
+      const floor = Math.min(level, dip.to ?? mix.dipTo);
+      level = level + (floor - level) * depth;
+    }
+
     const fadeStart = timeline.durationInFrames - tailFrames;
     if (frame >= fadeStart) {
       level *= interpolate(frame, [fadeStart, timeline.durationInFrames], [1, 0], {
@@ -50,5 +65,17 @@ export const Bed: React.FC<{ spec: ReelSpec; timeline: Timeline }> = ({ spec, ti
     return level;
   };
 
-  return <Audio src={staticFile(`assets/music/${bed.track}`)} volume={volume} loop />;
+  // `extend`, not the default `repeat`: with `repeat`, each pass of a looping
+  // track restarts the frame count handed to `volume`, so a reel longer than
+  // its track has every dip, duck and the closing fade land on the wrong
+  // frame — or never, since the tail fade sits past the end of one pass.
+  // This curve is written against the whole reel, so it needs the reel's frame.
+  return (
+    <Audio
+      src={staticFile(`assets/music/${bed.track}`)}
+      volume={volume}
+      loop
+      loopVolumeCurveBehavior="extend"
+    />
+  );
 };

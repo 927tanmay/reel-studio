@@ -15,6 +15,7 @@ export const Data: React.FC<GenProps<DataSpec>> = ({ spec, reel }) => {
   const { fps } = useVideoConfig();
   const tokens = reel.style;
   const P = tokens.palette;
+  const g = tokens.generators?.textScale ?? 1;
   const bars = spec.style === "bars";
   const max = Math.max(...spec.items.map((i) => i.value), 1);
 
@@ -28,8 +29,9 @@ export const Data: React.FC<GenProps<DataSpec>> = ({ spec, reel }) => {
       }}
     >
       {spec.items.map((item, i) => {
+        const start = item.at !== undefined ? Math.round(item.at * fps) : i * Math.round(fps * 0.18);
         const grow = spring({
-          frame: frame - i * Math.round(fps * 0.18),
+          frame: frame - start,
           fps,
           config: { damping: 200, stiffness: 90 },
           durationInFrames: Math.round(fps * 0.9),
@@ -43,7 +45,7 @@ export const Data: React.FC<GenProps<DataSpec>> = ({ spec, reel }) => {
               style={{
                 fontFamily: tokens.fonts.display,
                 fontWeight: 700,
-                fontSize: px(tokens, reel.frame, bars ? 54 : 132),
+                fontSize: px(tokens, reel.frame, (bars ? 54 : 132) * g),
                 color,
                 lineHeight: 1,
                 fontVariantNumeric: "tabular-nums",
@@ -75,7 +77,7 @@ export const Data: React.FC<GenProps<DataSpec>> = ({ spec, reel }) => {
             <div
               style={{
                 fontFamily: tokens.fonts.mono,
-                fontSize: px(tokens, reel.frame, 30),
+                fontSize: px(tokens, reel.frame, 30 * g),
                 color: P.muted ?? "#9aa4ae",
                 letterSpacing: "0.04em",
               }}
