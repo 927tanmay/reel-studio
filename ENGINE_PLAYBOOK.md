@@ -196,6 +196,13 @@ footage — cut, punched, reframed, captioned, banded.
 
   `layout: "column"` for a vertical short; `window` caps how many nodes are
   on screen at once before it pans (defaults to 3 for column, 2 for row).
+  `pan: false` holds the frame on the whole strip instead of gliding to
+  whichever nodes the current step shows — the right call for two
+  alternatives side by side, which should arrive without the picture moving.
+  It only works while the whole strip fits the `window`, because nothing ever
+  pans to the rest: at `window: 2` (row) two nodes both sit in frame, three
+  leave the outer cards mostly clipped, and four leave them off-screen
+  entirely. For more than two, raise `window` or leave `pan` on.
 
 - **`image`** — a plain full-bleed still. Distinct from `callout`, which
   *always* draws a focus box and dims everything else. Reach for `image`
@@ -215,6 +222,21 @@ footage — cut, punched, reframed, captioned, banded.
   `CLAUDE.md`: captured footage first, generated second, stock third, a video
   model last — a generator is what fills the gap when nothing was captured
   and stock would be generic.
+
+  Two things worth knowing for `data`: each item takes `at`, seconds into the
+  shot when that figure starts to grow, so a number can land on the word that
+  says it (`anchors(words.x).start("hundred") - shotStart`, the same
+  shot-local arithmetic as a diagram's `steps[].at`); omit it and the items
+  start together, staggered slightly. And `compare` centres itself in the
+  space above the badge band, not the whole frame, so it stays clear of a
+  label.
+
+- **`tokens.generators.textScale`** — multiplies the type in `diagram`,
+  `compare` and `data` (1 is unchanged, and absent means 1). Those clips were
+  drawn for a full frame and read small on a phone once one sits in a band or
+  carries little text. It is a property of the look, so it applies to every
+  generated clip in every reel that uses that look; a `diagram` card grows in
+  height with it and keeps its width, so the layout does not move.
 
 ### Split-screen: a talking head plus a generator, at once
 
@@ -276,6 +298,30 @@ Two things that aren't obvious from the type signature:
 - **`audio: { lead: n }` / `{ trail: n }`** — split edits (J-cut/L-cut), 6-12
   frames. A J-cut (`lead`) is the stronger of the two — hearing where you're
   going before you see it is what makes a cut feel motivated.
+- **`audio: { from: "hook" }`** — a named clip's sound under this whole shot,
+  read off the shot's own `in`, `seconds` and `drop` as if that clip were its
+  source. `hold` continues whatever played *last*, which is the wrong voice
+  when B-roll *opens* a take: a graphic that starts before its speaker does.
+  A later `hold` continues from wherever this one stops. Because it follows
+  the shot's own timeline, a `drop` on the shot tightens the voice with it.
+- **`hold` under a `blend` or `push`** needs nothing from you. The overlap
+  puts this shot's picture on screen early, over a previous shot whose sound
+  is still playing those frames, so held sound begins where the previous
+  sound *ends*, not where the picture does; starting it with the picture
+  plays that stretch of speech twice.
+- **`dips: [{ at, frames, to? }]`** — duck the music bed for `frames` frames,
+  `at` seconds into the shot, to the look's `mix.dipTo` unless `to` says
+  otherwise. A `hit` already ducks the bed briefly as a side effect; use a
+  dip when the music should be out of the way for as long as a word takes to
+  land, with no sound effect. It ramps in and out, so a sustained track does
+  not click.
+- **The bed and looping.** `bed.track` loops when the reel outlasts it, and
+  the level curve counts the *reel's* frames (`loopVolumeCurveBehavior:
+  "extend"`), which is what keeps a dip or the closing fade on the frame you
+  asked for. A reel that seems to ignore its dips or never fades out is the
+  first thing to check against this. `node scripts/make-music.mjs` writes a
+  16-second default to `public/assets/music/pulse.wav`; that folder is not
+  committed, so each machine generates or supplies its own.
 - **`matchGrade()`** — keep strength at or below the 0.5 default between
   *different-subject* clips (a screen recording vs. a face); push it higher
   only between two takes of the literal same subject (matching a CTA take
@@ -405,6 +451,25 @@ render-and-check cycle.
   version — `npm run takes <post> -- --diff <a> <b>` is the fastest way to
   understand *why* a duration or a frame changed between two renders, faster
   than re-deriving it from memory.
+- **Two `post.json` keys, set before the stage they belong to.**
+  `"vocabulary": ["Vercel", "AGENTS.md"]` goes to Whisper as its initial
+  prompt at `transcribe`, so a proper noun that would otherwise be heard as
+  something common ("Vercel" as "Varsal") comes out as spelled and stays that
+  way across re-transcribes — the fix to reach for instead of editing
+  `words.json` by hand, which the next transcribe erases. It raises the odds
+  rather than guaranteeing them, so read `transcript.md` afterwards.
+  Separately, transcribe now rejoins an extension Whisper splits off
+  (`AGENTS` + `.md`) into one word, so a caption does not print a space
+  inside a filename; it leaves a sentence-ending period, and a `.md` that
+  follows a word already ending in one, alone.
+  `"conform": { "width": 1440, "keys": ["hook-1"] }` brings the named clips
+  (every clip, if `keys` is omitted) down to that width at `ingest`. Use it
+  for 4K phone footage that a crop will never use the extra resolution of and
+  that is expensive to decode; clips it does not name keep the default limit
+  of twice the frame width. Conforming changes a clip's dimensions, so
+  `regionAt` must be given the *conformed* width and height from
+  `media.json` (§5), and ingest will not redo a clip it has already
+  conformed — delete `conformed/` to apply a new width.
 
 ---
 

@@ -111,7 +111,13 @@ by hand, and resuming is expected and supported.
    a silent screen recording stops the speaker dead — which is a choice worth
    making deliberately as a montage break, and a mistake everywhere else.
    Check for a badge on the same shot: captions now arrive there too, and the
-   two share the lower third.
+   two share the lower third. `hold` continues whatever played *last*, which
+   is the wrong voice when B-roll opens a take before its speaker starts —
+   `audio: { from: "hook" }` puts a named clip's sound under the whole shot
+   instead, read off the shot's own `in`, `seconds` and `drop`. Under a blend
+   or push, held sound starts where the previous shot's sound ends, not where
+   the overlapping picture does; that is automatic, and without it the
+   overlap plays the same words twice.
 14. **The sound does not have to change where the picture does.** `audio:
    { trail: n }` keeps the outgoing sound for this shot's first `n` frames
    (an L-cut); `audio: { lead: n }` starts this shot's sound `n` frames early,
@@ -152,6 +158,26 @@ by hand, and resuming is expected and supported.
    the editor grey, which is correcting the content, not the colour. Raise it
    only between takes of the same thing. Grading touches the picture only;
    text is never graded.
+18. **The music gets out of the way on purpose.** `dips: [{ at, frames, to? }]`
+   on a shot ducks the bed for a beat that wants the music gone for as long
+   as a word takes to land — a `hit` ducks it as a side effect, this is the
+   dip on its own, and it ramps so a sustained track does not click. The bed
+   loops, and its level curve is written against the whole reel, so it must
+   count the reel's frames rather than restart with each pass (`Bed.tsx` sets
+   `loopVolumeCurveBehavior="extend"`); a reel longer than its track once had
+   every dip land on the wrong frame. `node scripts/make-music.mjs` writes a
+   default bed to `public/assets/music/pulse.wav`; any track dropped in that
+   folder works, and it is not committed.
+19. **Tell the stages what they cannot know.** Two optional keys in a post's
+   `post.json`. `vocabulary: ["Vercel", "AGENTS.md"]` is handed to Whisper as
+   its initial prompt, so proper nouns and jargon are transcribed as spelled
+   and stay that way across every re-transcribe, instead of being hand-fixed
+   in `words.json` and lost; it makes a right spelling likelier, not certain,
+   so still read `transcript.md`. `conform: { width: 1440, keys: [...] }`
+   brings the named clips (all of them if `keys` is omitted) down to that
+   width at ingest, for 4K phone footage whose extra resolution no crop will
+   ever use and which is expensive to decode. Set both before running the
+   stage they belong to; neither changes anything already ingested.
 
 ## What stays human
 
@@ -224,6 +250,7 @@ npm run render 001-my-reel   # render, normalise, verify — auto-saves a take
 npm run takes 001-my-reel    # list, restore, diff or forget past takes
 npm run typecheck
 node scripts/make-sfx.mjs    # regenerate the default sound effects
+node scripts/make-music.mjs  # write the default music bed (not committed)
 ```
 
 ## Adding to the engine

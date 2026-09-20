@@ -170,6 +170,12 @@ that stretch — usually yes; say to drop them if the B-roll itself already
 displays the words (a code snippet, a terminal output) and repeating them as
 captions would be redundant.
 
+**If the B-roll opens a line before its speaker starts it** — a graphic that
+comes up first, with your voice arriving inside it — the voice that was last
+heard is the wrong one to continue. Name the take instead: "play the voice of
+middle under this diagram". It works the same way as above, from the start of
+that shot.
+
 **A stronger, rarer version: keep you visibly talking *and* show a generated
 graphic at the same time**, split across the frame — you in the bottom band,
 the graphic in the top, advancing on your words. Ask for this specifically
@@ -192,7 +198,10 @@ proactively: if a line in your script is literally a list — two or three
 named things — say so and ask for a diagram rather than leaving it as another
 few seconds of talking head.
 > Nodes, each with a label and optional sub-label. Which nodes connect. Which
-> nodes are visible at each step, and the word each step lands on.
+> nodes are visible at each step, and the word each step lands on. If it is
+> two alternatives shown together rather than a sequence, say "side by side"
+> and the picture holds still while the second arrives, instead of gliding
+> across to it.
 
 **code** — a snippet that types itself
 > The exact code, the language, which lines highlight and on which word, and an
@@ -207,7 +216,8 @@ few seconds of talking head.
 
 **data** — numbers that move
 > Each figure: its value, its label, an optional suffix. Say whether you want
-> plain counters or bars.
+> plain counters or bars, and, if a number should land as you say it, the word
+> it lands on. Without one the figures start together, slightly staggered.
 
 **callout** — attention on a still, with a focus box and everything else
 dimmed
@@ -244,6 +254,15 @@ because all three share the lower third.
 
 - **Titles** are authored text, not from speech. Supply the exact copy.
 - **Badges** are small labels naming what is on screen. Supply the exact copy.
+
+**Spell out the words a transcript will get wrong.** Captions are built from a
+transcript of what you actually say, and that is where names and jargon slip:
+a product heard as a similar-sounding common word, a filename split into two.
+List every proper noun, tool, and filename you will speak, spelled exactly as
+it should print (`Vercel`, `AGENTS.md`), or say there are none. The editor
+hands that list to the transcription step before it runs, which makes the
+right spelling likelier, and the transcript is still read back before
+anything renders.
   These belong on B-roll, which is naturally where captions are absent. Every
   badge in a reel sits in the same spot automatically — you name the copy per
   shot, not the position.
@@ -273,6 +292,8 @@ A brief is ready to hand over when every one of these is true.
 - [ ] Every B-roll moment names its source and its content
 - [ ] Every generated clip is specified in full
 - [ ] Title and badge copy is written out (captions need no copy — automatic)
+- [ ] Every name, tool and filename you will speak is listed as it should
+      print, or there are none
 - [ ] Music mood is stated, or explicitly none
 - [ ] The ending is decided: freeze on the last frame, a generated close, or
       just ending on the last word (the default if you don't say)
@@ -332,6 +353,7 @@ Title on hook: "<exact copy>"
 Badge on screen-demo: "<exact copy>"
 Badge on diagram-request-path: "<exact copy>"
 Emphasis: "<word>", "<word>" — or leave blank for the editor to propose
+Vocabulary: "<name or filename as it should print>", ... — or "none"
 
 ## Do not
 <anything specifically unwanted for this reel>
@@ -393,6 +415,7 @@ Title on hook: "Component libraries are finished"
 Badge on screen-demo: "one prompt, one component"
 Badge on diagram-review-loop: "the new loop"
 Emphasis: "obsolete" in hook, "reviewing" in middle
+Vocabulary: none — no product names or filenames are spoken
 
 ## Do not
 No stock footage. No generated video.
