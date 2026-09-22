@@ -169,6 +169,17 @@ the checklist, rather than between the checklist and the button.)
 When a collision is real and a shared position genuinely can't clear it,
 **compute the fix, don't eyeball it** — see §5.
 
+### Captions and a badge on the same shot, on purpose
+
+`verify.ts` fails a shot carrying both by default — the lower third is one
+zone, and rule 15 already covers why. `ReelSpec.allowCaptionsWithBadge: true`
+is the explicit opt-out, for a look where the badge genuinely sits clear of
+the caption band (the default look's does, at `bottom: 0.27` against
+captions at `0.20–0.25`) and the reel wants both on one shot rather than
+choosing. It's a `ReelSpec`-level flag, not per-shot — checked both states on
+a fixture before trusting it: fails without it, passes with it set, nothing
+in between.
+
 ---
 
 ## 3. Generators — one clip, one job each
@@ -203,6 +214,19 @@ footage — cut, punched, reframed, captioned, banded.
   pans to the rest: at `window: 2` (row) two nodes both sit in frame, three
   leave the outer cards mostly clipped, and four leave them off-screen
   entirely. For more than two, raise `window` or leave `pan` on.
+
+  A node's `visual` (`button` · `spinner` · `debounce` · `checkout` ·
+  `receipt` · `booking`) draws a small mockup above its label instead of
+  leaving the card as text only — line-art in the look's accent colour, so
+  it reads as one system with the card's own border rather than a second
+  illustration style dropped on top. Reach for it where the script names a
+  UI state that a label alone reads as an abstraction — "the button stays
+  disabled until it debounces" is a `debounce` node, not three more seconds
+  of talking head explaining what a debounced button does. `debounce`
+  specifically animates (ripples radiating outward); the rest are static.
+  Rendered all six in a fixture and read the frames back before trusting
+  them: distinct, legible, and the active/inactive pair (`button` vs
+  `debounce`) reads as two different states, not the same icon twice.
 
 - **`image`** — a plain full-bleed still. Distinct from `callout`, which
   *always* draws a focus box and dims everything else. Reach for `image`
@@ -340,6 +364,36 @@ Two things that aren't obvious from the type signature:
   are still set by `underSpeech`; check them against the voice's loudness (a
   -12.5 LUFS track under a -11 LUFS voice needed ~0.13), and give a `dips`
   entry its own `to` when the bed already sits below the look's `dipTo`.
+- **`bed.trackIn` — where in the *file* the bed starts reading, independent
+  of `startShot`.** File offset 0 is wherever the track happens to begin,
+  usually a quiet intro built for a loop point rather than for landing on a
+  reel's hook. `npm run beats <track>` writes a `<track>.beats.json` next to
+  the file (not committed, like the music folder itself) with BPM, a
+  confidence score, and candidate start points already snapped to a real
+  beat — pass the one that fits as `trackIn`, paired with `startShot` so the
+  beat lands on the exact frame the music enters.
+
+  The detector is a plain energy-flux autocorrelation, nothing more —
+  validated against a synthetic click track with a known, exact grid before
+  it was trusted on real audio, which caught a real octave error (the raw
+  peak was the track's own half-time echo). Locating one precise beat deep
+  into a real track needed a different approach than locating tempo: the
+  global phase, extrapolated from the track's start, drifts across the
+  dozens of bars to a late candidate even with a near-exact tempo estimate
+  (measured: 146ms off, close to a third of a beat, forty-some seconds in).
+  Picking "the single loudest transient nearby" as a local fix isn't
+  reliable either — real percussive music has several beats of comparable
+  loudness close together, so the answer changes with the search window's
+  width, which is what a genuinely local fix should never do. What holds up:
+  a local comb filter, averaging several real beats around the candidate
+  instead of trusting either one extrapolated beat or one single loudest
+  sample — cross-checked with an independent reimplementation at a different
+  window and hop, landing within 31ms.
+
+  Confidence below roughly 2 means the track probably has no hard beat at
+  all (strings, ambience) — a real finding, not a weaker version of the same
+  number. Its section-energy candidates are still worth using; they're about
+  where the track gets louder, which needs no beat grid to be meaningful.
 - **`matchGrade()`** — keep strength at or below the 0.5 default between
   *different-subject* clips (a screen recording vs. a face); push it higher
   only between two takes of the literal same subject (matching a CTA take

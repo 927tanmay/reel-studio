@@ -201,7 +201,10 @@ few seconds of talking head.
 > nodes are visible at each step, and the word each step lands on. If it is
 > two alternatives shown together rather than a sequence, say "side by side"
 > and the picture holds still while the second arrives, instead of gliding
-> across to it.
+> across to it. A node can carry a small icon instead of being text-only — a
+> button, a loading spinner, a debouncing button, a checkout card, a receipt,
+> a booking calendar. Ask for one where the node names a UI state that a
+> label alone would leave abstract.
 
 **code** — a snippet that types itself
 > The exact code, the language, which lines highlight and on which word, and an
