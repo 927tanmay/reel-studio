@@ -1,11 +1,128 @@
 import React from "react";
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion";
-import type { GenSpec } from "../spec";
+import type { DiagramVisual, Frame, GenSpec } from "../spec";
+import type { Tokens } from "../tokens";
 import { px } from "../scale";
 import type { GenProps } from "./index";
 import { currentStep } from "./index";
 
 type DiagramSpec = Extract<GenSpec, { type: "diagram" }>;
+
+/**
+ * The mockups a node's `visual` can draw, in place of a third line of text.
+ * Plain line-art in the accent colour so it reads as the same kind of mark
+ * as the card's own border and edges, not a second illustration style.
+ * Every size below is a `px()` call, so it scales with `textScale` and the
+ * frame the same way the label text next to it does.
+ */
+const NodeVisual: React.FC<{ variant: DiagramVisual; frame: number; tokens: Tokens; frameSize: Frame; scale: number }> = ({
+  variant,
+  frame,
+  tokens,
+  frameSize,
+  scale,
+}) => {
+  const P = tokens.palette;
+  const accent = P.accent ?? "#4FD1C5";
+  const u = (n: number) => px(tokens, frameSize, n * scale);
+
+  if (variant === "button" || variant === "debounce") {
+    const active = variant === "debounce";
+    return (
+      <div style={{ position: "relative", width: u(100), height: u(56), display: "flex", alignItems: "center", justifyContent: "center" }}>
+        {active &&
+          [0, 0.34, 0.67].map((offset) => {
+            const p = ((frame / 30 + offset) % 1) * 1; // one ripple every ~1s, staggered
+            return (
+              <div
+                key={offset}
+                style={{
+                  position: "absolute",
+                  width: u(72 + p * 40),
+                  height: u(32 + p * 18),
+                  borderRadius: u(8),
+                  border: `${u(2)}px solid ${accent}`,
+                  opacity: (1 - p) * 0.7,
+                }}
+              />
+            );
+          })}
+        <div
+          style={{
+            width: u(72),
+            height: u(32),
+            borderRadius: u(6),
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: active ? accent : "rgba(255,255,255,0.10)",
+            border: active ? "none" : `${u(1.5)}px solid rgba(255,255,255,0.2)`,
+          }}
+        >
+          <span
+            style={{
+              fontFamily: tokens.fonts.display,
+              fontWeight: 700,
+              fontSize: u(18),
+              color: active ? tokens.bg : "rgba(255,255,255,0.45)",
+            }}
+          >
+            Pay
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  if (variant === "spinner") {
+    const angle = (frame * 9) % 360;
+    const size = u(44);
+    return (
+      <svg width={size} height={size} viewBox="0 0 44 44" style={{ transform: `rotate(${angle}deg)` }}>
+        <circle cx="22" cy="22" r="18" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="4" />
+        <path d="M22 4 A18 18 0 0 1 40 22" fill="none" stroke={accent} strokeWidth="4" strokeLinecap="round" />
+      </svg>
+    );
+  }
+
+  if (variant === "checkout") {
+    return (
+      <svg width={u(76)} height={u(52)} viewBox="0 0 76 52">
+        <rect x="2" y="2" width="72" height="48" rx="8" fill="none" stroke={accent} strokeWidth="3" />
+        <rect x="2" y="15" width="72" height="10" fill={accent} opacity="0.5" />
+        <circle cx="16" cy="38" r="4" fill={accent} />
+        <circle cx="28" cy="38" r="4" fill={accent} opacity="0.5" />
+      </svg>
+    );
+  }
+
+  if (variant === "receipt") {
+    return (
+      <svg width={u(52)} height={u(58)} viewBox="0 0 52 58">
+        <path
+          d="M6 2h40v50l-5-4-5 4-5-4-5 4-5-4-5 4-5-4-5 4z"
+          fill="none"
+          stroke={accent}
+          strokeWidth="3"
+        />
+        <line x1="14" y1="16" x2="38" y2="16" stroke={accent} strokeWidth="3" />
+        <line x1="14" y1="25" x2="38" y2="25" stroke={accent} strokeWidth="3" opacity="0.6" />
+        <line x1="14" y1="34" x2="30" y2="34" stroke={accent} strokeWidth="3" opacity="0.6" />
+      </svg>
+    );
+  }
+
+  // booking
+  return (
+    <svg width={u(58)} height={u(54)} viewBox="0 0 58 54">
+      <rect x="2" y="8" width="54" height="44" rx="6" fill="none" stroke={accent} strokeWidth="3" />
+      <line x1="2" y1="21" x2="56" y2="21" stroke={accent} strokeWidth="3" />
+      <line x1="15" y1="2" x2="15" y2="13" stroke={accent} strokeWidth="3" strokeLinecap="round" />
+      <line x1="43" y1="2" x2="43" y2="13" stroke={accent} strokeWidth="3" strokeLinecap="round" />
+      <rect x="32" y="30" width="14" height="14" rx="3" fill={accent} />
+    </svg>
+  );
+};
 
 /**
  * Nodes that assemble, with the frame panning between them.
@@ -142,6 +259,9 @@ export const Diagram: React.FC<GenProps<DiagramSpec>> = ({ spec, reel }) => {
                   transform: `translateY(${(1 - (visible ? rise : 1)) * cardH * 0.15}px)`,
                 }}
               >
+                {node.visual ? (
+                  <NodeVisual variant={node.visual} frame={frame} tokens={tokens} frameSize={reel.frame} scale={g} />
+                ) : null}
                 <div
                   style={{
                     fontFamily: tokens.fonts.display,

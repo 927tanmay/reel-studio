@@ -276,6 +276,14 @@ Two things that aren't obvious from the type signature:
   audio directly like any ordinary shot. `audio: "hold"` is for a *different*
   shot pretending to be silent B-roll over someone else's voice; a banded
   region showing the actual speaker doesn't need the pretense.
+- **A `hold` straight after a band replays the band's words.** The band's
+  live region carries its own sound inside its video element, which the
+  timeline does not track, so a following `audio: "hold"` resumes from where
+  the shot *before* the band stopped and plays the band's speech a second time
+  (found on 007: "body like POST" heard twice, "fetch call…" never). After a
+  band, give the next shot `audio: { from: "<take>" }` with its `in` set to
+  the band's last frame, and dump the timeline's sound segments to confirm the
+  source time runs on without overlap.
 - **Reframe the video region.** A talking-head take cropped from its native
   vertical framing down into a short, wide band needs its own `regionAt` —
   the default center-crop from source-center rarely lands on the actual face
@@ -322,6 +330,16 @@ Two things that aren't obvious from the type signature:
   first thing to check against this. `node scripts/make-music.mjs` writes a
   16-second default to `public/assets/music/pulse.wav`; that folder is not
   committed, so each machine generates or supplies its own.
+- **A bed that enters and leaves on a shot.** By default the bed plays from
+  the reel's first frame and fades only over its last `tailFade`. `bed:
+  { startShot, fadeInFrames?, fadeOutShot, fadeOutFrames? }` pins the
+  entrance and a mid-reel exit to shot *indexes*, so they follow the picture
+  through any re-cut: the track starts from its own first bar on that shot's
+  first frame (silent before), and ramps to silence over `fadeOutFrames`
+  starting on the exit shot. Measured on a rendered file, not assumed. Levels
+  are still set by `underSpeech`; check them against the voice's loudness (a
+  -12.5 LUFS track under a -11 LUFS voice needed ~0.13), and give a `dips`
+  entry its own `to` when the bed already sits below the look's `dipTo`.
 - **`matchGrade()`** — keep strength at or below the 0.5 default between
   *different-subject* clips (a screen recording vs. a face); push it higher
   only between two takes of the literal same subject (matching a CTA take

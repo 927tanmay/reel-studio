@@ -96,7 +96,7 @@ export const verifySpec = (spec: ReelSpec, timeline: Timeline): Finding[] => {
   // Captions are on by default wherever a transcript exists, so this has to
   // check the same way ShotView decides it, not just an explicit `true`.
   for (const resolved of timeline.shots) {
-    if (willShowCaptions(spec, resolved) && resolved.shot.badge) {
+    if (!spec.allowCaptionsWithBadge && willShowCaptions(spec, resolved) && resolved.shot.badge) {
       findings.push({
         level: "fail",
         message:

@@ -1,5 +1,5 @@
 import React from "react";
-import { Audio, interpolate, staticFile } from "remotion";
+import { Audio, Sequence, interpolate, staticFile } from "remotion";
 import type { ReelSpec, Timeline } from "../spec";
 
 /**
@@ -28,6 +28,13 @@ export const Bed: React.FC<{ spec: ReelSpec; timeline: Timeline }> = ({ spec, ti
     .map((s) => [s.startFrame, s.startFrame + s.durationInFrames] as const);
 
   const tailFrames = Math.max(1, Math.round(mix.tailFade * fps));
+
+  const startFrame =
+    bed.startShot !== undefined ? (timeline.shots[bed.startShot]?.startFrame ?? 0) : 0;
+  const fadeInFrames = Math.max(1, Math.round(bed.fadeInFrames ?? 6));
+  const fadeOutFrom =
+    bed.fadeOutShot !== undefined ? (timeline.shots[bed.fadeOutShot]?.startFrame ?? null) : null;
+  const fadeOutFrames = Math.max(1, Math.round(bed.fadeOutFrames ?? tailFrames));
 
   const volume = (frame: number) => {
     const speaking = speechRanges.some(([a, b]) => frame >= a && frame < b);
@@ -62,6 +69,21 @@ export const Bed: React.FC<{ spec: ReelSpec; timeline: Timeline }> = ({ spec, ti
       });
     }
 
+    // A music entrance and a mid-reel exit, each pinned to a shot rather than
+    // a frame count so they follow the picture through any re-cut.
+    if (bed.startShot !== undefined) {
+      level *= interpolate(frame, [startFrame, startFrame + fadeInFrames], [0, 1], {
+        extrapolateLeft: "clamp",
+        extrapolateRight: "clamp",
+      });
+    }
+    if (fadeOutFrom !== null) {
+      level *= interpolate(frame, [fadeOutFrom, fadeOutFrom + fadeOutFrames], [1, 0], {
+        extrapolateLeft: "clamp",
+        extrapolateRight: "clamp",
+      });
+    }
+
     return level;
   };
 
@@ -70,12 +92,25 @@ export const Bed: React.FC<{ spec: ReelSpec; timeline: Timeline }> = ({ spec, ti
   // its track has every dip, duck and the closing fade land on the wrong
   // frame — or never, since the tail fade sits past the end of one pass.
   // This curve is written against the whole reel, so it needs the reel's frame.
+  //
+  // With `startShot` the track sits in a Sequence so it begins from its own
+  // first bar on that shot; inside one, the frame handed to `volume` is local
+  // to it, so the reel's frame is rebuilt by adding the offset back.
+  // `trackIn` is seconds into the *file*, independent of `startShot`, which
+  // is a position on the *reel*. Together they put a real beat under the
+  // exact frame music enters the reel on, instead of file offset 0 landing
+  // wherever it happens to.
+  const trackInFrames = Math.max(0, Math.round((bed.trackIn ?? 0) * fps));
+
   return (
-    <Audio
-      src={staticFile(`assets/music/${bed.track}`)}
-      volume={volume}
-      loop
-      loopVolumeCurveBehavior="extend"
-    />
+    <Sequence from={startFrame} layout="none">
+      <Audio
+        src={staticFile(`assets/music/${bed.track}`)}
+        trimBefore={trackInFrames > 0 ? trackInFrames : undefined}
+        volume={(f) => volume(f + startFrame)}
+        loop
+        loopVolumeCurveBehavior="extend"
+      />
+    </Sequence>
   );
 };

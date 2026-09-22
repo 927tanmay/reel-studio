@@ -114,7 +114,22 @@ export type Ribbon = {
 // Generated sources
 // ---------------------------------------------------------------------------
 
-export type DiagramNode = { id: string; label: string; sub?: string; color?: string };
+/**
+ * A small illustrative mockup drawn above a node's label instead of leaving
+ * the card as text-only — a disabled button, a spinner, a checkout card.
+ * Line-art in the look's accent colour, drawn to sit inside the same card
+ * shell every other node uses, so a band mixing plain and visual nodes still
+ * reads as one system rather than two different generators.
+ */
+export type DiagramVisual = "button" | "spinner" | "debounce" | "checkout" | "receipt" | "booking";
+
+export type DiagramNode = {
+  id: string;
+  label: string;
+  sub?: string;
+  color?: string;
+  visual?: DiagramVisual;
+};
 export type DiagramEdge = { from: string; to: string; label?: string };
 
 /** A step the generator advances to, optionally pinned to a spoken word. */
@@ -381,10 +396,35 @@ export type Shot = {
 export type Bed = {
   /** A file under public/assets/music. */
   track: string;
+  /**
+   * Seconds into the track file to start reading from — the file's own
+   * timeline, not the reel's. File offset 0 is wherever a stock track
+   * happens to begin, usually a quiet intro built for a loop point, not for
+   * landing on a reel's hook. `npm run beats <track>` finds real candidates:
+   * a beat grid, and the moments the track's own energy settles into a
+   * sustained run above its intro/outro level. Combine with `startShot` so
+   * the moment picked lands on the frame the music actually enters on.
+   */
+  trackIn?: number;
   underSpeech?: number;
   underSilence?: number;
   /** Shot indexes that count as speech. Defaults to every shot with captions. */
   speechShots?: number[];
+  /**
+   * Index of the shot the music comes in on. The track starts from its own
+   * beginning on that shot's first frame and is silent before it. Omit and it
+   * plays from the reel's first frame.
+   */
+  startShot?: number;
+  /** Frames the music takes to come up at `startShot`. Defaults to 6, enough to avoid a click. */
+  fadeInFrames?: number;
+  /**
+   * Index of the shot the music starts fading out on, ramping to silence over
+   * `fadeOutFrames`. Omit and only the reel's closing tail fade applies.
+   */
+  fadeOutShot?: number;
+  /** Frames that fade takes. Defaults to the look's `mix.tailFade`. */
+  fadeOutFrames?: number;
 };
 
 export type ReelSpec = {
@@ -393,6 +433,14 @@ export type ReelSpec = {
   style: Tokens;
   shots: Shot[];
   bed?: Bed;
+  /**
+   * Let a shot carry captions and a badge together. Off by default, and
+   * `verify.ts` fails the reel while it is: the lower third is one zone and two
+   * things in it usually read as a mistake. Set it when the look keeps them
+   * apart on purpose (the badge sits just above the caption band) and the
+   * reel wants both on the same shot.
+   */
+  allowCaptionsWithBadge?: boolean;
   /** Checked when the timeline is built, so a long reel fails before it renders. */
   target?: { maxSeconds?: number; minSeconds?: number };
   /** Durations and dimensions written by scripts/ingest.mjs. */
