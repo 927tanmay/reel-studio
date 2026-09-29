@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 import type { Frame } from "../spec";
 import type { TextStyle, Tokens } from "../tokens";
 import { px } from "../scale";
+import { textShadow } from "./surface";
 
 /** Turns a look's text tokens into CSS at the current frame size. */
 export const textStyle = (
@@ -21,13 +22,7 @@ export const textStyle = (
     textAlign: style.textAlign ?? "center",
     maxWidth: `${(style.maxWidth ?? 0.85) * 100}%`,
     textTransform: style.uppercase ? "uppercase" : undefined,
-    textShadow: style.shadow
-      ? `${px(tokens, frame, style.shadow.x ?? 0)}px ${px(tokens, frame, style.shadow.y ?? 0)}px ${px(
-          tokens,
-          frame,
-          style.shadow.blur,
-        )}px ${style.shadow.color}`
-      : undefined,
+    textShadow: textShadow(tokens, frame, style.shadow),
     margin: 0,
     whiteSpace: "pre-wrap",
   };

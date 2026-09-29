@@ -5,6 +5,7 @@ import { resolveTimeline, shotLabel } from "./spec";
 import { ShotView } from "./ShotView";
 import { Bed } from "./moves/Bed";
 import { Hits } from "./moves/Hits";
+import { Watermark } from "./moves/Watermark";
 import { useFonts } from "./fonts";
 
 export const Reel: React.FC<{ spec: ReelSpec }> = ({ spec }) => {
@@ -26,6 +27,7 @@ export const Reel: React.FC<{ spec: ReelSpec }> = ({ spec }) => {
 
       <Hits spec={spec} hits={timeline.hits} />
       {spec.bed ? <Bed spec={spec} timeline={timeline} /> : null}
+      <Watermark spec={spec} />
     </AbsoluteFill>
   );
 };

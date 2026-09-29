@@ -6,6 +6,7 @@ import { dominantSound, wordsInShot } from "../spec";
 import { normalise } from "../words";
 import { px } from "../scale";
 import { textStyle, verticalPlacement } from "./text";
+import { surfaceStyle } from "./surface";
 
 /**
  * Which media key's transcript this shot should caption from.
@@ -115,7 +116,7 @@ export const Captions: React.FC<{ spec: ReelSpec; resolved: ResolvedShot }> = ({
             ...base,
             ...(plate
               ? {
-                  backgroundColor: plate.color,
+                  ...surfaceStyle(spec.style, spec.frame, plate),
                   padding: `${px(spec.style, spec.frame, plate.padY)}px ${px(
                     spec.style,
                     spec.frame,

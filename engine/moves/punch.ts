@@ -1,6 +1,21 @@
 import { Easing as RemotionEasing, interpolate } from "remotion";
 import type { Easing, Enter, Exit, Push } from "../spec";
 
+// Standard overshoot/exponential formulas (Penner-style), not Remotion
+// built-ins — `interpolate`'s `easing` only needs to be a `t => number`
+// function, so these plug in exactly like the named curves above do.
+const BACK_C1 = 1.70158;
+const BACK_C3 = BACK_C1 + 1;
+const easeOutBack = (t: number) => 1 + BACK_C3 * (t - 1) ** 3 + BACK_C1 * (t - 1) ** 2;
+
+const BACK_C2 = BACK_C1 * 1.525;
+const easeInOutBack = (t: number) =>
+  t < 0.5
+    ? ((2 * t) ** 2 * ((BACK_C2 + 1) * 2 * t - BACK_C2)) / 2
+    : ((2 * t - 2) ** 2 * ((BACK_C2 + 1) * (t * 2 - 2) + BACK_C2) + 2) / 2;
+
+const easeOutExpo = (t: number) => (t >= 1 ? 1 : 1 - 2 ** (-10 * t));
+
 const curve = (name?: Easing) => {
   switch (name) {
     case "linear":
@@ -11,6 +26,12 @@ const curve = (name?: Easing) => {
       return RemotionEasing.inOut(RemotionEasing.ease);
     case "ease":
       return RemotionEasing.ease;
+    case "easeOutBack":
+      return easeOutBack;
+    case "easeInOutBack":
+      return easeInOutBack;
+    case "easeOutExpo":
+      return easeOutExpo;
     case "easeOut":
     default:
       // A punch that decelerates into rest reads as a hit. Linear reads as a

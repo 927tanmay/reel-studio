@@ -15,7 +15,29 @@ export type Rect = { x: number; y: number; w: number; h: number };
 
 export const rect = (x: number, y: number, w: number, h: number): Rect => ({ x, y, w, h });
 
-export type Easing = "linear" | "ease" | "easeIn" | "easeOut" | "easeInOut";
+export type Easing =
+  | "linear"
+  | "ease"
+  | "easeIn"
+  | "easeOut"
+  | "easeInOut"
+  /**
+   * Overshoots past 1 before settling back — a graphic that lands with a
+   * touch of bounce rather than just decelerating into rest. Reach for this
+   * on a ribbon, a title accent, or a logo sting; it reads as too playful
+   * for a hard cut's own punch, which is why `punch`/`exitPunch` keep their
+   * default rather than gaining this as an option.
+   */
+  | "easeOutBack"
+  /** The same overshoot on both ends — a settle, then a small departure. */
+  | "easeInOutBack"
+  /**
+   * Very fast off the mark, then a long, gentle tail into rest — reads as
+   * more energetic than the standard `easeOut`, which decelerates evenly
+   * throughout. Good for something that should feel like it's snapping into
+   * place rather than gliding there.
+   */
+  | "easeOutExpo";
 
 /** A scale ramp. `to` is the starting scale; the shot settles back to 1. */
 export type Punch = {
@@ -116,19 +138,43 @@ export type Ribbon = {
 
 /**
  * A small illustrative mockup drawn above a node's label instead of leaving
- * the card as text-only — a disabled button, a spinner, a checkout card.
- * Line-art in the look's accent colour, drawn to sit inside the same card
- * shell every other node uses, so a band mixing plain and visual nodes still
- * reads as one system rather than two different generators.
+ * the card as text-only. Line-art in the look's accent colour, drawn to sit
+ * inside the same card shell every other node uses, so a band mixing plain
+ * and illustrated nodes still reads as one system rather than two different
+ * generators. Two families: UI-state mockups (a disabled button, a checkout
+ * card — for a script naming a specific interface behaviour), and a general
+ * icon set (for a script naming a plain concept: done, blocked, a warning,
+ * a trend) that has no reason to be tied to any one kind of UI.
  */
-export type DiagramVisual = "button" | "spinner" | "debounce" | "checkout" | "receipt" | "booking";
+export type DiagramVisual =
+  | "button"
+  | "spinner"
+  | "debounce"
+  | "checkout"
+  | "receipt"
+  | "booking"
+  | "check"
+  | "cross"
+  | "arrow-right"
+  | "star"
+  | "lock"
+  | "warning"
+  | "info"
+  | "trend-up";
 
 export type DiagramNode = {
   id: string;
   label: string;
   sub?: string;
   color?: string;
-  visual?: DiagramVisual;
+  /**
+   * One of the built-in mockups/icons above, or a custom mark — a logo, a
+   * brand icon, anything not already covered — as `{ src: "assets/..." }`,
+   * a path under public/. A custom image is drawn at the same size and
+   * position the built-in icons use, so swapping one for the other moves
+   * nothing else in the layout.
+   */
+  visual?: DiagramVisual | { src: string };
 };
 export type DiagramEdge = { from: string; to: string; label?: string };
 
@@ -189,7 +235,15 @@ export type GenSpec =
          */
         at?: number;
       }[];
-      style?: "counter" | "bars";
+      /**
+       * `counter`/`bars` treat each item as its own independent quantity —
+       * each can carry its own colour. `line`/`area` treat the whole list as
+       * one series in order, plotted against `label` on the x-axis: a trend
+       * ("usage over time," "before vs after" as more than two points), not
+       * a set of named figures. A series has one colour, from its first
+       * item; per-point colour is what `counter`/`bars` are for.
+       */
+      style?: "counter" | "bars" | "line" | "area";
       seconds?: number;
     }
   | {
@@ -379,6 +433,13 @@ export type Shot = {
   badge?: string | { text: string; bottom?: number };
   /** A banner that flies in and lands. Motion graphics, not type. */
   ribbon?: Ribbon;
+  /**
+   * A name/role identification card — who is on screen, quieter than a
+   * `ribbon`. Shares the badge's zone: `verify.ts` fails a shot carrying
+   * both. `at` is seconds into the shot it arrives; omit `hold` to keep it
+   * up for the rest of the shot, the usual choice for introducing a speaker.
+   */
+  lowerThird?: { name: string; role?: string; at?: number; hold?: number; frames?: number };
   /** Extra sound effects at offsets within this shot, in seconds. */
   hits?: { at: number; sfx: string; volume?: number }[];
   /**

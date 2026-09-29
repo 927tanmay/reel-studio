@@ -17,6 +17,7 @@ import { Captions, primaryMediaKey } from "./moves/Captions";
 import { Title } from "./moves/Title";
 import { Badge } from "./moves/Badge";
 import { Ribbon } from "./moves/Ribbon";
+import { LowerThird } from "./moves/LowerThird";
 import { Generated, generatedSize } from "./generators";
 import { gradeFilter, needsMatrix } from "./colour";
 
@@ -393,6 +394,7 @@ export const ShotView: React.FC<{ resolved: ResolvedShot; spec: ReelSpec }> = ({
           {shot.title ? <Title spec={spec} title={shot.title} /> : null}
           {shot.badge ? <Badge spec={spec} badge={shot.badge} /> : null}
           {shot.ribbon ? <Ribbon spec={spec} ribbon={shot.ribbon} /> : null}
+          {shot.lowerThird ? <LowerThird spec={spec} lowerThird={shot.lowerThird} /> : null}
         </>
       ) : null}
     </AbsoluteFill>

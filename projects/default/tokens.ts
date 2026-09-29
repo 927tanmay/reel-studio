@@ -156,6 +156,31 @@ export const tokens: Tokens = {
     sub: { color: "#C9D3DD", size: 30, weight: 600, tracking: 0.01 },
   },
 
+  lowerThird: {
+    fontFamily: '-apple-system, "Helvetica Neue", Arial, sans-serif',
+    size: 38,
+    weight: 700,
+    color: "#FFFFFF",
+    tracking: -0.005,
+    lineHeight: 1.15,
+    textAlign: "left",
+    maxWidth: 0.7,
+    // Same band the badge uses, on purpose — the two are mutually exclusive
+    // on one shot (verify.ts), so sharing a position keeps every piece of
+    // bottom-third graphics in this look landing in the one place a viewer
+    // learns to expect it.
+    bottom: 0.27,
+    shadow: { color: "rgba(0,0,0,0.5)", blur: 8, y: 2 },
+    plate: { color: "rgba(10,14,18,0.82)", padX: 24, padY: 14, radius: 10 },
+    frames: 14,
+    accent: { color: "#4FD1C5", weight: 5 },
+    sub: { color: "#C9D3DD", size: 26, weight: 600, tracking: 0.01 },
+  },
+
+  // A corner logo for the whole reel. Point `src` at a real mark under
+  // public/assets/brand/ to turn this on; omit the whole block for none.
+  // watermark: { src: "assets/brand/mark.png", corner: "bottom-right", width: 90, margin: 36, opacity: 0.85 },
+
   // Fractions of the frame the platform interface covers. Verified, not trusted.
   safe: { top: 0.1, bottom: 0.15, left: 0.05, right: 0.05 },
 

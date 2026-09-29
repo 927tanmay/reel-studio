@@ -1,6 +1,6 @@
 import React from "react";
-import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion";
-import type { DiagramVisual, Frame, GenSpec } from "../spec";
+import { AbsoluteFill, Img, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
+import type { DiagramNode, Frame, GenSpec } from "../spec";
 import type { Tokens } from "../tokens";
 import { px } from "../scale";
 import type { GenProps } from "./index";
@@ -9,22 +9,101 @@ import { currentStep } from "./index";
 type DiagramSpec = Extract<GenSpec, { type: "diagram" }>;
 
 /**
- * The mockups a node's `visual` can draw, in place of a third line of text.
- * Plain line-art in the accent colour so it reads as the same kind of mark
- * as the card's own border and edges, not a second illustration style.
- * Every size below is a `px()` call, so it scales with `textScale` and the
- * frame the same way the label text next to it does.
+ * The mockups and icons a node's `visual` can draw, in place of a third line
+ * of text, or a custom image when `visual` is `{ src }`. Plain line-art in
+ * the accent colour so it reads as the same kind of mark as the card's own
+ * border and edges, not a second illustration style. Every size below is a
+ * `px()` call, so it scales with `textScale` and the frame the same way the
+ * label text next to it does.
  */
-const NodeVisual: React.FC<{ variant: DiagramVisual; frame: number; tokens: Tokens; frameSize: Frame; scale: number }> = ({
-  variant,
-  frame,
-  tokens,
-  frameSize,
-  scale,
-}) => {
+const NodeVisual: React.FC<{
+  variant: NonNullable<DiagramNode["visual"]>;
+  frame: number;
+  tokens: Tokens;
+  frameSize: Frame;
+  scale: number;
+}> = ({ variant, frame, tokens, frameSize, scale }) => {
   const P = tokens.palette;
   const accent = P.accent ?? "#4FD1C5";
   const u = (n: number) => px(tokens, frameSize, n * scale);
+
+  if (typeof variant === "object") {
+    // A custom mark — a logo, a brand icon — drawn at the same footprint the
+    // built-in icons use, so swapping between them moves nothing else.
+    const size = u(52);
+    return <Img src={staticFile(variant.src)} style={{ width: size, height: size, objectFit: "contain" }} />;
+  }
+
+  // The general icon set: single-colour line-art, one viewBox size and
+  // stroke weight shared across all eight, so none of them reads heavier or
+  // lighter than the rest sitting in the same row of nodes.
+  const ICON_STROKE = 3.6;
+  const iconSvg = (children: React.ReactNode, viewBox = "0 0 48 48") => (
+    <svg width={u(44)} height={u(44)} viewBox={viewBox}>
+      <g
+        fill="none"
+        stroke={accent}
+        strokeWidth={ICON_STROKE}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        {children}
+      </g>
+    </svg>
+  );
+
+  switch (variant) {
+    case "check":
+      return iconSvg(<path d="M10 25 L19 34 L38 13" />);
+    case "cross":
+      return iconSvg(
+        <>
+          <path d="M12 12 L36 36" />
+          <path d="M36 12 L12 36" />
+        </>,
+      );
+    case "arrow-right":
+      return iconSvg(
+        <>
+          <path d="M8 24 L40 24" />
+          <path d="M27 11 L40 24 L27 37" />
+        </>,
+      );
+    case "star":
+      return iconSvg(
+        <path d="M24 5 L29.5 18 L43 19.5 L33 29 L36 43 L24 36 L12 43 L15 29 L5 19.5 L18.5 18 Z" strokeLinejoin="round" />,
+      );
+    case "lock":
+      return iconSvg(
+        <>
+          <rect x="10" y="21" width="28" height="20" rx="4" />
+          <path d="M15 21 V14 a9 9 0 0 1 18 0 V21" />
+        </>,
+      );
+    case "warning":
+      return iconSvg(
+        <>
+          <path d="M24 6 L44 40 L4 40 Z" strokeLinejoin="round" />
+          <path d="M24 19 V29" />
+          <circle cx="24" cy="34.5" r="0.6" fill={accent} />
+        </>,
+      );
+    case "info":
+      return iconSvg(
+        <>
+          <circle cx="24" cy="24" r="18" />
+          <path d="M24 22 V33" />
+          <circle cx="24" cy="14.5" r="0.6" fill={accent} />
+        </>,
+      );
+    case "trend-up":
+      return iconSvg(
+        <>
+          <path d="M6 34 L18 22 L26 28 L42 10" />
+          <path d="M30 10 L42 10 L42 22" />
+        </>,
+      );
+  }
 
   if (variant === "button" || variant === "debounce") {
     const active = variant === "debounce";

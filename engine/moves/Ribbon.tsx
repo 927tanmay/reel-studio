@@ -3,6 +3,7 @@ import { AbsoluteFill, interpolate, spring, useCurrentFrame } from "remotion";
 import type { ReelSpec, Shot } from "../spec";
 import { px } from "../scale";
 import { textStyle } from "./text";
+import { surfaceStyle } from "./surface";
 
 /**
  * A banner that arrives.
@@ -91,7 +92,7 @@ export const Ribbon: React.FC<{ spec: ReelSpec; ribbon: NonNullable<Shot["ribbon
       >
         <div
           style={{
-            backgroundColor: style.plate.color,
+            ...surfaceStyle(spec.style, spec.frame, style.plate),
             padding: pad,
             borderRadius: px(spec.style, spec.frame, style.plate.radius),
             display: "flex",

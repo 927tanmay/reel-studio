@@ -4,6 +4,7 @@ import type { ReelSpec, Shot } from "../spec";
 import { px } from "../scale";
 import { textStyle, verticalPlacement } from "./text";
 import { ease } from "./punch";
+import { surfaceStyle } from "./surface";
 
 /** A small persistent label naming what is on screen. */
 export const Badge: React.FC<{ spec: ReelSpec; badge: NonNullable<Shot["badge"]> }> = ({
@@ -51,7 +52,7 @@ export const Badge: React.FC<{ spec: ReelSpec; badge: NonNullable<Shot["badge"]>
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            backgroundColor: style.plate.color,
+            ...surfaceStyle(spec.style, spec.frame, style.plate),
             padding: `${px(spec.style, spec.frame, style.plate.padY)}px ${px(
               spec.style,
               spec.frame,

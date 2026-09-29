@@ -6,6 +6,8 @@
  * yourself writing a literal into a move or a generator, it belongs here.
  */
 
+export type ShadowLayer = { color: string; blur: number; x?: number; y?: number };
+
 export type TextStyle = {
   fontFamily: string;
   /** Size in pixels, measured against `designWidth`. Scales with the frame. */
@@ -19,11 +21,60 @@ export type TextStyle = {
   /** Fraction of frame width the text may occupy before wrapping. */
   maxWidth?: number;
   uppercase?: boolean;
-  shadow?: { color: string; blur: number; x?: number; y?: number } | null;
+  /**
+   * One shadow, or several stacked. A single layer reads as a CSS default —
+   * legible, not designed. What actually reads as depth is two: a tight, dark
+   * one close to the glyph for edge contrast, and a soft, larger one further
+   * out for the sense the text is sitting slightly off the background. An
+   * array applies every layer in order; a bare object is exactly one layer,
+   * unchanged from before this existed.
+   */
+  shadow?: ShadowLayer | ShadowLayer[] | null;
   /** Vertical placement as a fraction of frame height, 0 = top, 1 = bottom. */
   top?: number;
   bottom?: number;
 };
+
+/**
+ * A gradient behind a plate or a card — an angle and two or more colour
+ * stops. Kept separate from a plain `color` rather than folded into it:
+ * a flat colour is still the common case and shouldn't need a one-stop
+ * gradient to express it.
+ */
+export type Gradient = { angle: number; stops: { color: string; at: number }[] };
+
+/**
+ * Frosted glass: a blur of whatever sits behind the element, a colour tint
+ * over it, and a hairline border to sell the edge of the pane. Needs the
+ * element to actually have something visually busy behind it to read as
+ * glass rather than as a plain translucent plate — over a flat background
+ * the two look the same.
+ */
+export type Glass = { blur: number; tint?: string; borderColor?: string };
+
+/** A soft, spread glow in one colour — a glow is a shadow with no offset. */
+export type Glow = { color: string; radius: number; spread?: number };
+
+/**
+ * A background treatment: `color` is what's applied when a look declares
+ * nothing else, and stays the fallback even when the others are set — a
+ * generator resolving this doesn't need to know whether gradient or glass
+ * won, only that `color` is safe to paint first, unconditionally.
+ */
+export type Surface = {
+  color: string;
+  gradient?: Gradient;
+  glass?: Glass;
+  glow?: Glow;
+};
+
+/**
+ * A `Surface` sized as a padded rectangle behind text — what `plate` has
+ * always been, plus the option of a gradient, glass or glow. Every existing
+ * plate (a flat `color`, `padX`, `padY`, `radius`) is already a valid one of
+ * these with nothing else set; adding this changed no look's rendered output.
+ */
+export type Plate = Surface & { padX: number; padY: number; radius: number };
 
 export type CaptionStyle = TextStyle & {
   /** Colour applied to the word currently being spoken. */
@@ -33,7 +84,7 @@ export type CaptionStyle = TextStyle & {
   /** Frames of cross-fade when a card changes. Keep this small. */
   fadeFrames: number;
   /** Optional plate behind the text, for legibility over bright footage. */
-  plate?: { color: string; padX: number; padY: number; radius: number } | null;
+  plate?: Plate | null;
   /**
    * The standing treatment for a shot's `emphasis` words — the two or three
    * words per reel that carry the actual claim, marked deliberately rather
@@ -47,7 +98,7 @@ export type CaptionStyle = TextStyle & {
 };
 
 export type BadgeStyle = TextStyle & {
-  plate: { color: string; padX: number; padY: number; radius: number };
+  plate: Plate;
   /**
    * The same sweep-in rule Title uses, so a B-roll label reads as the same
    * graphic language as an A-roll headline rather than a plainer style of
@@ -81,7 +132,7 @@ export type TitleStyle = TextStyle & {
  * every other decision.
  */
 export type RibbonStyle = TextStyle & {
-  plate: { color: string; padX: number; padY: number; radius: number };
+  plate: Plate;
   /** Frames the fly-in takes when a shot doesn't name its own. */
   frames: number;
   spring: { damping: number; stiffness: number; mass: number };
@@ -89,6 +140,37 @@ export type RibbonStyle = TextStyle & {
   accent: { color: string; weight: number; inset: number };
   /** The second line, when a ribbon carries one. */
   sub: { color: string; size: number; weight: number; tracking?: number };
+};
+
+/**
+ * A broadcast-style name/role identification card — distinct from `ribbon`,
+ * which is a message banner (a follow ask, a result) that overshoots in and
+ * holds; this is quieter on purpose: a slide-up and a fade, an accent bar on
+ * its leading edge rather than a rule beneath the text, because identifying
+ * who is on screen should read as information, not as an event.
+ */
+export type LowerThirdStyle = TextStyle & {
+  plate: Plate;
+  accent: { color: string; weight: number };
+  sub: { color: string; size: number; weight: number; tracking?: number };
+  /** Frames the slide-up and fade take when a shot doesn't name its own. */
+  frames: number;
+};
+
+/**
+ * A persistent mark — a corner logo, a channel bug — present for the whole
+ * reel rather than tied to any one shot. Optional: a look with no watermark
+ * renders exactly as it did before this existed.
+ */
+export type Watermark = {
+  /** Path under public/, e.g. "assets/brand/mark.png". */
+  src: string;
+  corner: "top-left" | "top-right" | "bottom-left" | "bottom-right";
+  /** Width in design pixels; height follows the source's own aspect. */
+  width: number;
+  /** Distance from both frame edges, in design pixels. */
+  margin: number;
+  opacity?: number;
 };
 
 export type Tokens = {
@@ -108,6 +190,9 @@ export type Tokens = {
   caption: CaptionStyle;
   badge: BadgeStyle;
   ribbon: RibbonStyle;
+  lowerThird: LowerThirdStyle;
+  /** A corner logo present for the whole reel. Omit and nothing renders. */
+  watermark?: Watermark;
   /**
    * Regions the platform interface covers, as fractions of frame height.
    * Nothing readable is allowed to land inside them; verify.ts enforces it.

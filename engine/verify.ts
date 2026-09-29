@@ -68,11 +68,13 @@ export const verifySpec = (spec: ReelSpec, timeline: Timeline): Finding[] => {
     title: spec.shots.some((s) => s.title),
     badge: spec.shots.some((s) => s.badge),
     ribbon: spec.shots.some((s) => s.ribbon),
+    lowerThird: spec.shots.some((s) => s.lowerThird),
   };
 
   if (used.title) findings.push(...checkSafe("Title", t.title, t));
   if (used.captions) findings.push(...checkSafe("Captions", t.caption, t));
   if (used.badge) findings.push(...checkSafe("Badge", t.badge, t));
+  if (used.lowerThird) findings.push(...checkSafe("Lower third", t.lowerThird, t));
 
   // A ribbon settles wherever the shot puts it, so each one is checked where
   // it actually lands rather than at the look's default.
@@ -102,6 +104,20 @@ export const verifySpec = (spec: ReelSpec, timeline: Timeline): Finding[] => {
         message:
           `A shot carries both captions and a badge. They share the lower third; ` +
           `give one of them a different position or drop it from this shot.`,
+      });
+      break;
+    }
+  }
+
+  // A badge and a lower third share the same zone above the caption band —
+  // the same reasoning as captions-plus-badge, and it fails the same way
+  // rather than warning, since the collision is certain, not a matter of
+  // where a look happens to place things.
+  for (const shot of spec.shots) {
+    if (shot.badge && shot.lowerThird) {
+      findings.push({
+        level: "fail",
+        message: `Shot carries both a badge and a lower third. They share the same zone; drop one of them from this shot.`,
       });
       break;
     }
