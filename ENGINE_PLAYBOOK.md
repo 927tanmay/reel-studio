@@ -407,14 +407,17 @@ Two things that aren't obvious from the type signature:
   audio directly like any ordinary shot. `audio: "hold"` is for a *different*
   shot pretending to be silent B-roll over someone else's voice; a banded
   region showing the actual speaker doesn't need the pretense.
-- **A `hold` straight after a band replays the band's words.** The band's
-  live region carries its own sound inside its video element, which the
-  timeline does not track, so a following `audio: "hold"` resumes from where
-  the shot *before* the band stopped and plays the band's speech a second time
-  (found on 007: "body like POST" heard twice, "fetch call…" never). After a
-  band, give the next shot `audio: { from: "<take>" }` with its `in` set to
-  the band's last frame, and dump the timeline's sound segments to confirm the
-  source time runs on without overlap.
+- **A `hold` straight after a band now resumes from the band, not before
+  it.** `resolveTimeline()` used to track "what's currently audible" only off
+  a shot's own top-level `src`, which a banded shot doesn't have — so the
+  tracker sat frozen on whatever played *before* the band while the band's
+  live region was actually heard, and the next shot's `audio: "hold"` resumed
+  from there, replaying the band's own words (found on 007: "body like POST"
+  heard twice, "fetch call…" never). Fixed: a banded shot's own audio is now
+  whichever region has a string `source` present in `media.json` with
+  `hasAudio`, tracked the same way an ordinary shot's `src` is. `hold` right
+  after a band just works now; dump the timeline's sound segments if a look
+  ever seems to contradict that.
 - **Reframe the video region.** A talking-head take cropped from its native
   vertical framing down into a short, wide band needs its own `regionAt` —
   the default center-crop from source-center rarely lands on the actual face

@@ -938,8 +938,20 @@ export const resolveTimeline = (spec: ReelSpec): Timeline => {
     // the whole shot, or for a handful of frames either side of it — is what
     // the three `audio` settings buy.
     const sounds: Sound[] = [];
-    const ownKey =
-      typeof shot.src === "string" && spec.media?.[shot.src]?.hasAudio ? shot.src : null;
+    // A banded shot has no single `src`, but one region is usually the same
+    // take still talking, played live inside `Bands` — that region's key is
+    // this shot's "own" audio the same way `shot.src` is for an ordinary one,
+    // so a `hold` on the *next* shot resumes from it instead of falling back
+    // to whatever played before this band and replaying it.
+    const bandAudioKey = shot.bands?.regions.find(
+      (region): region is BandSpec & { source: string } =>
+        typeof region.source === "string" && Boolean(spec.media?.[region.source]?.hasAudio),
+    )?.source;
+    const ownKey = shot.bands
+      ? (bandAudioKey ?? null)
+      : typeof shot.src === "string" && spec.media?.[shot.src]?.hasAudio
+        ? shot.src
+        : null;
 
     /** Plays the running source onward from where it stopped, for `frames`. */
     const carryOn = (asked: number, why: string): Sound | null => {
