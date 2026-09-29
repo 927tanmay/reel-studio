@@ -11,6 +11,7 @@
     "transcribe": "node scripts/transcribe.mjs",
     "tighten": "node --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/tighten.mjs",
     "align": "node scripts/align.mjs",
+    "beatcheck": "node scripts/beatcheck.mjs",
     "render": "node scripts/render.mjs",
     "verify": "node scripts/verify.mjs",
     "takes": "node scripts/takes.mjs",

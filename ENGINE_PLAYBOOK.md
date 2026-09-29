@@ -504,6 +504,26 @@ Two things that aren't obvious from the type signature:
   all (strings, ambience) — a real finding, not a weaker version of the same
   number. Its section-energy candidates are still worth using; they're about
   where the track gets louder, which needs no beat grid to be meaningful.
+- **`beatGrid` — the same grid, used past `trackIn`.** `npm run beats
+  <track>` writes BPM and phase into `<track>.beats.json`; import that file
+  into `ReelSpec.beatGrid` the same way `media`/`words` come in once their
+  stage has run (`import beatGrid from "../../assets/music/pulse.wav.beats.json";`,
+  then `beatGrid` in the `reel({...})` call — a plain JSON import, no `with {
+  type: "json" }` needed, the same as every other JSON a shotlist already
+  reads). With that set, a `hits`/`dips` entry can carry `onBeat: true` and
+  `resolveTimeline` nudges its `at` to whichever real beat falls nearest,
+  automatically — converting through `bed.trackIn` and `bed.startShot` the
+  same way the engine already tracks where the bed's own audio sits, never
+  reaching past the edges of the shot that owns it. A shot's own cut can't
+  do this the same way: its length is a measured duration or a spoken word,
+  never music, so moving a cut to chase a beat has to be a choice, not
+  something silent. `npm run beatcheck <post>` is the report for that case —
+  every cut (labelled with its `enter` kind, so a punch is easy to pick out),
+  plus every hit and dip whether or not it's `onBeat`, against the grid, with
+  the exact frame count a `seconds` nudge would need to close a near-miss.
+  Verified directly against `resolveTimeline` with a synthetic beat grid
+  (nearest-beat math for on-beat, off-beat-by-design, and out-of-shot-bounds
+  cases each checked by hand) before trusting it on a real shotlist.
 - **`matchGrade()`** — keep strength at or below the 0.5 default between
   *different-subject* clips (a screen recording vs. a face); push it higher
   only between two takes of the literal same subject (matching a CTA take

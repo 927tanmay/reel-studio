@@ -35,6 +35,7 @@ Never put a colour, a size, a duration or a structural assumption into
 | 05 | Word timings | `npm run transcribe <post>` | `words.json`, `transcript.md` |
 | 05b | Tightening report (optional) | `npm run tighten <post>` | — |
 | 06 | Shotlist | you, with the user | `shotlist.ts` |
+| 06b | Beat check (optional) | `npm run beatcheck <post>` | — |
 | 07 | Compose | `npm run studio` | — |
 | 08 | Render and verify | `npm run render <post>` | `out/<post>/reel.mp4`, a take |
 | 09 | Export timeline (optional) | `npm run export-timeline <post>` | `out/<post>/timeline.edl` |
@@ -240,6 +241,18 @@ by hand, and resuming is expected and supported.
    where the existing default is deliberately restrained. `easeOutExpo` is
    fast off the mark with a long gentle tail, for something that should
    read as snapping into place rather than gliding there.
+26. **A hit or a dip can land on the beat, not just at its own `at`.**
+   Import a track's `<track>.beats.json` (written by `npm run beats
+   <track>`) into `ReelSpec.beatGrid` the same way `media`/`words` come in,
+   and set `onBeat: true` on a `hits` or `dips` entry — `resolveTimeline`
+   nudges it to whichever real beat falls nearest, automatically, never
+   past the edges of its own shot. A shot's own cut can't do this: its
+   length comes from a measured duration or a spoken word, never from
+   music, so moving a cut to chase a beat is an editorial call, not
+   something the engine makes silently. `npm run beatcheck <post>` reports
+   the distance instead — every cut, hit and dip against the grid, so a
+   `seconds` nudge that would close the gap is visible without guessing at
+   the arithmetic by hand.
 
 ## What stays human
 
@@ -292,10 +305,12 @@ public/assets/   fonts and sound effects are committed, so those renders are
 scripts/         ingest · transcribe · align · render · verify · new-post ·
                  takes (lists, restores, diffs and forgets past renders) ·
                  grade (measures colour) · beats (tempo, confidence and real
-                 start points for a music file) · tighten (reports what a
+                 start points for a music file) · beatcheck (every cut, hit
+                 and dip against the beat grid; dump-beatcheck.ts is its own
+                 internal, not run directly) · tighten (reports what a
                  tightening pass would remove) ·
                  export-timeline (writes an EDL; dump-timeline.ts and
-                 ts-resolve-hook.mjs are its own internals, not run directly)
+                 ts-resolve-hook.mjs are shared internals, not run directly)
 posts.ts         the register; every reel needs a line here
 out/             renders, not committed
 out/<post>/takes/  every past render, kept until you say to forget it
@@ -317,6 +332,7 @@ npm run typecheck
 node scripts/make-sfx.mjs    # regenerate the default sound effects
 node scripts/make-music.mjs  # write the default music bed (not committed)
 npm run beats <track>        # tempo, confidence, real start points for a music file
+npm run beatcheck 001-my-reel  # how far every cut, hit and dip sits from the beat grid
 ```
 
 ## Adding to the engine

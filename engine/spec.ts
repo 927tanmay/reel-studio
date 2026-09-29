@@ -7,6 +7,7 @@
  */
 
 import type { Tokens } from "./tokens";
+import { nearestBeat, type BeatGrid } from "./beats";
 
 export type Frame = { w: number; h: number; fps: number };
 
@@ -440,16 +441,23 @@ export type Shot = {
    * up for the rest of the shot, the usual choice for introducing a speaker.
    */
   lowerThird?: { name: string; role?: string; at?: number; hold?: number; frames?: number };
-  /** Extra sound effects at offsets within this shot, in seconds. */
-  hits?: { at: number; sfx: string; volume?: number }[];
+  /**
+   * Extra sound effects at offsets within this shot, in seconds. `onBeat`
+   * nudges `at` to whichever real beat falls nearest it instead of playing
+   * at exactly the second written — needs `ReelSpec.beatGrid` and `bed` both
+   * set, and only reaches as far as this shot's own frames; either missing,
+   * and it plays at its own `at` with a warning explaining why.
+   */
+  hits?: { at: number; sfx: string; volume?: number; onBeat?: boolean }[];
   /**
    * Duck the music bed to near-silence for `frames` frames, `at` seconds into
    * this shot. A `hit` already ducks the bed for a moment as a side effect;
    * this is the dip on its own, with no sound effect, for a beat that wants
    * the music out of the way for as long as a word takes to land. `to`
-   * overrides the look's `mix.dipTo`.
+   * overrides the look's `mix.dipTo`. `onBeat` snaps `at` the same way it
+   * does on a hit.
    */
-  dips?: { at: number; frames: number; to?: number }[];
+  dips?: { at: number; frames: number; to?: number; onBeat?: boolean }[];
   /** Anything you want to read back later. Ignored by the engine. */
   note?: string;
 };
@@ -508,6 +516,18 @@ export type ReelSpec = {
   media?: MediaManifest;
   /** Word timings per media key, written by scripts/transcribe.mjs. */
   words?: Record<string, WordTiming[]>;
+  /**
+   * The `bed.track`'s tempo and phase, written by `npm run beats <track>` to
+   * `<track>.beats.json` next to the file. Import it the same way `media`/
+   * `words` come in once their own stage has run — uncomment the line, no
+   * different from any other optional per-machine file. A shot's `hits` or
+   * `dips` reads this (with `onBeat: true`) to land on the music instead of
+   * wherever its own `at` falls; `npm run beatcheck <post>` reports how far
+   * every shot's own cut sits from the nearest beat too, for the moves this
+   * can't safely nudge on its own — a cut is anchored to a measured duration
+   * or a spoken word, never to music.
+   */
+  beatGrid?: BeatGrid;
 };
 
 export type WordTiming = {
@@ -799,6 +819,26 @@ export const resolveTimeline = (spec: ReelSpec): Timeline => {
   const dips: ResolvedDip[] = [];
   const shots: ResolvedShot[] = [];
 
+  /**
+   * The nearest beat-aligned frame to `frame`, or null when there's nothing
+   * to snap to yet — no `beatGrid`, no `bed`, or a moment before the bed's
+   * own `startShot` even starts playing. `bed.trackIn` is the track-file
+   * second the bed's `startShot` begins on, so any later frame converts to a
+   * track-file second the same way, gets pulled to the nearest beat, and
+   * converts back.
+   */
+  const snapToBeat = (frame: number): number | null => {
+    const beatGrid = spec.beatGrid;
+    const bed = spec.bed;
+    if (!beatGrid || !bed) return null;
+    const bedStartFrame = shots[bed.startShot ?? 0]?.startFrame;
+    if (bedStartFrame === undefined || frame < bedStartFrame) return null;
+    const trackIn = bed.trackIn ?? 0;
+    const trackSeconds = trackIn + (frame - bedStartFrame) / fps;
+    const snapped = nearestBeat(beatGrid, trackSeconds);
+    return bedStartFrame + Math.round((snapped - trackIn) * fps);
+  };
+
   // Tracks where the *next* shot would start under a plain cut. A blend moves
   // its own startFrame earlier than this without moving anyone else's.
   let cursor = 0;
@@ -1080,11 +1120,38 @@ export const resolveTimeline = (spec: ReelSpec): Timeline => {
     if (shot.enter?.kind === "punch" && shot.enter.hit) {
       hits.push({ frame: startFrame, sfx: shot.enter.hit, volume: shot.enter.hitVolume ?? 1 });
     }
+
+    // `onBeat` only ever nudges a hit or dip within the shot that asked for
+    // it — never onto a neighbour's frames, which would mean a sound firing
+    // before or after the picture it belongs to.
+    const onBeatFrame = (asked: number, label: string): number => {
+      const snapped = snapToBeat(asked);
+      if (snapped === null) {
+        warnings.push(
+          `Shot ${index}'s ${label} asks to land on a beat, but there's no beatGrid and bed both ` +
+            `active yet to snap to. Playing at its own \`at\` instead.`,
+        );
+        return asked;
+      }
+      if (snapped < startFrame || snapped >= startFrame + durationInFrames) {
+        warnings.push(
+          `Shot ${index}'s ${label} would snap to a beat outside this shot's own frames. ` +
+            `Playing at its own \`at\` instead.`,
+        );
+        return asked;
+      }
+      return snapped;
+    };
+
     for (const h of shot.hits ?? []) {
-      hits.push({ frame: startFrame + Math.round(h.at * fps), sfx: h.sfx, volume: h.volume ?? 1 });
+      const asked = startFrame + Math.round(h.at * fps);
+      const frame = h.onBeat ? onBeatFrame(asked, `hit "${h.sfx}"`) : asked;
+      hits.push({ frame, sfx: h.sfx, volume: h.volume ?? 1 });
     }
     for (const d of shot.dips ?? []) {
-      dips.push({ frame: startFrame + Math.round(d.at * fps), frames: d.frames, to: d.to });
+      const asked = startFrame + Math.round(d.at * fps);
+      const frame = d.onBeat ? onBeatFrame(asked, "dip") : asked;
+      dips.push({ frame, frames: d.frames, to: d.to });
     }
 
     cursor = startFrame + durationInFrames;
