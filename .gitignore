@@ -3,19 +3,24 @@ out/
 .DS_Store
 *.log
 
-# Raw and intermediate media is large and regenerable from the originals you
-# keep elsewhere. Commit shotlists, manifests and word timings, not footage.
-public/posts/*/raw/
-public/posts/*/clean/
-public/posts/*/conformed/
+# Music you drop in is yours, not source; each machine generates or
+# supplies its own (npm run beats reads it locally either way).
 public/assets/music/*
 !public/assets/music/.gitkeep
 
 # Whisper models are large downloads, not source.
 .whisper/
 
-# A specific personal reel, kept out of the shared repo entirely by choice —
-# unlike the general rule above, this excludes the whole post, not just its
-# footage. posts.ts's own registration of it is a real local edit that stays
-# uncommitted alongside this for the same reason.
-public/posts/001-my-reel/
+# Every reel is personal content — footage, brief, transcript, the shotlist
+# built from them — kept out of the shared repo by choice, not by what it
+# happens to contain. Only 000-smoke-test stays committed: it uses nothing
+# but generated sources, so it's the engine's own proof it works from a
+# clean checkout, not a real post. This is what makes the engine itself
+# safe to push anywhere — nothing personal is in the tree it excludes from.
+#
+# posts.ts's own registration of a real post (an import line, an entry in
+# the map) is a real local edit that stays uncommitted alongside its
+# folder, for the same reason — expect `git status` to always show it
+# modified while any real post is registered.
+public/posts/*
+!public/posts/000-smoke-test/
