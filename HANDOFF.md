@@ -201,10 +201,13 @@ few seconds of talking head.
 > nodes are visible at each step, and the word each step lands on. If it is
 > two alternatives shown together rather than a sequence, say "side by side"
 > and the picture holds still while the second arrives, instead of gliding
-> across to it. A node can carry a small icon instead of being text-only — a
-> button, a loading spinner, a debouncing button, a checkout card, a receipt,
-> a booking calendar. Ask for one where the node names a UI state that a
-> label alone would leave abstract.
+> across to it. A node can carry a small icon instead of being text-only —
+> either a plain one (a checkmark, a cross, an arrow, a star, a lock, a
+> warning, an info mark, a trend line — for a node naming a concept, which
+> is most of them) or a UI mockup (a button, a loading spinner, a debouncing
+> button, a checkout card, a receipt, a booking calendar — for a node naming
+> a *specific interface state* a label alone would leave abstract). A custom
+> logo or brand mark can go on a node too, if you have the file.
 
 **code** — a snippet that types itself
 > The exact code, the language, which lines highlight and on which word, and an
@@ -217,10 +220,12 @@ few seconds of talking head.
 > A title and up to four bullet points for each side, and the word the second
 > side wipes in on.
 
-**data** — numbers that move
+**data** — numbers that move, or a trend across several of them
 > Each figure: its value, its label, an optional suffix. Say whether you want
-> plain counters or bars, and, if a number should land as you say it, the word
-> it lands on. Without one the figures start together, slightly staggered.
+> plain counters, bars, or — for a claim tracked across more than two points
+> ("usage over time," not just a before-and-after) — a line or a filled
+> trend line. And, if a number should land as you say it, the word it lands
+> on. Without one the figures start together, slightly staggered.
 
 **callout** — attention on a still, with a focus box and everything else
 dimmed
@@ -252,11 +257,22 @@ automatically — you do not need to ask, and there is nothing to specify unless
 you want them turned *off* somewhere they would otherwise appear (rare; note it
 under "Do not" if so).
 
-Two other kinds, and **neither appears alongside captions on the same shot**
-because all three share the lower third.
+Three other kinds.
 
-- **Titles** are authored text, not from speech. Supply the exact copy.
-- **Badges** are small labels naming what is on screen. Supply the exact copy.
+- **Titles** are authored text, not from speech, and sit at the *top* of
+  frame — because the bottom is spoken for. A title works fine alongside
+  captions on the same shot; they're in different places on purpose. Supply
+  the exact copy.
+- **Badges** are small labels naming what is on screen, at the bottom.
+  **A badge never appears with captions on the same shot** — they'd share
+  one zone. These belong on B-roll, which is naturally where captions are
+  absent. Every badge in a reel sits in the same spot automatically — you
+  name the copy per shot, not the position.
+- **A lower third** names who is on screen — a person's name, optionally
+  their role — also at the bottom. Ask for one the moment a new speaker is
+  introduced, rather than leaving the viewer to work out who they're
+  looking at. It shares its position with a badge, so **a shot never gets
+  both**; say which one it needs.
 
 **Spell out the words a transcript will get wrong.** Captions are built from a
 transcript of what you actually say, and that is where names and jargon slip:
@@ -266,9 +282,6 @@ it should print (`Vercel`, `AGENTS.md`), or say there are none. The editor
 hands that list to the transcription step before it runs, which makes the
 right spelling likelier, and the transcript is still read back before
 anything renders.
-  These belong on B-roll, which is naturally where captions are absent. Every
-  badge in a reel sits in the same spot automatically — you name the copy per
-  shot, not the position.
 
 Keep title copy short enough to read at phone size in the time it is up. Two
 lines is comfortable; four is not.
@@ -294,7 +307,8 @@ A brief is ready to hand over when every one of these is true.
 - [ ] Every anchor word appears exactly once in its line
 - [ ] Every B-roll moment names its source and its content
 - [ ] Every generated clip is specified in full
-- [ ] Title and badge copy is written out (captions need no copy — automatic)
+- [ ] Title, badge and lower-third copy is written out (captions need no
+      copy — automatic)
 - [ ] Every name, tool and filename you will speak is listed as it should
       print, or there are none
 - [ ] Music mood is stated, or explicitly none

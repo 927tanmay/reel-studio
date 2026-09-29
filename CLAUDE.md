@@ -197,6 +197,49 @@ by hand, and resuming is expected and supported.
    answer — it means the track likely has no hard beat to sync to at all
    (ambient, orchestral), and a candidate start point chosen by its section
    energy is still worth using even then.
+21. **A plate is a `Surface`, and a flat colour is the simplest one.** Every
+   `plate` (badge, ribbon, caption) can carry a `gradient`, a `glass` blur or
+   a `glow` on top of its `color`, which always applies first and stays the
+   fallback. `glass` needs something visually busy *behind* the plate to
+   read as glass rather than as a plain translucent colour — over a flat
+   background the two look identical. These are look decisions, not shotlist
+   ones: put them in `projects/*/tokens.ts`, the same as every other plate
+   property already there.
+22. **A node's `visual` is an icon, a UI mockup, or a custom mark — never
+   guess which fits.** The built-in set is two families: `button` /
+   `spinner` / `debounce` / `checkout` / `receipt` / `booking` for a script
+   naming a specific interface state, and `check` / `cross` / `arrow-right`
+   / `star` / `lock` / `warning` / `info` / `trend-up` for a plain concept
+   with no UI attached. `{ src: "assets/..." }` drops in anything else — a
+   logo, a brand mark — at the same footprint the built-ins use, so swapping
+   one for another moves nothing else in the layout.
+23. **A `data` shot is either independent figures or one trend — the
+   `style` says which, and they don't mix.** `counter`/`bars` are named
+   quantities that can each carry their own colour. `line`/`area` are one
+   series in order, plotted against `label`; the whole line takes its colour
+   from the first item, because a trend is one thing being tracked, not
+   several. Reach for `line`/`area` on a script line making a comparison
+   across more than two points ("usage over time," not just "before and
+   after") — two points is still better served by `compare`.
+24. **Two more things share the badge's zone, and neither is optional to
+   check.** `Shot.lowerThird` (a name/role card) and `Tokens.watermark` (a
+   persistent corner mark for the whole reel) both exist now. A lower third
+   is quieter than `ribbon` on purpose — a slide-up and a fade, not a spring
+   overshoot — because identifying who is on screen should read as
+   information arriving, not an event. `verify.ts` fails a shot carrying
+   both a badge and a lower third, same reasoning as captions-plus-badge:
+   propose one or the other, never assume they can share a shot because
+   nothing crashed. A watermark is `Tokens`-level, not a shot: one mark, the
+   whole reel, the same way a channel's fonts and palette are.
+25. **Text shadow can stack, and easing has three louder options now.**
+   `TextStyle.shadow` takes an array — a tight, dark layer close to the
+   glyph plus a soft, larger one further out reads as depth; one layer reads
+   as a CSS default. `easeOutBack`/`easeInOutBack` overshoot past the target
+   before settling, for a graphic that should land with a touch of bounce —
+   reach for them on a ribbon or a lower third, not on `punch`/`exitPunch`,
+   where the existing default is deliberately restrained. `easeOutExpo` is
+   fast off the mark with a long gentle tail, for something that should
+   read as snapping into place rather than gliding there.
 
 ## What stays human
 

@@ -113,10 +113,13 @@ motivated edit — anything more is decoration with nothing to attach to.
 
 ## 2. Text roles and the shared motion language
 
-Three roles, and each renders through its own component: `Title` (authored
+Four roles, and each renders through its own component: `Title` (authored
 claims, top of frame), `Badge` (small persistent B-roll labels, bottom of
 frame), `Ribbon` (a banner that travels in and lands — motion graphics, not
-type). Captions are automatic wherever a transcript exists.
+type), `LowerThird` (a name/role card, quieter than `Ribbon` on purpose — a
+slide-up and a fade, not a spring overshoot, because identifying who is on
+screen should read as information arriving, not an event). Captions are
+automatic wherever a transcript exists.
 
 All three now share the same accent-sweep motif: a short rule that trails the
 text in by a couple of frames, sweeping to full width/scale as it lands. It
@@ -180,6 +183,78 @@ choosing. It's a `ReelSpec`-level flag, not per-shot — checked both states on
 a fixture before trusting it: fails without it, passes with it set, nothing
 in between.
 
+### A badge and a lower third, on the same shot
+
+Same zone, same reasoning, but this one is a hard fail with no opt-out —
+`verify.ts` treats the collision as certain, not a matter of where a look
+happens to place things (unlike captions-plus-badge, which can genuinely
+clear each other depending on the look's numbers). If a shot needs both a
+persistent label and a name card, that's two shots or a rewrite, not a
+position to hunt for.
+
+### A watermark is reel-wide, not per-shot
+
+`Tokens.watermark` (`src`, `corner`, `width`, `margin`, `opacity?`) renders
+once in `Reel.tsx`, alongside `Hits`/`Bed`, not inside `ShotView` — it has to
+survive every cut, so it can't be shot-scoped the way everything else in
+this section is. `Img` from Remotion, not a plain `<img>`, so the render
+waits for it to actually load rather than risking a blank first frame.
+
+### A plate is a `Surface` now — gradient, glass, glow
+
+`engine/moves/surface.ts` turns a `Surface` (`color`, plus optional
+`gradient`/`glass`/`glow`) into CSS, and every plate (`Badge`, `Ribbon`,
+`Caption`, `LowerThird`) is one. `color` always applies first and stays the
+fallback — a plate with nothing else set renders exactly as every plate did
+before this existed, which is how the whole existing look survived this
+change with zero rendered difference.
+
+- **`glass` needs something visually busy behind the plate to read as
+  glass**, not just a translucent colour. Over a flat background the two
+  are indistinguishable — checked directly: a glass plate over the look's
+  own solid `bg` shows nothing `backdrop-filter` is doing, because there's
+  no detail behind it to blur. Verified the blur itself is real (not
+  silently dropped by the render pipeline, which is a genuine risk with
+  `backdrop-filter` in some headless-Chromium setups) by rendering a glass
+  plate directly over a high-contrast checkerboard: the pattern is visibly
+  softened under the plate, sharp outside it.
+- **`gradient` is opaque by default** (each stop is a solid colour), so it
+  paints over whatever `glass` blur is doing beneath it — a plate with both
+  set shows the gradient, not a blurred backdrop, unless the gradient's own
+  stops carry transparency.
+- **`glow` is a shadow with no offset** — `boxShadow: 0 0 <radius> <color>`.
+  Subtle at small radii; a radius comparable to the plate's own size reads
+  as a genuine halo rather than a thicker border.
+
+### Text shadow can stack
+
+`TextStyle.shadow` accepts one layer (unchanged from before) or an array.
+Two layers is what actually reads as depth rather than a CSS default: a
+tight, dark layer close to the glyph for edge contrast, a soft, larger one
+further out for the sense the text is sitting slightly off the background.
+`engine/moves/surface.ts`'s `textShadow()` joins every layer into one
+`text-shadow` list; `text.ts` calls it unconditionally now, so a single
+`shadow` object still works exactly as it always did.
+
+### Three new easing curves, and where they don't belong
+
+`easeOutBack` / `easeInOutBack` (a standard Penner-style overshoot,
+implemented as a plain `t => number` function — Remotion's `interpolate`
+`easing` option needs nothing more, no spring-specific handling) and
+`easeOutExpo` (fast off the mark, long gentle tail). Validated against their
+formulas directly before use: `easeOutBack(0) = 0`, `easeOutBack(1) = 1`,
+peak overshoot `1.10` at `t = 0.58` — matches the closed-form expectation to
+four decimal places.
+
+`punch`/`exitPunch` accept these through the same `easing?: Easing` field
+every other option uses (checked end to end: a punch with `easing:
+"easeOutBack"` renders and settles correctly), but the *existing* default on
+`punch` is deliberately restrained — `curve()`'s own comment says a punch
+that decelerates into rest reads as a hit, and overshoot undercuts that.
+Reach for the new curves on a `Ribbon` or `LowerThird` instead, where a
+touch of bounce on arrival is the point rather than a distraction from a
+percussive edit.
+
 ---
 
 ## 3. Generators — one clip, one job each
@@ -215,18 +290,50 @@ footage — cut, punched, reframed, captioned, banded.
   leave the outer cards mostly clipped, and four leave them off-screen
   entirely. For more than two, raise `window` or leave `pan` on.
 
-  A node's `visual` (`button` · `spinner` · `debounce` · `checkout` ·
-  `receipt` · `booking`) draws a small mockup above its label instead of
-  leaving the card as text only — line-art in the look's accent colour, so
-  it reads as one system with the card's own border rather than a second
-  illustration style dropped on top. Reach for it where the script names a
-  UI state that a label alone reads as an abstraction — "the button stays
-  disabled until it debounces" is a `debounce` node, not three more seconds
-  of talking head explaining what a debounced button does. `debounce`
-  specifically animates (ripples radiating outward); the rest are static.
-  Rendered all six in a fixture and read the frames back before trusting
-  them: distinct, legible, and the active/inactive pair (`button` vs
-  `debounce`) reads as two different states, not the same icon twice.
+  A node's `visual` draws a small mockup above its label instead of leaving
+  the card as text only — line-art in the look's accent colour, so it reads
+  as one system with the card's own border rather than a second
+  illustration style dropped on top. Two families, don't mix them up:
+  `button` / `spinner` / `debounce` / `checkout` / `receipt` / `booking` are
+  UI-state mockups — reach for one where the script names a *specific*
+  interface behaviour ("the button stays disabled until it debounces" is a
+  `debounce` node, not three more seconds of talking head explaining what a
+  debounced button does). `check` / `cross` / `arrow-right` / `star` /
+  `lock` / `warning` / `info` / `trend-up` are a plain icon set with no UI
+  attached, for a concept a script names directly ("done," "blocked," "a
+  warning") — reach for these far more often; most nodes name a concept, not
+  a UI. `debounce` specifically animates (ripples radiating outward); every
+  other built-in is static. `{ src: "assets/..." }` is the escape hatch for
+  anything not in either set — a logo, a brand mark — drawn at the same
+  footprint (`u(52)`, `objectFit: "contain"`) so it slots into a row of
+  built-ins without shifting the layout.
+
+  Rendered all of this in a fixture before trusting it: four nodes in one
+  row — three icons and a custom image — all distinct, legible, and the
+  active/inactive UI pair (`button` vs `debounce`) reading as two different
+  states rather than the same icon twice.
+
+- **`data` with `style: "line"` or `"area"`** — a real trend, not independent
+  figures. `counter`/`bars` treat `items` as separate quantities, each with
+  its own colour; `line`/`area` treat the same array as one series in order,
+  plotted against `label`, with the *whole line* taking its colour from
+  `items[0].color` — a trend is one thing being tracked, and per-point
+  colour is what the other two styles are for. Reach for it on a script line
+  making a comparison across more than two points ("usage over time"); two
+  points alone is still better served by `compare`.
+
+  The reveal draws the line on rather than showing it whole: point
+  geometry (x from index, y from value against the series' own min/max) is
+  known directly in JS, so the path length for `strokeDashoffset` is summed
+  from the segments rather than read via `getTotalLength()` — nothing here
+  needs a DOM measurement to find out what it already has. `area` adds an
+  SVG `linearGradient` fill fading to transparent under the same path, not a
+  `Surface` gradient — SVG fills and CSS `background-image` gradients are
+  different mechanisms, and forcing the token-level `Gradient` type into an
+  SVG context would need its own translation layer for one generator.
+  Rendered against a five-point series before trusting it: the zigzag shape
+  matched the data, dots landed in step with the stroke as it drew on, and
+  the final point's value highlighted correctly once the line reached it.
 
 - **`image`** — a plain full-bleed still. Distinct from `callout`, which
   *always* draws a focus box and dims everything else. Reach for `image`
@@ -557,7 +664,13 @@ transition/emphasis calls `CLAUDE.md` already asks for:
 - **Any line making an abstract claim with no footage of it** (a number, a
   comparison, a before/after) — candidate for `data`/`compare`/`terminal`
   rather than stretching captured footage to cover something it doesn't
-  show.
+  show. A claim tracked across more than two points ("usage over time," not
+  just "before and after") is specifically `data` with `style: "line"` or
+  `"area"` — §3.
+- **The moment a new speaker is introduced** — candidate for
+  `Shot.lowerThird`, not a title card. A title states a claim; a lower third
+  identifies a person, and doing that with a title reads as the reel making
+  a statement about someone rather than naming who they are.
 - **The closing line** — if it ends on a beat worth freezing on rather than
   cutting to black, `image` with a still pulled from the exact last frame of
   the final take is close to free (no new footage, no generator content to
