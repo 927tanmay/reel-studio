@@ -253,6 +253,16 @@ by hand, and resuming is expected and supported.
    the distance instead — every cut, hit and dip against the grid, so a
    `seconds` nudge that would close the gap is visible without guessing at
    the arithmetic by hand.
+27. **A look can name its own fonts, not just what's installed.** `fonts.files`
+   loads `.woff2` files from `public/assets/fonts` (committed, unlike music) at
+   startup, and delays the render until they're in; a role's `fontFamily`
+   still has to name the family, system stack kept as a real fallback. A
+   variable font file — check for an `fvar` table before assuming otherwise —
+   covers every weight a look needs from one download; register it once per
+   weight in `fonts.files` rather than sourcing separate static files. Pick a
+   font whose licence allows embedding and redistribution with no per-render
+   fee (SIL Open Font License is the safe default), since this folder ships
+   in the repository.
 
 ## What stays human
 

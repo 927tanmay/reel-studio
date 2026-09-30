@@ -255,6 +255,35 @@ Reach for the new curves on a `Ribbon` or `LowerThird` instead, where a
 touch of bounce on arrival is the point rather than a distraction from a
 percussive edit.
 
+### A look can carry its own fonts, not just system ones
+
+`fonts.files` in a look's `tokens.ts` (`{ family, file, weight?, style? }[]`)
+loads local `.woff2` files from `public/assets/fonts` at startup —
+`engine/fonts.ts`'s `useFonts` registers each with `FontFace` and delays the
+render until they're all loaded, so a font that failed to load is a build
+error, not a silent fallback partway through a render. A role's own
+`fontFamily` still needs to name the family (`'"Inter", -apple-system, ...'`,
+system stack kept as a real fallback, not decoration).
+
+**One variable file can stand in for several weight downloads.** The default
+look uses Inter at 600/700/800 (badge/caption/emphasis) with a single
+`Inter-Variable.woff2`, registered three times in `fonts.files` — once per
+weight, same file each time. Confirmed with `fontTools` before trusting it:
+the file has an `fvar` table with a `wght` axis spanning 100–900, so it's a
+true variable font, and Google's own CSS API serves the identical URL for
+every weight in that range for exactly this reason — not a bug, not three
+copies of the same static instance by accident. Registering one `FontFace`
+per weight against that single file works because each request pins a
+specific point on the file's own weight axis; the browser renders that
+instance, not the file's default (Inter's variable font defaults to 400/
+Regular if never told otherwise).
+
+**License matters here because `public/assets/fonts` is committed**, unlike
+music. A font needs a licence that allows embedding and redistribution with
+no per-render fee and no video-use restriction — SIL Open Font License is
+the safe default (Inter, and most of Google Fonts, ship under it); the
+licence text belongs in the same folder as the file it covers, not assumed.
+
 ---
 
 ## 3. Generators — one clip, one job each
