@@ -225,6 +225,33 @@ export const verifySpec = (spec: ReelSpec, timeline: Timeline): Finding[] => {
     }
   }
 
+  // A thumbnail's title sits wherever `Tokens.thumbnail.top` (or `title.top`,
+  // its fallback) puts it — right for full-frame playback, not necessarily
+  // for a profile grid, which crops a 9:16 reel to roughly 3:4 and keeps
+  // only the centre ~75% of frame height. A title landing in the cropped
+  // 12.5% at either edge is invisible in the one place a thumbnail is
+  // actually seen most: someone's profile grid, before they've tapped in.
+  if (spec.thumbnail) {
+    const thumbStyle = t.thumbnail;
+    const top = spec.thumbnail.top ?? thumbStyle?.top ?? 0.4;
+    const size = thumbStyle?.size ?? t.title.size;
+    const lineHeight = t.title.lineHeight ?? 1.1;
+    const height = (size * lineHeight * 2) / 1920;
+    const bottom = top + height;
+    const GRID_SAFE = 0.125;
+
+    if (top < GRID_SAFE || bottom > 1 - GRID_SAFE) {
+      findings.push({
+        level: "warn",
+        message:
+          `This reel's thumbnail title sits at ${(top * 100).toFixed(1)}%–` +
+          `${(bottom * 100).toFixed(1)}% from the top, outside the centre ` +
+          `${(GRID_SAFE * 100).toFixed(0)}–${((1 - GRID_SAFE) * 100).toFixed(0)}% a profile grid's ` +
+          `3:4 crop keeps. Move Tokens.thumbnail.top closer to the middle.`,
+      });
+    }
+  }
+
   // Cropping is correctness, not taste: enlarging a region past what was
   // captured invents detail, and scaling without cropping first distorts.
   for (const shot of spec.shots) {

@@ -1,6 +1,6 @@
 import React from "react";
 import { AbsoluteFill, Audio, OffthreadVideo, Sequence, staticFile, useCurrentFrame } from "remotion";
-import type { BandSpec, ReelSpec, ResolvedShot, Segment, Sound, Source } from "./spec";
+import type { BandSpec, ReelSpec, ResolvedShot, Segment, Shot, Sound, Source } from "./spec";
 import { coverRegion, fullFrame, lerpRect, px } from "./scale";
 import {
   enterScale,
@@ -265,12 +265,31 @@ const Bands: React.FC<{ spec: ReelSpec; resolved: ResolvedShot; bandAudioVolume:
   );
 };
 
-export const ShotView: React.FC<{ resolved: ResolvedShot; spec: ReelSpec }> = ({
-  resolved,
-  spec,
-}) => {
+export const ShotView: React.FC<{
+  resolved: ResolvedShot;
+  spec: ReelSpec;
+  /**
+   * "none" is for a still frame outside the reel — a thumbnail. It keeps the
+   * exact picture pipeline (crop, grade, scale, bands) but drops every text
+   * overlay: captions, title, badge, ribbon, lower third. A caption frozen
+   * mid-word reads as a mistake, the others name a beat that only makes
+   * sense in motion, and a thumbnail draws its own title on top separately
+   * (see Thumbnail.tsx) rather than reusing the in-video one as-is.
+   */
+  overlays?: "full" | "none";
+  /**
+   * Overrides the shot's own crop — a thumbnail is one still, not a shot the
+   * eye tracks for several seconds, so it can afford to sit tighter than the
+   * crop that shot uses in motion.
+   */
+  reframeOverride?: Shot["reframe"];
+  /** Appended to the picture's own filter list — a contrast/saturation lift
+   *  behind everything else, for a thumbnail punching up the picture. */
+  extraFilter?: string;
+}> = ({ resolved, spec, overlays = "full", reframeOverride, extraFilter }) => {
   const frame = useCurrentFrame();
   const { shot } = resolved;
+  const reframe = reframeOverride !== undefined ? reframeOverride : shot.reframe;
 
   // Picture scales; text does not. Scaling type produces soft, wobbling edges.
   // Exit reads `effectiveExit`, not `shot.exit` directly — a blend defaults
@@ -323,7 +342,10 @@ export const ShotView: React.FC<{ resolved: ResolvedShot; spec: ReelSpec }> = ({
   const blur = pushMotionBlur(frame, shot.enter, spec.frame.w, spec.frame.h);
   const hasBlur = blur.x > 0.5 || blur.y > 0.5;
 
-  const filter = [gradeFilterValue, hasBlur ? `url(#${blurId})` : null].filter(Boolean).join(" ") || undefined;
+  const filter =
+    [gradeFilterValue, hasBlur ? `url(#${blurId})` : null, extraFilter ?? null]
+      .filter(Boolean)
+      .join(" ") || undefined;
 
   // Captions default to on wherever a transcript exists; a shotlist opts out
   // with `captions: false` rather than opting in.
@@ -369,7 +391,7 @@ export const ShotView: React.FC<{ resolved: ResolvedShot; spec: ReelSpec }> = ({
             source={shot.src}
             spec={spec}
             resolved={resolved}
-            reframe={shot.reframe}
+            reframe={reframe}
             segments={resolved.segments}
             carryAudio={carryAudio}
             audioVolume={audioVolume}
@@ -388,7 +410,7 @@ export const ShotView: React.FC<{ resolved: ResolvedShot; spec: ReelSpec }> = ({
             />
           ))}
 
-      {exitOverlayVisible(frame, resolved.durationInFrames, resolved.overlayFadeOutFrames) ? (
+      {overlays === "full" && exitOverlayVisible(frame, resolved.durationInFrames, resolved.overlayFadeOutFrames) ? (
         <>
           {showCaptions ? <Captions spec={spec} resolved={resolved} /> : null}
           {shot.title ? <Title spec={spec} title={shot.title} /> : null}

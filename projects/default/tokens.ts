@@ -43,6 +43,10 @@ export const tokens: Tokens = {
       { family: "Inter", file: "assets/fonts/Inter-Variable.woff2", weight: "600" },
       { family: "Inter", file: "assets/fonts/Inter-Variable.woff2", weight: "700" },
       { family: "Inter", file: "assets/fonts/Inter-Variable.woff2", weight: "800" },
+      // For thumbnail.fontFamily below only — a static file (not variable),
+      // registered once at the one weight it's used at. SIL OFL, licence
+      // text alongside it, same as Inter's own.
+      { family: "Poppins", file: "assets/fonts/Poppins-ExtraBold.woff2", weight: "800" },
     ],
   },
 
@@ -160,6 +164,35 @@ export const tokens: Tokens = {
     spring: { damping: 13, stiffness: 140, mass: 0.9 },
     accent: { color: "#4FD1C5", weight: 6, inset: 64 },
     sub: { color: "#C9D3DD", size: 30, weight: 600, tracking: 0.01 },
+  },
+
+  thumbnail: {
+    // A different, heavier display face than the in-video title's Inter —
+    // a thumbnail is a poster, not type the eye reads while something
+    // moves, and a distinct font is part of what makes a channel's covers
+    // recognisable as a set before a single word is read.
+    fontFamily: '"Poppins", -apple-system, "Helvetica Neue", Arial, sans-serif',
+    size: 104,
+    weight: 800,
+    color: "#FFFFFF",
+    // Centred, not title's 0.14: Instagram's profile grid crops a 9:16 reel
+    // to roughly 3:4, keeping only the centre ~75% of frame height. 0.14
+    // is exactly the top line that crop cuts first.
+    top: 0.4,
+    accent: { color: "#4FD1C5", weight: 6, width: 0.28 },
+    // Guarantees legibility regardless of what's behind it — unlike an
+    // in-video title, a thumbnail gets exactly one frame and no chance to
+    // land somewhere plainer a few frames later.
+    scrim: { color: "rgba(0,0,0,0.6)", height: 0.55 },
+    // A slight lift so the picture itself competes better at thumbnail
+    // size, where a phone screen already lit at full brightness is what
+    // everything else in a feed is also doing.
+    contrast: 1.08,
+    saturate: 1.15,
+    // Same red as caption/title emphasis elsewhere in this look — reads as
+    // "the one thing this cover is claiming" rather than a fourth, unrelated
+    // colour.
+    emphasis: { color: "#F97583" },
   },
 
   lowerThird: {

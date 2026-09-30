@@ -38,6 +38,7 @@ Never put a colour, a size, a duration or a structural assumption into
 | 06b | Beat check (optional) | `npm run beatcheck <post>` | — |
 | 07 | Compose | `npm run studio` | — |
 | 08 | Render and verify | `npm run render <post>` | `out/<post>/reel.mp4`, a take |
+| 08b | Thumbnail (optional) | `npm run thumbnail <post>` | `out/<post>/thumbnail.jpg` |
 | 09 | Export timeline (optional) | `npm run export-timeline <post>` | `out/<post>/timeline.edl` |
 
 Each stage writes a file the next one reads. Stopping after any of them, editing
@@ -264,6 +265,33 @@ by hand, and resuming is expected and supported.
    fee (SIL Open Font License is the safe default), since this folder ships
    in the repository.
 
+28. **A thumbnail is a frozen shot plus a poster, not a separate image.**
+   `ReelSpec.thumbnail` (`{ shot, at?, text?, emphasize?, top?, reframe? }`)
+   names a shot by its 0-based index and a moment inside it; `npm run
+   thumbnail <post>` freezes that instant through the exact same picture
+   pipeline the reel itself uses — crop, grade, scale — so the picture can
+   never drift out of sync the way a separately-composed image would. Every
+   other overlay is dropped unconditionally: a caption frozen mid-word reads
+   as a mistake, and a badge or ribbon names a beat that only makes sense in
+   motion. The title itself is *not* a reuse of the in-video `Title` — it's
+   its own look, `Tokens.thumbnail`, because a thumbnail is a poster
+   competing for a thumb mid-scroll, not type the eye reads over several
+   seconds: a heavier display font, centred rather than near an edge (a
+   profile grid crops a 9:16 reel to roughly 3:4, and `verify.ts` fails a
+   thumbnail title sitting outside the centre ~75% that crop keeps), a dark
+   scrim rising from the bottom so it reads over anything behind it, and a
+   contrast/saturation lift on the picture. `text` is a short cover line —
+   3-5 words reads better than the in-video sentence — and `emphasize` marks
+   which word(s) in it carry the claim, the same standing-choice idea
+   `Shot.emphasis` already is for captions. `reframe` and `top` both fall
+   back to the look's defaults but exist per-reel because they're facts about
+   *that* footage: how tightly a crop can go before it clips the subject, and
+   how much headroom that crop leaves above the head for the title sitting
+   over it — get one without the other and the title either floats in dead
+   curtain or lands on a forehead. Pick `at`, `reframe` and `top` together by
+   comparing candidates the same way a badge position gets compared: render a
+   few, look, choose.
+
 ## What stays human
 
 Take selection, where a cut lands emotionally, whether a crop reads at phone
@@ -312,7 +340,7 @@ public/posts/    one folder per reel, self-contained
 public/assets/   fonts and sound effects are committed, so those renders are
                  offline; music is not (public/assets/music/*.gitkeep aside)
                  — each machine generates or supplies its own
-scripts/         ingest · transcribe · align · render · verify · new-post ·
+scripts/         ingest · transcribe · align · render · thumbnail · verify · new-post ·
                  takes (lists, restores, diffs and forgets past renders) ·
                  grade (measures colour) · beats (tempo, confidence and real
                  start points for a music file) · beatcheck (every cut, hit
@@ -337,6 +365,7 @@ npm run tighten 001-my-reel  # what dead air and fillers a pass would remove
 npm run align 001-my-reel    # only if clean/ has repaired audio
 npm run studio               # live preview
 npm run render 001-my-reel   # render, normalise, verify — auto-saves a take
+npm run thumbnail 001-my-reel  # freeze a shot's own picture pipeline into a feed thumbnail
 npm run takes 001-my-reel    # list, restore, diff or forget past takes
 npm run typecheck
 node scripts/make-sfx.mjs    # regenerate the default sound effects

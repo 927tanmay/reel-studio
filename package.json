@@ -13,6 +13,7 @@
     "align": "node scripts/align.mjs",
     "beatcheck": "node scripts/beatcheck.mjs",
     "render": "node scripts/render.mjs",
+    "thumbnail": "node scripts/thumbnail.mjs",
     "verify": "node scripts/verify.mjs",
     "takes": "node scripts/takes.mjs",
     "export-timeline": "node scripts/export-timeline.mjs",

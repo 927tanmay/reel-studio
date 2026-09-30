@@ -125,6 +125,46 @@ export type TitleStyle = TextStyle & {
 };
 
 /**
+ * The look of a feed thumbnail — deliberately its own block rather than a
+ * reuse of `title`. A thumbnail is a poster, not an in-video caption: it can
+ * run a heavier display font than reads well over several seconds of
+ * motion, and it has to sit centred rather than near an edge, because a
+ * profile grid crops a 9:16 reel to roughly 3:4 and only the centre is
+ * guaranteed to survive that crop. Every field is optional and falls back to
+ * `title`'s own value — a look with no `thumbnail` block still gets a
+ * usable, if plainer, thumbnail.
+ */
+export type ThumbnailStyle = {
+  fontFamily?: string;
+  size?: number;
+  weight?: number;
+  color?: string;
+  /** Fraction of frame height from the top. Centred by default — see above —
+   *  rather than inheriting `title.top`, which is tuned for full-frame
+   *  playback, not a grid-cropped still. */
+  top?: number;
+  accent?: { color: string; weight: number; width: number };
+  /**
+   * A dark gradient behind the title, rising from the bottom, guaranteeing
+   * legibility regardless of whatever's behind it. An in-video title can
+   * lean on a whole shot's worth of chances to land over a plain patch of
+   * frame; a thumbnail gets exactly one frame and no such luck.
+   */
+  scrim?: { color: string; height: number };
+  /** A contrast/saturation lift on the picture alone, behind the scrim. 1 (or
+   *  omitted) leaves the picture exactly as graded for the reel itself. */
+  contrast?: number;
+  saturate?: number;
+  /**
+   * The standing colour for a thumbnail's own emphasised word(s) — see
+   * `ThumbnailSpec.emphasize` in spec.ts. Falls back to `title.accent`'s
+   * colour when omitted, so an emphasis-less look still gets *something*
+   * distinct from the base colour if it's ever added later.
+   */
+  emphasis?: { color: string; scale?: number };
+};
+
+/**
  * The look of a `ribbon` — a banner that travels in and lands, rather than
  * fading in place like a title. The spring is part of the look, not the
  * engine: overshoot and settle are exactly the numbers that decide whether a
@@ -191,6 +231,8 @@ export type Tokens = {
   badge: BadgeStyle;
   ribbon: RibbonStyle;
   lowerThird: LowerThirdStyle;
+  /** The look for a feed thumbnail. Optional — see ThumbnailStyle. */
+  thumbnail?: ThumbnailStyle;
   /** A corner logo present for the whole reel. Omit and nothing renders. */
   watermark?: Watermark;
   /**

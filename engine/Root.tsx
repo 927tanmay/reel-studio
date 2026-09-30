@@ -2,6 +2,7 @@ import React from "react";
 import { Composition } from "remotion";
 import { posts } from "../posts";
 import { Reel } from "./Reel";
+import { Thumbnail } from "./Thumbnail";
 import { resolveTimeline } from "./spec";
 import { formatFindings, verifySpec } from "./verify";
 
@@ -21,16 +22,28 @@ export const Root: React.FC = () => {
         if (report) console.warn(report);
 
         return (
-          <Composition
-            key={id}
-            id={id}
-            component={Reel}
-            durationInFrames={timeline.durationInFrames}
-            fps={spec.frame.fps}
-            width={spec.frame.w}
-            height={spec.frame.h}
-            defaultProps={{ spec }}
-          />
+          <React.Fragment key={id}>
+            <Composition
+              id={id}
+              component={Reel}
+              durationInFrames={timeline.durationInFrames}
+              fps={spec.frame.fps}
+              width={spec.frame.w}
+              height={spec.frame.h}
+              defaultProps={{ spec }}
+            />
+            {spec.thumbnail ? (
+              <Composition
+                id={`${id}-thumbnail`}
+                component={Thumbnail}
+                durationInFrames={1}
+                fps={spec.frame.fps}
+                width={spec.frame.w}
+                height={spec.frame.h}
+                defaultProps={{ spec }}
+              />
+            ) : null}
+          </React.Fragment>
         );
       })}
     </>

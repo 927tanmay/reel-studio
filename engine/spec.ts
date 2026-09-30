@@ -528,6 +528,55 @@ export type ReelSpec = {
    * or a spoken word, never to music.
    */
   beatGrid?: BeatGrid;
+  /**
+   * One extra still, alongside the reel itself — a feed thumbnail.
+   * `npm run thumbnail <post>` renders it. It reuses the exact picture
+   * pipeline a real shot uses (crop, grade, scale), so it can never drift
+   * from what the reel actually looks like the way a separately-composed
+   * image would.
+   */
+  thumbnail?: ThumbnailSpec;
+};
+
+export type ThumbnailSpec = {
+  /** Index into `shots` (0-based) — which shot's picture to freeze on. */
+  shot: number;
+  /**
+   * Seconds into that shot to freeze at. Defaults to 0.8s: late enough that
+   * a title's own entrance animation (a few frames) has settled, early
+   * enough to still be near the shot's own start.
+   */
+  at?: number;
+  /**
+   * Overrides the shot's own title text for the thumbnail specifically.
+   * Falls back to that shot's `title`, if it has one; a thumbnail with
+   * neither shows the picture alone.
+   */
+  text?: string;
+  /**
+   * Overrides the shot's own crop for the thumbnail specifically. A still
+   * viewed small in a feed can afford to sit tighter on the subject than
+   * the crop that shot uses while playing — build it with `regionAt` the
+   * same way any other shot's `reframe` is built. Falls back to that shot's
+   * own `reframe`, or no crop at all if it has none.
+   */
+  reframe?: { from: Rect; to?: Rect };
+  /**
+   * Word(s) from `text` (or the shot's own title, whichever applies) to
+   * render in the look's thumbnail-emphasis colour — the two or three words
+   * actually carrying the cover's claim, the same standing-choice idea
+   * `Shot.emphasis` already is for captions. Matched case-insensitively,
+   * punctuation stripped; a word that never occurs is silently inert.
+   */
+  emphasize?: string[];
+  /**
+   * Overrides `Tokens.thumbnail.top` for this reel specifically. The look's
+   * own default is centred for an average frame, but where the chosen shot
+   * puts the subject's head is a fact about that footage, not the channel —
+   * a tighter crop that clears background clutter can leave less (or more)
+   * headroom above it than another reel's does.
+   */
+  top?: number;
 };
 
 export type WordTiming = {
