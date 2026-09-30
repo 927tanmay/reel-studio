@@ -33,15 +33,21 @@ export const tokens: Tokens = {
   },
 
   fonts: {
-    display: '-apple-system, "Helvetica Neue", Arial, sans-serif',
+    display: '"Inter", -apple-system, "Helvetica Neue", Arial, sans-serif',
     mono: 'ui-monospace, "SF Mono", Menlo, monospace',
-    // Drop a .woff2 into public/assets/fonts and declare it here to stop
-    // depending on what happens to be installed:
-    // files: [{ family: "Poppins", file: "assets/fonts/Poppins-Bold.woff2", weight: "700" }],
+    // One variable file, registered three times at the weights the roles
+    // below actually use (600/700/800) — the browser renders each request
+    // as that exact instance from the file's own weight axis, so this
+    // isn't three downloads pretending to be different weights.
+    files: [
+      { family: "Inter", file: "assets/fonts/Inter-Variable.woff2", weight: "600" },
+      { family: "Inter", file: "assets/fonts/Inter-Variable.woff2", weight: "700" },
+      { family: "Inter", file: "assets/fonts/Inter-Variable.woff2", weight: "800" },
+    ],
   },
 
   title: {
-    fontFamily: '-apple-system, "Helvetica Neue", Arial, sans-serif',
+    fontFamily: '"Inter", -apple-system, "Helvetica Neue", Arial, sans-serif',
     size: 72,
     weight: 800,
     color: "#FFFFFF",
@@ -65,7 +71,7 @@ export const tokens: Tokens = {
   },
 
   caption: {
-    fontFamily: '-apple-system, "Helvetica Neue", Arial, sans-serif',
+    fontFamily: '"Inter", -apple-system, "Helvetica Neue", Arial, sans-serif',
     size: 40,
     weight: 700,
     color: "#FFFFFF",
@@ -133,7 +139,7 @@ export const tokens: Tokens = {
   },
 
   ribbon: {
-    fontFamily: '-apple-system, "Helvetica Neue", Arial, sans-serif',
+    fontFamily: '"Inter", -apple-system, "Helvetica Neue", Arial, sans-serif',
     size: 56,
     weight: 800,
     color: "#FFFFFF",
@@ -157,7 +163,7 @@ export const tokens: Tokens = {
   },
 
   lowerThird: {
-    fontFamily: '-apple-system, "Helvetica Neue", Arial, sans-serif',
+    fontFamily: '"Inter", -apple-system, "Helvetica Neue", Arial, sans-serif',
     size: 38,
     weight: 700,
     color: "#FFFFFF",
