@@ -77,7 +77,24 @@ shotlists at the copy. That file holds the whole look: palette, type, caption
 style, safe zones, punch presets, mix levels. One repository can serve several
 channels without them contaminating each other.
 
+## Documentation
+
+Five files, each for a different reader:
+
+- **`README.md`** (this file) — setup, and the shortest path to a rendered file.
+- **`GUIDE.md`** — a full worked walkthrough, one real reel start to finish.
+- **`CLAUDE.md`** — the rules an agent driving this repo follows; read this
+  first if you're pairing with one.
+- **`ENGINE_PLAYBOOK.md`** — practical detail found by rendering, for an agent
+  mid-edit.
+- **`HANDOFF.md`** and **`DIRECTION.md`** — for whoever writes briefs upstream,
+  even if that's a different project entirely.
+
 ## Licence
 
-Your own. Remotion, which does the compositing, is free for individuals and
-organisations up to three people; see `remotion.dev/license`.
+MIT — see `LICENSE`. Two things it doesn't cover:
+
+- **Remotion**, which does the compositing, is free for individuals and
+  organisations up to three people; see `remotion.dev/license`.
+- **The bundled font** (`public/assets/fonts/Inter-Variable.woff2`) ships
+  under the SIL Open Font License; see `Inter-OFL.txt` in the same folder.
