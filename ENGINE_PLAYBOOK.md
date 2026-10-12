@@ -286,6 +286,29 @@ licence text belongs in the same folder as the file it covers, not assumed.
 
 ---
 
+### Hand-drawn marks on a screen recording
+
+`Shot.marks` (CLAUDE.md rule 29) is built on `@remotion/rough-notation`, and
+three things found by rendering it are worth knowing before writing one:
+
+- **Region is in pixels of the finished frame, not the source.** The library
+  measures the element it wraps, so `Marks.tsx` hands it a child sized in
+  pixels from the region. Anything percentage-sized collapses to zero inside
+  its shrink-to-fit wrapper and the stroke silently never draws — no error.
+- **The stroke overshoots the region by `marks.padding`.** A circle drawn on
+  a region that hugs the text runs past it and can leave the frame edge. Give
+  the region a little breathing room, or lower the padding in the look.
+- **Look at a frame before trusting a region.** Render one still at the frame
+  the mark is fully drawn (`npx remotion still <post> out.png --frame=N`, N =
+  shot start + `at` + draw-on frames) and nudge. Two tries is normal; the
+  smoke test's two marks each took one correction.
+
+Reach for `circle` on a number or a single word, `underline` under a line of
+code or a path, `highlight` over a button or a term, `box` round a region the
+viewer should treat as one thing, `strike`/`cross` for the thing the speaker
+is rejecting. One mark at a time per beat; two on screen at once is the
+shot trying to say two things (the same reasoning as rule 15).
+
 ## 3. Generators — one clip, one job each
 
 `engine/generators/`: `diagram`, `code`, `terminal`, `compare`, `data`,

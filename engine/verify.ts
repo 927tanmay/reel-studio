@@ -93,6 +93,38 @@ export const verifySpec = (spec: ReelSpec, timeline: Timeline): Finding[] => {
     );
   }
 
+  // Marks point at something in the picture, so they may sit anywhere the
+  // picture does — the safe zones are for readable text. What can go wrong is
+  // asking for one the look cannot draw, or one that lands off the frame.
+  for (const resolved of timeline.shots) {
+    const { shot, index, durationInFrames } = resolved;
+    if (!shot.marks?.length) continue;
+    if (!t.marks) {
+      findings.push({
+        level: "fail",
+        message: `Shot ${index} has marks, but the look defines no \`marks\` style. Add one to the look's tokens.`,
+      });
+      continue;
+    }
+    shot.marks.forEach((m, i) => {
+      const { x, y, w, h } = m.region;
+      if (x < 0 || y < 0 || w <= 0 || h <= 0 || x + w > 1 || y + h > 1) {
+        findings.push({
+          level: "fail",
+          message:
+            `Shot ${index} mark ${i} (${m.kind}) has a region outside the frame ` +
+            `(x ${x}, y ${y}, w ${w}, h ${h}) — these are fractions of the frame, 0 to 1.`,
+        });
+      }
+      if ((m.at ?? 0) * spec.frame.fps >= durationInFrames) {
+        findings.push({
+          level: "warn",
+          message: `Shot ${index} mark ${i} (${m.kind}) starts at ${m.at}s, after the shot has ended — it will never show.`,
+        });
+      }
+    });
+  }
+
   // Captions and badges share the lower third. Two things competing for one
   // zone holds for most of a series and then quietly breaks on one post.
   // Captions are on by default wherever a transcript exists, so this has to

@@ -94,6 +94,9 @@ export default reel({
       // engine mirrors this blend's own zoom onto the outgoing side on its
       // own, so both shots move even though only one line of code asked for it.
       enter: blend({ to: 1.06, frames: 8 }),
+      // Proves hand-drawn marks: a stroke that draws itself on after the wipe
+      // lands, then fades. Region is a guess at first and corrected by looking.
+      marks: [{ kind: "circle", region: { x: 0.06, y: 0.385, w: 0.15, h: 0.04 }, at: 2.2, hold: 1 }],
       note: "Unpaired blend: the previous shot gets its zoom-out for free, not because anyone wrote it.",
     },
 
@@ -111,6 +114,7 @@ export default reel({
       // the compare shot as it crosses, no cross-dissolve, no scale change.
       enter: push({ direction: "left", frames: 10 }),
       badge: "1080x1920 · 30fps",
+      marks: [{ kind: "underline", region: { x: 0.04, y: 0.5, w: 0.5, h: 0.028 }, at: 2.8 }],
     },
   ],
 });

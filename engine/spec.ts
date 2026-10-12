@@ -133,6 +133,44 @@ export type Ribbon = {
   offset?: number;
 };
 
+
+/**
+ * A hand-drawn annotation over the picture: a circle round a number, an
+ * underline under a line of code, a marker highlight over a button. It draws
+ * itself on, holds, and fades.
+ *
+ * `region` is where on the *frame* to mark — fractions of the output frame's
+ * width and height from the top-left, i.e. what the viewer sees after any
+ * reframe, not a position in the source file. The engine cannot read a screen
+ * recording, so finding the thing to mark (look at a frame) is the author's
+ * job; the engine's is making the stroke land on the word that names it:
+ * pass `at` from `anchors()`, never a timecode.
+ *
+ * The stroke (colour, weight, roughness, draw-on length) is the look's, in
+ * `Tokens.marks`; what's here is what to mark, where, and when.
+ */
+export type Mark = {
+  kind: "circle" | "underline" | "box" | "highlight" | "bracket" | "strike" | "cross";
+  region: { x: number; y: number; w: number; h: number };
+  /** Seconds into the shot it starts drawing. Defaults to the shot's first frame. */
+  at?: number;
+  /** Frames the draw-on takes. Defaults to the look's `marks.frames`. */
+  frames?: number;
+  /**
+   * Seconds it stays fully drawn before fading. Omit and it stays for the rest
+   * of the shot.
+   */
+  hold?: number;
+  /** A palette name or a CSS colour. Defaults to the look's `marks.color`. */
+  color?: string;
+  /**
+   * Which hand-drawn variation to use. Strokes are seeded, so the same number
+   * always draws the same wobble; change it to get a different take on the
+   * same shape.
+   */
+  seed?: number;
+};
+
 // ---------------------------------------------------------------------------
 // Generated sources
 // ---------------------------------------------------------------------------
@@ -434,6 +472,13 @@ export type Shot = {
   badge?: string | { text: string; bottom?: number };
   /** A banner that flies in and lands. Motion graphics, not type. */
   ribbon?: Ribbon;
+  /**
+   * Hand-drawn annotations over the picture — see `Mark`. Unlike every other
+   * overlay these point at something *in* the frame, so they are not subject to
+   * the safe-zone gate; `verify.ts` only checks they fit in the frame and that
+   * the look defines a `marks` style.
+   */
+  marks?: Mark[];
   /**
    * A name/role identification card — who is on screen, quieter than a
    * `ribbon`. Shares the badge's zone: `verify.ts` fails a shot carrying

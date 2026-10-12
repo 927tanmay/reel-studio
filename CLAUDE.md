@@ -292,6 +292,23 @@ by hand, and resuming is expected and supported.
    comparing candidates the same way a badge position gets compared: render a
    few, look, choose.
 
+29. **A mark points at something in the picture, and lands on the word that
+   names it.** `Shot.marks` draws a hand-drawn circle, underline, box,
+   highlight, bracket, strike or cross over a region of the frame, drawing
+   itself on and then fading. Use it on screen recordings, where the viewer
+   has to find one line or button on a phone-sized screen; it is a pointer,
+   not decoration, so mark one thing at a time. `region` is fractions of the
+   *output frame* (what the viewer sees after any reframe), which means the
+   engine cannot find the thing for you — look at a frame and measure, then
+   leave a little room, because the stroke sits outside the region by
+   `marks.padding`. Time it with `at` from `anchors()`, never a timecode.
+   The stroke itself (colour, weight, wobble, draw-on frames) is the look's,
+   `Tokens.marks`; a look without one cannot be annotated and `verify.ts`
+   says so. Strokes are seeded and held still, so every render is identical;
+   `seed` picks a different take on the same shape. Marks are exempt from the
+   safe-zone gate — they point at picture, not readable text — but must stay
+   inside the frame.
+
 ## What stays human
 
 Take selection, where a cut lands emotionally, whether a crop reads at phone
@@ -333,7 +350,7 @@ engine/          the moves and the contract — general, never show-specific
   words.ts       word anchoring, and the pauses/fillers a cut removes
   colour.ts      matching one clip's colour to another's
   verify.ts      gates that need no render
-  moves/         punch · blend · push · captions · title · badge · bed · hits
+  moves/         punch · blend · push · captions · title · badge · marks · bed · hits
   generators/    diagram · code · terminal · compare · data · callout
 projects/        one look per channel; copy default/ and change everything
 public/posts/    one folder per reel, self-contained

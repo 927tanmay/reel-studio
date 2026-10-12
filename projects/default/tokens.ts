@@ -216,6 +216,20 @@ export const tokens: Tokens = {
     sub: { color: "#C9D3DD", size: 26, weight: 600, tracking: 0.01 },
   },
 
+  marks: {
+    // The same yellow the caption's active word uses: a mark and the word that
+    // triggered it read as one device. Teal (the accent) disappears against
+    // the dark editors these usually sit on.
+    color: "#FFD60A",
+    highlightColor: "rgba(255,214,10,0.38)",
+    strokeWidth: 7,
+    roughness: 1.4,
+    bowing: 1.2,
+    padding: 14,
+    frames: 12,
+    fadeFrames: 6,
+  },
+
   // A corner logo for the whole reel. Point `src` at a real mark under
   // public/assets/brand/ to turn this on; omit the whole block for none.
   // watermark: { src: "assets/brand/mark.png", corner: "bottom-right", width: 90, margin: 36, opacity: 0.85 },

@@ -213,6 +213,30 @@ export type Watermark = {
   opacity?: number;
 };
 
+/**
+ * The look of a hand-drawn annotation (`Shot.marks`): the stroke, not where
+ * or when it lands. Optional — a look with none simply cannot be annotated,
+ * and `verify.ts` says so if a shot asks.
+ */
+export type MarksStyle = {
+  /** A palette name or a CSS colour for a stroke. */
+  color: string;
+  /** Marker highlights are translucent so the text stays readable under them. */
+  highlightColor: string;
+  /** Stroke weight in design pixels. */
+  strokeWidth: number;
+  /** 0 is ruler-straight; around 1.5 reads as a quick pen. */
+  roughness: number;
+  /** How much a line bows between its ends. */
+  bowing: number;
+  /** Gap, in design pixels, between the marked region and the stroke. */
+  padding: number;
+  /** Frames a stroke takes to draw on when a mark doesn't name its own. */
+  frames: number;
+  /** Frames it takes to fade out once its hold ends. */
+  fadeFrames: number;
+};
+
 export type Tokens = {
   name: string;
   /** The width these pixel sizes were designed against. Everything scales from it. */
@@ -231,6 +255,8 @@ export type Tokens = {
   badge: BadgeStyle;
   ribbon: RibbonStyle;
   lowerThird: LowerThirdStyle;
+  /** The look of hand-drawn annotations. Omit and shots cannot carry `marks`. */
+  marks?: MarksStyle;
   /** The look for a feed thumbnail. Optional — see ThumbnailStyle. */
   thumbnail?: ThumbnailStyle;
   /** A corner logo present for the whole reel. Omit and nothing renders. */
