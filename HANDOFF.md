@@ -126,6 +126,28 @@ shot" (the picture's already changed, the old sound hasn't caught up yet).
 Six to twelve frames is the usual range; more than that stops reading as a
 seam and starts reading as its own effect.
 
+**Three more things you can ask for at a moment, each worth it only when the
+picture needs it:**
+
+- **A hand-drawn mark** — a circle, underline, box, highlight, bracket or
+  strike that draws itself on over a spot in the picture, then fades.
+  Ask for one on a screen recording or a still, where the viewer has to
+  find *one* line, number or button on a phone-sized screen: "on the word
+  'timeout', circle the 30s value in the config." **Describe what to mark
+  in words, not coordinates** — "the third row of the table", "the Run
+  button, top right". The editor measures where that is from a still;
+  you cannot know it from here. One mark at a time per beat.
+- **A click highlight** — a ring (and optionally a dimmed spotlight, and an
+  arrow if the recording shows no cursor) landing on whatever was clicked:
+  "on 'deploy', ring the Deploy button." Say whether the recording already
+  shows a real cursor; if it does, the arrow is left off.
+- **A speed ramp** — a stretch of footage racing and then easing to normal
+  speed to land on one line: "run the build log at 4x, ease down to normal
+  on 'failed'." Ask for it when part of a capture is dull but you want the
+  viewer to see that time passed. Name the word it should be at normal
+  speed by. The footage's own sound is dropped under a ramp, so say which
+  voice continues under it (see section 4).
+
 When writing the script, notice which words are distinctive and put your beats
 on those. If a line has no distinctive word where you need a beat, rewrite the
 line. That is cheaper than fixing it in the edit.
@@ -190,7 +212,7 @@ graphic should get; the rest works the same as any other generated clip
 
 ## 5. Write generated clips out in full
 
-Seven kinds of clip can be generated. If you ask for one, supply all of its
+Eight kinds of clip can be generated. If you ask for one, supply all of its
 content. Half a diagram is a question, not a brief.
 
 **diagram** — nodes that assemble and pan. The one worth reaching for
@@ -239,6 +261,16 @@ dimmed
 > instead of cutting to black or holding on a title card. Ask for this
 > explicitly as a closing option; the default without it is the reel simply
 > ending on the last word.
+
+**orb** — a dotted sphere of light that reads as "an AI is working"
+> Which of five motions: *working* (particles on orbits), *searching* (a
+> scan sweeping a globe), *listening* (rings pushed like a waveform),
+> *connecting* (a constellation wiring itself together), *breathing* (a ring
+> swelling and settling). Ask for one **only** where a line says "thinking",
+> "searching", "the agent is…" and there is nothing real to show — it is
+> decoration with one job, not filler. It can pulse with the voice speaking
+> under it; say so, and say which take continues under it. Colour and size
+> belong to the channel's look, not the brief.
 
 Example of a complete diagram request:
 
@@ -309,6 +341,8 @@ A brief is ready to hand over when every one of these is true.
 - [ ] Every generated clip is specified in full
 - [ ] Title, badge and lower-third copy is written out (captions need no
       copy — automatic)
+- [ ] Any mark, click highlight or speed ramp names *what* it points at or
+      *where it settles*, in words and against a spoken word — not coordinates
 - [ ] Every name, tool and filename you will speak is listed as it should
       print, or there are none
 - [ ] Music mood is stated, or explicitly none
@@ -364,6 +398,9 @@ Steps: <node set> on the word "<word>", ...
 - On the word "<word>" in hook, cut to screen-demo
 - On the word "<word>" in middle, punch, sharp, with a snap
 - On the word "<word>" in middle, punch, quiet, no sound
+- On the word "<word>" in screen-demo, circle <what, in words>      (optional)
+- On the word "<word>" in screen-demo, ring the click on <what>     (optional)
+- In screen-demo, run <stretch> at <n>x, ease to normal on "<word>" (optional)
 
 ## Text
 Title on hook: "<exact copy>"
