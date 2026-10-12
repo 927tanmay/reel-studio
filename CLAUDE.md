@@ -36,6 +36,7 @@ Never put a colour, a size, a duration or a structural assumption into
 | 05b | Tightening report (optional) | `npm run tighten <post>` | — |
 | 06 | Shotlist | you, with the user | `shotlist.ts` |
 | 06b | Beat check (optional) | `npm run beatcheck <post>` | — |
+| 06c | Pacing check (optional) | `npm run critique <post>` | — |
 | 07 | Compose | `npm run studio` | — |
 | 08 | Render and verify | `npm run render <post>` | `out/<post>/reel.mp4`, a take |
 | 08b | Thumbnail (optional) | `npm run thumbnail <post>` | `out/<post>/thumbnail.jpg` |
@@ -309,6 +310,20 @@ by hand, and resuming is expected and supported.
    safe-zone gate — they point at picture, not readable text — but must stay
    inside the frame.
 
+30. **Measure the pacing before the render, and say what it can't see.** `npm
+   run critique <post>` reads the resolved timeline — no render — and reports
+   when the picture first changes, how many changes land in the hook, the
+   longest stretch with none, and (where a transcript is attached) speech
+   coverage, wpm and dead air. A cut, a mark, a ribbon, a lower third, a
+   diagram step, a code highlight, a terminal line and a compare wipe each
+   count as a change; ones within a quarter-second merge. Its thresholds
+   (a change every ~3 s, something in the first 2 s, silence over 0.5 s) are
+   rules of thumb for short-form, not findings, and are flags precisely so a
+   reel that is deliberately slow can say so. Continuous motion — a slow
+   reframe, typing — is invisible to it, so a flagged gap over one is a
+   question, not a defect. Offer the numbers; whether the opening earns the
+   next five seconds stays the human's call.
+
 ## What stays human
 
 Take selection, where a cut lands emotionally, whether a crop reads at phone
@@ -362,7 +377,9 @@ scripts/         ingest · transcribe · align · render · thumbnail · verify 
                  grade (measures colour) · beats (tempo, confidence and real
                  start points for a music file) · beatcheck (every cut, hit
                  and dip against the beat grid; dump-beatcheck.ts is its own
-                 internal, not run directly) · tighten (reports what a
+                 internal, not run directly) · critique (pacing numbers from
+                 the resolved timeline; engine/critique.ts is the analysis,
+                 dump-critique.ts its internal) · tighten (reports what a
                  tightening pass would remove) ·
                  export-timeline (writes an EDL; dump-timeline.ts and
                  ts-resolve-hook.mjs are shared internals, not run directly)
@@ -389,6 +406,7 @@ node scripts/make-sfx.mjs    # regenerate the default sound effects
 node scripts/make-music.mjs  # write the default music bed (not committed)
 npm run beats <track>        # tempo, confidence, real start points for a music file
 npm run beatcheck 001-my-reel  # how far every cut, hit and dip sits from the beat grid
+npm run critique 001-my-reel   # pacing: first change, longest gap, speech coverage, dead air
 ```
 
 ## Adding to the engine
