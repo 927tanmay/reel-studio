@@ -22,6 +22,7 @@ import { Marks } from "./moves/Marks";
 import { Pointer } from "./moves/Pointer";
 import { Generated, generatedSize } from "./generators";
 import { gradeFilter, needsMatrix } from "./colour";
+import { rampPieces } from "./ramp";
 
 /** Shown instead of a black hole when a shotlist names media that is not there. */
 const Missing: React.FC<{ what: string }> = ({ what }) => (
@@ -96,6 +97,15 @@ const SourceView: React.FC<{
   const useCleanAudio = Boolean(entry.cleanAudio);
   const playbackRate = resolved.shot.speed ?? 1;
 
+  // A speed ramp plays as short constant-rate pieces, since a video element
+  // takes one playback rate; everything else is its own segments at the
+  // shot's single rate. Same shape either way, so one render path.
+  const ramp = resolved.shot.speedRamp;
+  const parts: { startFrame: number; frames: number; sourceStart: number; rate: number }[] =
+    ramp && ramp.length > 0 && ramp.every((p) => p.speed > 0)
+      ? rampPieces(ramp, fps, resolved.durationInFrames, resolved.shot.in ?? 0)
+      : segments.map((s) => ({ ...s, rate: playbackRate }));
+
   // One clip per surviving stretch of the take. A shot that dropped nothing
   // has exactly one segment starting at its own `in`, which is the same
   // single video element this rendered before segments existed — the
@@ -105,7 +115,7 @@ const SourceView: React.FC<{
   // across the shot as a whole rather than restarting at every join.
   return (
     <AbsoluteFill style={{ overflow: "hidden" }}>
-      {segments.map((segment, i) => (
+      {parts.map((segment, i) => (
         <Sequence
           key={i}
           from={segment.startFrame}
@@ -116,7 +126,7 @@ const SourceView: React.FC<{
             src={staticFile(entry.file)}
             trimBefore={segment.sourceStart > 0 ? Math.round(segment.sourceStart * fps) : undefined}
             muted={!carryAudio || useCleanAudio || !entry.hasAudio}
-            playbackRate={playbackRate}
+            playbackRate={segment.rate}
             volume={audioVolume}
             style={{
               position: "absolute",
@@ -133,7 +143,7 @@ const SourceView: React.FC<{
                 0,
                 Math.round((segment.sourceStart + (entry.audioOffset ?? 0)) * fps),
               )}
-              playbackRate={playbackRate}
+              playbackRate={segment.rate}
               volume={audioVolume}
             />
           ) : null}

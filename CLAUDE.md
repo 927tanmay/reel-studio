@@ -339,6 +339,20 @@ by hand, and resuming is expected and supported.
    that arrive just *after* the voice read as late; only the card leads, the
    active-word highlight stays on the voice. Both are look-level numbers.
 
+32. **A shot can change speed partway through.** `speedRamp: [{ at, speed }]`
+   (`at` in seconds on screen) races through the dull stretch and eases down
+   to land on the thing that matters — a build log at 4×, settling to 1× on
+   the error. The speed eases between keyframes rather than turning a corner
+   at each one. Leave `seconds` out and the length is measured by finding
+   when the ramp has consumed the whole source window, not assumed. A ramped
+   shot has no sound of its own, because a changing rate warps it: bring a
+   voice in with `audio: "hold"` or `{ from }`, which plays at its natural
+   rate. It replaces `speed`, and does not compose with `drop` or `bands`
+   (both warn). Footage slowed below about half speed repeats source frames
+   — nothing invents the ones between. `engine/ramp.ts` holds the arithmetic,
+   shared by the timeline and the renderer so they cannot disagree about
+   where in the source a frame lands.
+
 ## What stays human
 
 Take selection, where a cut lands emotionally, whether a crop reads at phone

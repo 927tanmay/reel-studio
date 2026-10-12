@@ -8,6 +8,7 @@
 
 import type { Tokens } from "./tokens";
 import { nearestBeat, type BeatGrid } from "./beats";
+import { rampDuration, rampSource, type RampPoint } from "./ramp";
 
 export type Frame = { w: number; h: number; fps: number };
 
@@ -433,6 +434,23 @@ export type Shot = {
    */
   speed?: number;
   /**
+   * A rate that changes *within* the shot: keyframes of `{ at, speed }`, `at`
+   * in seconds on screen. The speed eases between keyframes and holds the
+   * first before it and the last after it — race through a build log at 4x,
+   * ease down to 1x to land on the line that matters. Replaces `speed` for
+   * this shot (setting both warns).
+   *
+   * `seconds` is still on-screen time; leave it out and the length is
+   * measured from the file by finding when the ramp has consumed the whole
+   * source window. A ramped shot has no sound of its own — a voice pitched
+   * and warped by a changing rate is never wanted — so bring one in with
+   * `audio: "hold"` or `audio: { from }`, which plays at its natural rate.
+   * Drops and `bands` don't compose with it and are ignored with a warning.
+   * Footage slowed below about half speed repeats source frames; no ramp
+   * invents the in-between ones.
+   */
+  speedRamp?: RampPoint[];
+  /**
    * What happens to the sound at this shot's cut, when it should not simply
    * change with the picture.
    *
@@ -681,6 +699,15 @@ export type MediaEntry = {
 export type MediaManifest = Record<string, MediaEntry>;
 
 export const reel = (spec: ReelSpec): ReelSpec => spec;
+
+/**
+ * Whether a shot's `speedRamp` can actually be played: present, every
+ * keyframe a positive rate, and not on a banded shot. An unusable ramp is
+ * left alone here — `verify.ts` is what says why — rather than fed to the
+ * duration solver, which a zero speed would send nowhere.
+ */
+const usableRamp = (shot: Shot): boolean =>
+  Boolean(shot.speedRamp && shot.speedRamp.length > 0 && !shot.bands && shot.speedRamp.every((p) => p.speed > 0));
 
 // ---------------------------------------------------------------------------
 // Timeline resolution
@@ -983,6 +1010,9 @@ export const resolveTimeline = (spec: ReelSpec): Timeline => {
             `Run "npm run ingest" for this post, or set seconds explicitly.`,
         );
         seconds = DEFAULT_GEN_SECONDS;
+      } else if (usableRamp(shot)) {
+        // A ramp with no `seconds`: find when it has consumed the whole window.
+        seconds = rampDuration(shot.speedRamp!, measured - (shot.in ?? 0));
       } else {
         seconds = measured - (shot.in ?? 0);
       }
@@ -992,11 +1022,25 @@ export const resolveTimeline = (spec: ReelSpec): Timeline => {
     // shot carrying `speed` consumes proportionally more of its source across
     // that same stretch, and one without it consumes exactly as much as it
     // shows. Everything below works in source seconds, then converts once.
-    const speed = shot.speed ?? 1;
+    const ramp = usableRamp(shot) ? shot.speedRamp! : null;
+    if (shot.speedRamp && shot.speedRamp.length > 0) {
+      if (shot.bands) {
+        warnings.push(`Shot ${index} sets \`speedRamp\` alongside \`bands\`. Each region plays its own source; the ramp is ignored.`);
+      }
+      if (ramp && shot.speed !== undefined) {
+        warnings.push(`Shot ${index} sets both \`speed\` and \`speedRamp\`. The ramp replaces it; \`speed\` is ignored.`);
+      }
+      if (ramp && shot.drop && shot.drop.length > 0) {
+        warnings.push(`Shot ${index} sets \`drop\` alongside \`speedRamp\`. A ramp has no single rate to close a gap at; the drops are ignored.`);
+      }
+    }
+    // Under a ramp, `speed` is 1 everywhere below: borrowed sound plays at its
+    // natural rate, and the picture's own rate is the ramp's business alone.
+    const speed = ramp ? 1 : (shot.speed ?? 1);
     const inSeconds = shot.in ?? 0;
-    const windowEnd = inSeconds + seconds * speed;
+    const windowEnd = ramp ? inSeconds + rampSource(ramp, seconds) : inSeconds + seconds * speed;
 
-    const drops = mergeGaps(shot.drop ?? []);
+    const drops = ramp ? [] : mergeGaps(shot.drop ?? []);
     if (drops.length > 0) {
       if (shot.bands) {
         warnings.push(
@@ -1022,11 +1066,17 @@ export const resolveTimeline = (spec: ReelSpec): Timeline => {
     const segments: Segment[] = [];
     let elapsed = 0;
     let frameCursor = 0;
-    for (const range of kept) {
+    // A ramped shot is one stretch of source whose on-screen length is `seconds`
+    // exactly — the ramp, not a division by a constant rate, sets the mapping.
+    for (const range of ramp ? [] : kept) {
       elapsed += (range.to - range.from) / speed;
       const frames = Math.max(1, Math.round(elapsed * fps) - frameCursor);
       segments.push({ sourceStart: range.from, startFrame: frameCursor, frames });
       frameCursor += frames;
+    }
+    if (ramp) {
+      frameCursor = Math.max(1, Math.round(seconds * fps));
+      segments.push({ sourceStart: inSeconds, startFrame: 0, frames: frameCursor });
     }
     if (segments.length === 0) {
       warnings.push(
@@ -1110,11 +1160,21 @@ export const resolveTimeline = (spec: ReelSpec): Timeline => {
       (region): region is BandSpec & { source: string } =>
         typeof region.source === "string" && Boolean(spec.media?.[region.source]?.hasAudio),
     )?.source;
-    const ownKey = shot.bands
-      ? (bandAudioKey ?? null)
-      : typeof shot.src === "string" && spec.media?.[shot.src]?.hasAudio
-        ? shot.src
-        : null;
+    // A ramped shot has no sound of its own: a rate that keeps changing would
+    // warp it, so what is audible under it is whatever `audio` borrows.
+    const ownKey = ramp
+      ? null
+      : shot.bands
+        ? (bandAudioKey ?? null)
+        : typeof shot.src === "string" && spec.media?.[shot.src]?.hasAudio
+          ? shot.src
+          : null;
+    if (ramp && typeof shot.src === "string" && spec.media?.[shot.src]?.hasAudio && !shot.audio) {
+      warnings.push(
+        `Shot ${index} ("${shot.src}") ramps its speed, so its own sound is dropped. ` +
+          `Use \`audio: "hold"\` or \`audio: { from }\` to put a voice under it.`,
+      );
+    }
 
     /** Plays the running source onward from where it stopped, for `frames`. */
     const carryOn = (asked: number, why: string): Sound | null => {

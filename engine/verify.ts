@@ -125,6 +125,21 @@ export const verifySpec = (spec: ReelSpec, timeline: Timeline): Finding[] => {
     });
   }
 
+  // A ramp's keyframes are rates: zero or negative never advances the source
+  // (and the duration solver would never finish), so they fail up front.
+  for (const resolved of timeline.shots) {
+    const ramp = resolved.shot.speedRamp;
+    if (!ramp) continue;
+    if (ramp.some((p) => !(p.speed > 0) || p.at < 0)) {
+      findings.push({
+        level: "fail",
+        message:
+          `Shot ${resolved.index} has a speedRamp keyframe with a speed of zero or less, or a negative time. ` +
+          `Every keyframe needs \`speed\` above 0 and \`at\` from 0.`,
+      });
+    }
+  }
+
   // A pointer is the same kind of overlay as a mark: it points into the
   // picture, so the safe zones don't apply, but its positions must be real.
   for (const resolved of timeline.shots) {

@@ -329,6 +329,26 @@ shot trying to say two things (the same reasoning as rule 15).
   of the sound. At 100 ms the first caption shows on frame 0 of a shot that
   opens mid-word, which is correct.
 
+### Speed ramps
+
+`Shot.speedRamp` (CLAUDE.md rule 32). Found by rendering a test clip with a
+frame counter burned into it, and reading the counter off stills:
+
+- **The mapping is exact, so test it that way.** A synthetic clip with its
+  own timecode, ramped `{1s → 4×, 3s → 1×}`, showed source 2.00, 4.00, 7.43
+  and 9.00 s at screen 0.5, 1, 2 and 3 s — the integral of the curve, to the
+  frame. Do the same on a new look or a changed ramp before trusting it on
+  footage you can't read a clock off.
+- **It plays as short constant-rate pieces.** A video element takes one
+  playback rate, so a ramp is two-frame pieces while the speed changes and
+  one long piece wherever it is flat. Pieces are contiguous in the source, so
+  there is no seam to see.
+- **Keyframe at the beat, not before it.** Ease takes the whole gap between
+  two keyframes, so a ramp meant to land on a word should have its slow
+  keyframe at that word's `at`, from `anchors()`, not a moment earlier.
+- **Mute is not a bug.** A ramped shot dropping its own sound is deliberate;
+  the warning says so and names `audio: "hold"` as the fix.
+
 ## 3. Generators — one clip, one job each
 
 `engine/generators/`: `diagram`, `code`, `terminal`, `compare`, `data`,
