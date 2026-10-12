@@ -171,6 +171,29 @@ export type Mark = {
   seed?: number;
 };
 
+/**
+ * A pointer moving over the picture, with click rings and an optional
+ * spotlight — for a screen recording where the viewer has to see *what was
+ * clicked* on a phone-sized screen.
+ *
+ * Positions are fractions of the output frame, like `Mark.region`, and times
+ * are seconds into the shot; the engine cannot read the recording, so the
+ * author measures where the thing is. Anchor `at` to a spoken word through
+ * `anchors()`, not a timecode.
+ *
+ * Most screen recordings already show a real cursor. Leave `arrow` off and
+ * only the click rings and spotlight are drawn, at the points listed;
+ * turn it on for a capture with no visible cursor, or a generated source.
+ */
+export type Pointer = {
+  /** Waypoints in time order. The pointer glides between them and holds on the last. */
+  path: { at: number; x: number; y: number; click?: boolean }[];
+  /** Draw a pointer arrow gliding along the path. Defaults to off. */
+  arrow?: boolean;
+  /** Dim the rest of the picture around each click, so the eye lands on it. */
+  spotlight?: boolean;
+};
+
 // ---------------------------------------------------------------------------
 // Generated sources
 // ---------------------------------------------------------------------------
@@ -479,6 +502,12 @@ export type Shot = {
    * the look defines a `marks` style.
    */
   marks?: Mark[];
+  /**
+   * A pointer, click rings and optional spotlight over the picture — see
+   * `Pointer`. Like `marks`, it points at something *in* the frame, so the
+   * safe-zone gate does not apply; `verify.ts` checks positions and the look.
+   */
+  pointer?: Pointer;
   /**
    * A name/role identification card — who is on screen, quieter than a
    * `ribbon`. Shares the badge's zone: `verify.ts` fails a shot carrying

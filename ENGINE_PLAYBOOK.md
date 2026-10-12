@@ -309,6 +309,26 @@ viewer should treat as one thing, `strike`/`cross` for the thing the speaker
 is rejecting. One mark at a time per beat; two on screen at once is the
 shot trying to say two things (the same reasoning as rule 15).
 
+### Pointer and click highlights on a screen recording
+
+`Shot.pointer` (CLAUDE.md rule 31). What rendering it showed:
+
+- **The spotlight is a radial dim, not a mask.** A soft falloff from the lit
+  radius to 1.7× that, so the edge reads as light rather than a hole. It
+  only lights on a `click`; a spotlight with no click in the path draws
+  nothing, and `verify.ts` warns rather than letting that pass quietly.
+- **A second arrow over a real cursor looks wrong.** Most screen recordings
+  already show the cursor; drawing another beside it reads as a glitch. Use
+  the ring and spotlight alone there, and only add `arrow` where the capture
+  has none.
+- **Measure the click, don't eyeball it.** Render one still at the click
+  frame (shot start + `at`) and nudge `x`/`y` — the smoke test needed one
+  correction to land the ring on a code line.
+- **Caption lead is a card thing.** `caption.leadMs` moves when a card
+  appears, not when a word lights, so the yellow highlight never runs ahead
+  of the sound. At 100 ms the first caption shows on frame 0 of a shot that
+  opens mid-word, which is correct.
+
 ## 3. Generators — one clip, one job each
 
 `engine/generators/`: `diagram`, `code`, `terminal`, `compare`, `data`,

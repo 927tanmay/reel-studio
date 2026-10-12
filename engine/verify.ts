@@ -125,6 +125,46 @@ export const verifySpec = (spec: ReelSpec, timeline: Timeline): Finding[] => {
     });
   }
 
+  // A pointer is the same kind of overlay as a mark: it points into the
+  // picture, so the safe zones don't apply, but its positions must be real.
+  for (const resolved of timeline.shots) {
+    const { shot, index, durationInFrames } = resolved;
+    if (!shot.pointer) continue;
+    if (!t.pointer) {
+      findings.push({
+        level: "fail",
+        message: `Shot ${index} has a pointer, but the look defines no \`pointer\` style. Add one to the look's tokens.`,
+      });
+      continue;
+    }
+    if (shot.pointer.path.length === 0) {
+      findings.push({ level: "fail", message: `Shot ${index} has a pointer with an empty path.` });
+      continue;
+    }
+    shot.pointer.path.forEach((p, i) => {
+      if (p.x < 0 || p.x > 1 || p.y < 0 || p.y > 1) {
+        findings.push({
+          level: "fail",
+          message:
+            `Shot ${index} pointer waypoint ${i} (x ${p.x}, y ${p.y}) is outside the frame — ` +
+            `these are fractions of the frame, 0 to 1.`,
+        });
+      }
+      if (p.at * spec.frame.fps >= durationInFrames) {
+        findings.push({
+          level: "warn",
+          message: `Shot ${index} pointer waypoint ${i} is at ${p.at}s, after the shot has ended — it will never show.`,
+        });
+      }
+    });
+    if (shot.pointer.spotlight && !shot.pointer.path.some((p) => p.click)) {
+      findings.push({
+        level: "warn",
+        message: `Shot ${index} pointer asks for a spotlight but has no click — the spotlight only lights on a click, so nothing will show.`,
+      });
+    }
+  }
+
   // Captions and badges share the lower third. Two things competing for one
   // zone holds for most of a series and then quietly breaks on one post.
   // Captions are on by default wherever a transcript exists, so this has to

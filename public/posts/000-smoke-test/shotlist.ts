@@ -79,6 +79,16 @@ export default reel({
       // A real cross-dissolve: starts 8 frames before the diagram would have
       // ended, fades in on top of it while zooming from 1.12 down to 1.
       enter: blend({ to: 1.12, frames: 8 }),
+      // Proves the pointer: an arrow glides to a line and clicks it, with a
+      // ring and a spotlight. Positions are measured off a still.
+      pointer: {
+        path: [
+          { at: 0.8, x: 0.8, y: 0.75 },
+          { at: 2.0, x: 0.3, y: 0.5, click: true },
+        ],
+        arrow: true,
+        spotlight: true,
+      },
       note: "Blend, not a punch: two shots overlap and zoom together instead of meeting at a hard edge.",
     },
 

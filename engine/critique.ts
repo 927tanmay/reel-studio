@@ -8,7 +8,7 @@ import { dominantSound, shotLabel, wordsInShot, type ReelSpec, type Timeline } f
  * supplies, not something fixed here.
  */
 
-export type ChangeKind = "cut" | "mark" | "ribbon" | "lower-third" | "step" | "wipe";
+export type ChangeKind = "cut" | "mark" | "pointer" | "ribbon" | "lower-third" | "step" | "wipe";
 
 export type Change = { seconds: number; kind: ChangeKind; shot: number; label: string };
 
@@ -76,6 +76,7 @@ export const critiqueTimeline = (
 
     const at = (seconds: number | undefined) => start + (seconds ?? 0);
     for (const m of r.shot.marks ?? []) push(at(m.at), "mark", r.index, `${m.kind} mark`);
+    for (const p of r.shot.pointer?.path ?? []) if (p.click) push(at(p.at), "pointer", r.index, "click");
     if (r.shot.ribbon) push(at(r.shot.ribbon.at), "ribbon", r.index, "ribbon");
     if (r.shot.lowerThird) push(at(r.shot.lowerThird.at), "lower-third", r.index, "lower third");
 

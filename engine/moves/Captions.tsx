@@ -68,13 +68,16 @@ export const Captions: React.FC<{ spec: ReelSpec; resolved: ResolvedShot }> = ({
   });
 
   const nowMs = (frame / fps) * 1000;
+  // The card leads the voice; the active-word highlight does not. Pages are
+  // chosen on the shifted clock, tokens are lit on the real one.
+  const cardMs = nowMs + (style.leadMs ?? 0);
   const pageIndex = pages.findIndex(
-    (p) => nowMs >= p.startMs && nowMs < p.startMs + p.durationMs,
+    (p) => cardMs >= p.startMs && cardMs < p.startMs + p.durationMs,
   );
   if (pageIndex === -1) return null;
   const page = pages[pageIndex];
 
-  const pageStartFrame = (page.startMs / 1000) * fps;
+  const pageStartFrame = ((page.startMs - (style.leadMs ?? 0)) / 1000) * fps;
   const opacity = interpolate(
     frame,
     [pageStartFrame, pageStartFrame + style.fadeFrames],

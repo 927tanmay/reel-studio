@@ -83,6 +83,14 @@ export type CaptionStyle = TextStyle & {
   windowMs: number;
   /** Frames of cross-fade when a card changes. Keep this small. */
   fadeFrames: number;
+  /**
+   * Milliseconds a caption card appears *before* its first word is spoken, so
+   * the eye has the words as the ear gets them rather than just after. Around
+   * 100–200 reads as in sync; zero reads as a hair late. Only the card leads —
+   * the active-word highlight still follows the voice exactly, so the colour
+   * never runs ahead of the sound. Optional; absent is zero.
+   */
+  leadMs?: number;
   /** Optional plate behind the text, for legibility over bright footage. */
   plate?: Plate | null;
   /**
@@ -214,6 +222,33 @@ export type Watermark = {
 };
 
 /**
+ * The look of the pointer overlay (`Shot.pointer`): the click ring, the
+ * optional arrow and the spotlight dim. Optional — a look with none cannot
+ * carry a pointer, and `verify.ts` says so if a shot asks.
+ */
+export type PointerStyle = {
+  /** Ring, ripple and dot colour — a palette name or a CSS colour. */
+  color: string;
+  /** Resting ring radius, in design pixels. */
+  ringRadius: number;
+  ringWidth: number;
+  /** Frames a click's ripple takes to expand and fade. */
+  rippleFrames: number;
+  /** Arrow height in design pixels, when a shot draws one. */
+  arrowSize: number;
+  /** 0..1 — how dark the picture goes outside a spotlight. */
+  dim: number;
+  /** Radius, in design pixels, of the lit area in a spotlight. */
+  spotlightRadius: number;
+  /** Frames a spotlight takes to fade in, and again to fade out. */
+  spotlightFrames: number;
+  /** Frames the pointer takes to fade in at its first waypoint and out after its last. */
+  fadeFrames: number;
+  /** Frames the pointer stays after its last waypoint before fading. */
+  lingerFrames: number;
+};
+
+/**
  * The look of a hand-drawn annotation (`Shot.marks`): the stroke, not where
  * or when it lands. Optional — a look with none simply cannot be annotated,
  * and `verify.ts` says so if a shot asks.
@@ -257,6 +292,8 @@ export type Tokens = {
   lowerThird: LowerThirdStyle;
   /** The look of hand-drawn annotations. Omit and shots cannot carry `marks`. */
   marks?: MarksStyle;
+  /** The look of the pointer overlay. Omit and shots cannot carry a `pointer`. */
+  pointer?: PointerStyle;
   /** The look for a feed thumbnail. Optional — see ThumbnailStyle. */
   thumbnail?: ThumbnailStyle;
   /** A corner logo present for the whole reel. Omit and nothing renders. */

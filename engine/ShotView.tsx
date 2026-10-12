@@ -19,6 +19,7 @@ import { Badge } from "./moves/Badge";
 import { Ribbon } from "./moves/Ribbon";
 import { LowerThird } from "./moves/LowerThird";
 import { Marks } from "./moves/Marks";
+import { Pointer } from "./moves/Pointer";
 import { Generated, generatedSize } from "./generators";
 import { gradeFilter, needsMatrix } from "./colour";
 
@@ -417,6 +418,7 @@ export const ShotView: React.FC<{
           {shot.title ? <Title spec={spec} title={shot.title} /> : null}
           {shot.badge ? <Badge spec={spec} badge={shot.badge} /> : null}
           {shot.ribbon ? <Ribbon spec={spec} ribbon={shot.ribbon} /> : null}
+          {shot.pointer ? <Pointer spec={spec} pointer={shot.pointer} /> : null}
           {shot.marks ? <Marks spec={spec} marks={shot.marks} /> : null}
           {shot.lowerThird ? <LowerThird spec={spec} lowerThird={shot.lowerThird} /> : null}
         </>

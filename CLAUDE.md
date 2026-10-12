@@ -324,6 +324,21 @@ by hand, and resuming is expected and supported.
    question, not a defect. Offer the numbers; whether the opening earns the
    next five seconds stays the human's call.
 
+31. **Show what was clicked, and let the caption arrive just ahead of its
+   word.** `Shot.pointer` draws a click ring, an optional arrow and an
+   optional spotlight over a screen recording: `path` is waypoints
+   (`{ at, x, y, click? }`, fractions of the output frame, seconds into the
+   shot), the pointer glides between them, and each `click` rings and, with
+   `spotlight: true`, dims everything else around it. A real recording
+   usually already shows its cursor, so leave `arrow` off there and take
+   only the ring and spotlight; turn it on for a capture with no cursor or a
+   generated source. Positions are measured, not guessed — pull a still —
+   and `at` anchors to the word that names the click. Style is `Tokens.
+   pointer`. Separately, `caption.leadMs` (default look: 100) shows each
+   caption card that long before its first word is spoken, because words
+   that arrive just *after* the voice read as late; only the card leads, the
+   active-word highlight stays on the voice. Both are look-level numbers.
+
 ## What stays human
 
 Take selection, where a cut lands emotionally, whether a crop reads at phone
@@ -365,7 +380,7 @@ engine/          the moves and the contract — general, never show-specific
   words.ts       word anchoring, and the pauses/fillers a cut removes
   colour.ts      matching one clip's colour to another's
   verify.ts      gates that need no render
-  moves/         punch · blend · push · captions · title · badge · marks · bed · hits
+  moves/         punch · blend · push · captions · title · badge · marks · pointer · bed · hits
   generators/    diagram · code · terminal · compare · data · callout
 projects/        one look per channel; copy default/ and change everything
 public/posts/    one folder per reel, self-contained

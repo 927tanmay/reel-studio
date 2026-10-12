@@ -92,6 +92,9 @@ export const tokens: Tokens = {
     windowMs: 900,
     // Captions refresh every few words, so anything noticeable becomes noise.
     fadeFrames: 2,
+    // The card shows 100ms before its first word is spoken — reads as in sync
+    // rather than a hair late. The yellow highlight still follows the voice.
+    leadMs: 100,
     plate: null,
     // A deliberately different color from activeColor: emphasis is a standing
     // choice about which words carry the claim, not a transient one about
@@ -228,6 +231,19 @@ export const tokens: Tokens = {
     padding: 14,
     frames: 12,
     fadeFrames: 6,
+  },
+
+  pointer: {
+    color: "#FFD60A",
+    ringRadius: 56,
+    ringWidth: 6,
+    rippleFrames: 14,
+    arrowSize: 64,
+    dim: 0.55,
+    spotlightRadius: 190,
+    spotlightFrames: 8,
+    fadeFrames: 5,
+    lingerFrames: 18,
   },
 
   // A corner logo for the whole reel. Point `src` at a real mark under
