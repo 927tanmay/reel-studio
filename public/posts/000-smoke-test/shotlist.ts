@@ -126,5 +126,13 @@ export default reel({
       badge: "1080x1920 · 30fps",
       marks: [{ kind: "underline", region: { x: 0.04, y: 0.5, w: 0.5, h: 0.028 }, at: 2.8 }],
     },
+
+    {
+      // Proves the orb generator: dots drawn as a pure function of the frame,
+      // no footage and no transcript needed.
+      src: { type: "orb", state: "working", seconds: 3 },
+      enter: blend({ to: 1.06, frames: 8 }),
+      title: "Generated, not recorded.",
+    },
   ],
 });

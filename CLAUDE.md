@@ -353,6 +353,19 @@ by hand, and resuming is expected and supported.
    shared by the timeline and the renderer so they cannot disagree about
    where in the source a frame lands.
 
+33. **An orb is for a line about an AI working, and it can move with the
+   voice.** `src: { type: "orb", state }` draws a dotted sphere of light —
+   `working` (particles on tilted orbits), `searching` (a scan sweeping a
+   globe), `listening` (rings pushed like a waveform), `connecting` (a
+   constellation wiring itself together) or `breathing`. It is decoration with
+   a purpose: reach for it where a script says "thinking", "searching" or
+   "the agent is…" and there is nothing real to show, never as general filler.
+   `reactToSpeech: true` pulses it with whatever voice is audible under the
+   shot — pair it with `audio: "hold"` or `audio: { from }`. Colour, size,
+   position, dot size, density and spin are `Tokens.orb`; a look without one
+   cannot show an orb and `verify.ts` says so. Every dot is a pure function of
+   the frame, seeded, so it is identical on every render.
+
 ## What stays human
 
 Take selection, where a cut lands emotionally, whether a crop reads at phone
@@ -395,7 +408,7 @@ engine/          the moves and the contract — general, never show-specific
   colour.ts      matching one clip's colour to another's
   verify.ts      gates that need no render
   moves/         punch · blend · push · captions · title · badge · marks · pointer · bed · hits
-  generators/    diagram · code · terminal · compare · data · callout
+  generators/    diagram · code · terminal · compare · data · callout · orb
 projects/        one look per channel; copy default/ and change everything
 public/posts/    one folder per reel, self-contained
 public/assets/   fonts and sound effects are committed, so those renders are

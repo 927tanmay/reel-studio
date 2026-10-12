@@ -14,6 +14,7 @@ import {
   ease,
 } from "./moves/punch";
 import { Captions, primaryMediaKey } from "./moves/Captions";
+import { wordsInShot } from "./spec";
 import { Title } from "./moves/Title";
 import { Badge } from "./moves/Badge";
 import { Ribbon } from "./moves/Ribbon";
@@ -81,7 +82,19 @@ const SourceView: React.FC<{
     return (
       <AbsoluteFill style={{ overflow: "hidden" }}>
         <div style={{ position: "absolute", ...box, width: box.width, height: box.height }}>
-          <Generated spec={source} reel={spec} durationInFrames={resolved.durationInFrames} />
+          <Generated
+            spec={source}
+            reel={spec}
+            durationInFrames={resolved.durationInFrames}
+            words={(() => {
+              // Only a generator that follows the voice reads these, so only
+              // an orb that asked pays for working them out.
+              if (source.type !== "orb" || !source.reactToSpeech) return undefined;
+              const key = primaryMediaKey(resolved);
+              const all = key ? spec.words?.[key] : undefined;
+              return all ? wordsInShot(resolved, fps, all) : undefined;
+            })()}
+          />
         </div>
       </AbsoluteFill>
     );

@@ -7,6 +7,8 @@ import { Compare } from "./Compare";
 import { Data } from "./Data";
 import { Callout } from "./Callout";
 import { ImageGen } from "./Image";
+import { Orb } from "./Orb";
+import type { WordTiming } from "../spec";
 
 /**
  * Generated clips are sources, not a special case. They render at the delivery
@@ -27,9 +29,14 @@ export type GenProps<T extends GenSpec = GenSpec> = {
   spec: T;
   reel: ReelSpec;
   durationInFrames: number;
+  /**
+   * The words audible under this shot, in shot-local milliseconds, for a
+   * generator that moves with the voice. Absent when no transcript is under it.
+   */
+  words?: WordTiming[];
 };
 
-export const Generated: React.FC<GenProps> = ({ spec, reel, durationInFrames }) => {
+export const Generated: React.FC<GenProps> = ({ spec, reel, durationInFrames, words }) => {
   switch (spec.type) {
     case "diagram":
       return <Diagram spec={spec} reel={reel} durationInFrames={durationInFrames} />;
@@ -45,6 +52,8 @@ export const Generated: React.FC<GenProps> = ({ spec, reel, durationInFrames }) 
       return <Callout spec={spec} reel={reel} durationInFrames={durationInFrames} />;
     case "image":
       return <ImageGen spec={spec} reel={reel} durationInFrames={durationInFrames} />;
+    case "orb":
+      return <Orb spec={spec} reel={reel} durationInFrames={durationInFrames} words={words} />;
   }
 };
 

@@ -319,6 +319,23 @@ export type GenSpec =
     }
   | {
       /**
+       * A dotted "thinking" orb for the line that says an AI is working,
+       * searching or listening and there is nothing real to show. `state`
+       * picks the motion: `working` (particles on tilted orbits), `searching`
+       * (a scan sweeping a dotted globe), `listening` (rings pushed like a
+       * waveform), `connecting` (a constellation wiring itself together) or
+       * `breathing` (a ring that swells and settles). `reactToSpeech` makes it
+       * pulse with whatever voice is audible under this shot — pair it with
+       * `audio: "hold"` or `audio: { from }`. Colour, size, dot size, density
+       * and spin are the look's, in `Tokens.orb`.
+       */
+      type: "orb";
+      state: "working" | "searching" | "listening" | "connecting" | "breathing";
+      reactToSpeech?: boolean;
+      seconds?: number;
+    }
+  | {
+      /**
       * A plain still, full-bleed. Distinct from `callout`, which always draws
       * a focus box and dims everything else — this is for when the picture
       * itself is the point, like a freeze-frame closing a reel, and any

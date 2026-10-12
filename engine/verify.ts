@@ -125,6 +125,18 @@ export const verifySpec = (spec: ReelSpec, timeline: Timeline): Finding[] => {
     });
   }
 
+  // An orb is drawn from the look's own style, so a look without one has
+  // nothing to draw it with.
+  if (!t.orb) {
+    const orbShot = timeline.shots.find((r) => typeof r.shot.src === "object" && r.shot.src.type === "orb");
+    if (orbShot) {
+      findings.push({
+        level: "fail",
+        message: `Shot ${orbShot.index} uses an orb, but the look defines no \`orb\` style. Add one to the look's tokens.`,
+      });
+    }
+  }
+
   // A ramp's keyframes are rates: zero or negative never advances the source
   // (and the duration solver would never finish), so they fail up front.
   for (const resolved of timeline.shots) {

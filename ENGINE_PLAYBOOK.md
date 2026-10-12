@@ -349,6 +349,28 @@ frame counter burned into it, and reading the counter off stills:
 - **Mute is not a bug.** A ramped shot dropping its own sound is deliberate;
   the warning says so and names `audio: "hold"` as the fix.
 
+### The orb generator
+
+`src: { type: "orb" }` (CLAUDE.md rule 33), inspired by the dotted
+thought-orb loaders in AI interfaces — the maths is our own, not their code.
+
+- **Look at it in motion terms, not a still.** A single frame of `searching`
+  is a plain dotted globe; the sweep only reads across frames. Check two
+  frames a few apart, as a bright band moving round it. (A first version
+  inverted the angular distance and lit the *far* side — invisible in
+  review until two frames were compared.)
+- **Speech reaction moves amplitude and brightness, never speed.** Scaling
+  rotation by a changing energy would need the integral of that energy to
+  stay continuous; amplitude and brightness are plain functions of time, so
+  they cannot jump. Energy is 1 inside a word and falls off over about
+  140 ms either side, so it breathes with the voice rather than flickering
+  on every gap between syllables.
+- **It needs a voice to follow.** `reactToSpeech` reads the words of whatever
+  is audible under the shot, so the shot needs `audio: "hold"` or
+  `{ from }`; with none it simply stays at full energy.
+- **Keep it above the captions.** `Tokens.orb.top` is the vertical centre; at
+  the default 0.4 a 62%-wide orb clears the caption band.
+
 ## 3. Generators — one clip, one job each
 
 `engine/generators/`: `diagram`, `code`, `terminal`, `compare`, `data`,

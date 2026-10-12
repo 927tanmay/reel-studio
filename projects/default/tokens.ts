@@ -246,6 +246,20 @@ export const tokens: Tokens = {
     lingerFrames: 18,
   },
 
+  orb: {
+    // The accent, not the caption yellow: the orb is a standing graphic that
+    // fills the frame for seconds, and the warmer colours are reserved for
+    // the small things that point at something.
+    color: "accent",
+    size: 0.62,
+    // Centred above the caption band rather than dead centre.
+    top: 0.4,
+    dot: 6,
+    density: 1,
+    spin: 0.12,
+    glow: 0.6,
+  },
+
   // A corner logo for the whole reel. Point `src` at a real mark under
   // public/assets/brand/ to turn this on; omit the whole block for none.
   // watermark: { src: "assets/brand/mark.png", corner: "bottom-right", width: 90, margin: 36, opacity: 0.85 },

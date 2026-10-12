@@ -222,6 +222,27 @@ export type Watermark = {
 };
 
 /**
+ * The look of the `orb` generator: a dotted sphere of light. Optional — a look
+ * with none cannot show an orb, and `verify.ts` says so if a shot asks.
+ */
+export type OrbStyle = {
+  /** A palette name or a CSS colour. */
+  color: string;
+  /** Diameter as a fraction of frame width. */
+  size: number;
+  /** Vertical centre as a fraction of frame height — keep it above the captions. */
+  top: number;
+  /** Radius of a dot at middle depth, in design pixels. */
+  dot: number;
+  /** Multiplies how many dots each state draws. 1 is the tuned count. */
+  density: number;
+  /** Rotation, in turns per second. */
+  spin: number;
+  /** 0..1 — the soft light behind the dots. 0 is none. */
+  glow: number;
+};
+
+/**
  * The look of the pointer overlay (`Shot.pointer`): the click ring, the
  * optional arrow and the spotlight dim. Optional — a look with none cannot
  * carry a pointer, and `verify.ts` says so if a shot asks.
@@ -294,6 +315,8 @@ export type Tokens = {
   marks?: MarksStyle;
   /** The look of the pointer overlay. Omit and shots cannot carry a `pointer`. */
   pointer?: PointerStyle;
+  /** The look of the orb generator. Omit and a shot cannot use one. */
+  orb?: OrbStyle;
   /** The look for a feed thumbnail. Optional — see ThumbnailStyle. */
   thumbnail?: ThumbnailStyle;
   /** A corner logo present for the whole reel. Omit and nothing renders. */
