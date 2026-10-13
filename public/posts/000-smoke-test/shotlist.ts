@@ -54,6 +54,9 @@ export default reel({
       // its final frames instead of sitting still while the next fades over it.
       exit: exitPunch({ to: 1.1, frames: 8 }),
       badge: "steps advance on cue",
+      // Proves the floating card: this generated clip sits as a rounded card
+      // over a blurred copy of itself instead of filling the frame.
+      card: true,
       note: "In a real reel these steps would be pinned to spoken words.",
     },
 

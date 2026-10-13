@@ -141,6 +141,18 @@ picture needs it:**
   arrow if the recording shows no cursor) landing on whatever was clicked:
   "on 'deploy', ring the Deploy button." Say whether the recording already
   shows a real cursor; if it does, the arrow is left off.
+- **Show the recording as a card** — instead of cropping a landscape screen
+  recording to fill the vertical frame, show the whole thing as a rounded
+  card floating over a soft blurred copy of itself. Ask for it on any
+  screen capture where the viewer needs to see more than a slice of it —
+  "show screen-demo as a card." Nothing else is needed from you.
+- **Zoom in on the click** — the picture pushes in toward a click so a small
+  target is legible on a phone, then eases back out: "on 'deploy', zoom in
+  on the Deploy button click." It needs a recording with real resolution
+  (the editor will say if the zoom would blur it), and it replaces drawing a
+  mark at the same moment — the two don't mix on one beat, so choose which.
+  Clicks, marks and zooms each get a small sound automatically; you don't
+  ask for those.
 - **A speed ramp** — a stretch of footage racing and then easing to normal
   speed to land on one line: "run the build log at 4x, ease down to normal
   on 'failed'." Ask for it when part of a capture is dull but you want the
@@ -341,7 +353,7 @@ A brief is ready to hand over when every one of these is true.
 - [ ] Every generated clip is specified in full
 - [ ] Title, badge and lower-third copy is written out (captions need no
       copy — automatic)
-- [ ] Any mark, click highlight or speed ramp names *what* it points at or
+- [ ] Any mark, click highlight, zoom, card or speed ramp names *what* it points at or
       *where it settles*, in words and against a spoken word — not coordinates
 - [ ] Every name, tool and filename you will speak is listed as it should
       print, or there are none
@@ -400,6 +412,8 @@ Steps: <node set> on the word "<word>", ...
 - On the word "<word>" in middle, punch, quiet, no sound
 - On the word "<word>" in screen-demo, circle <what, in words>      (optional)
 - On the word "<word>" in screen-demo, ring the click on <what>     (optional)
+- On the word "<word>" in screen-demo, zoom in on the click on <what> (optional)
+- Show screen-demo as a card                                        (optional)
 - In screen-demo, run <stretch> at <n>x, ease to normal on "<word>" (optional)
 
 ## Text

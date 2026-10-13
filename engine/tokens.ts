@@ -267,6 +267,71 @@ export type PointerStyle = {
   fadeFrames: number;
   /** Frames the pointer stays after its last waypoint before fading. */
   lingerFrames: number;
+  /**
+   * The look of an auto-zoom (`Pointer.zoom`): the picture pushes in toward a
+   * click, holds, and eases back out. Optional — a look without it cannot zoom,
+   * and `verify.ts` says so if a shot asks.
+   */
+  zoom?: {
+    /** Magnification at the peak. A shot may override it with its own number. */
+    to: number;
+    /** Frames the zoom reaches its peak *before* the click, so the eye is already there. */
+    lead: number;
+    /** Frames to ease in, ending at the lead. */
+    inFrames: number;
+    /** Frames to hold after the click. */
+    holdFrames: number;
+    /** Frames to ease back out. */
+    outFrames: number;
+  };
+};
+
+/**
+ * The look of a floating screen card (`Shot.card`): the picture sits as a
+ * rounded card with a soft shadow over a blurred, dimmed copy of itself,
+ * instead of filling the frame edge to edge. Optional — a look without one
+ * cannot show a card, and `verify.ts` says so if a shot asks.
+ */
+export type CardStyle = {
+  /** Card width as a fraction of frame width. */
+  width: number;
+  /** Vertical centre as a fraction of frame height — clear of the title and captions. */
+  top: number;
+  /** The tallest the card may be, as a fraction of frame height. */
+  maxHeight: number;
+  /** Corner radius in design pixels. */
+  radius: number;
+  shadow: { color: string; blur: number; y: number };
+  /** A hairline round the card, or null for none. */
+  border?: { color: string; weight: number } | null;
+  /** The copy of the picture behind the card. */
+  background: {
+    /** Blur radius in design pixels. */
+    blur: number;
+    /** 0..1 — how much it is darkened. */
+    dim: number;
+    /** Enlarges it so the blur's soft edge falls outside the frame. */
+    scale: number;
+    saturate: number;
+  };
+  /** Frames the card takes to settle in, and the scale it settles from. */
+  enterFrames: number;
+  enterScale: number;
+};
+
+/** A sound effect the look plays on an event, rather than a shotlist naming it each time. */
+export type EventSound = { sfx: string; volume?: number; duck?: boolean };
+
+/**
+ * Sounds the engine plays by itself when something happens on screen, so a
+ * click that rings also taps and a stroke that draws also ticks without each
+ * shotlist restating it. Every key is optional; absent, that event is silent.
+ * `duck` defaults to false: these are small sounds that sit fine on the music.
+ */
+export type EventSounds = {
+  click?: EventSound;
+  mark?: EventSound;
+  zoom?: EventSound;
 };
 
 /**
@@ -317,6 +382,10 @@ export type Tokens = {
   pointer?: PointerStyle;
   /** The look of the orb generator. Omit and a shot cannot use one. */
   orb?: OrbStyle;
+  /** The look of a floating screen card. Omit and a shot cannot use one. */
+  card?: CardStyle;
+  /** Sounds played automatically on events (clicks, marks, zooms). Omit for silence. */
+  sounds?: EventSounds;
   /** The look for a feed thumbnail. Optional — see ThumbnailStyle. */
   thumbnail?: ThumbnailStyle;
   /** A corner logo present for the whole reel. Omit and nothing renders. */

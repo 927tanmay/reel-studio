@@ -371,6 +371,33 @@ thought-orb loaders in AI interfaces — the maths is our own, not their code.
 - **Keep it above the captions.** `Tokens.orb.top` is the vertical centre; at
   the default 0.4 a 62%-wide orb clears the caption band.
 
+### Card, click zoom and event sounds
+
+`card`, `pointer.zoom` and `Tokens.sounds` (CLAUDE.md rules 34–36), checked
+with a 1920×1080 test-pattern clip as the "screen recording":
+
+- **The card needs a source with a real aspect.** It sizes itself from the
+  reframe's `from` rect, else the whole source, so a recording with no
+  reframe becomes a 16:9 card. A generated shot is frame-shaped, so a card on
+  one is just a smaller 9:16 clip over its own blur — fine as a regression
+  fixture (the smoke test does it), not a design.
+- **Zoom happens inside the card's clip.** The zoom wrapper sits inside the
+  rounded, overflow-hidden layer, so the picture grows within the card and
+  its corners hold; the card itself doesn't scale. Its focus is the click in
+  frame coordinates, converted to the card's own corner and clamped inside it.
+- **Magnification is checked against the card, not the frame.** A 1920-wide
+  recording in a 994-wide card sits at 0.52× native, so 1.6× is 0.83× — real
+  headroom. The same recording cropped full-frame is already 1.78× native,
+  and any zoom on top of it is invented pixels; `verify.ts` says so.
+- **Blur costs a second decode.** The blurred copy is its own muted video
+  element on the same file. Fine on a short screen shot; on a long one,
+  notice the render time.
+- **Check events by their audio, not the shotlist.** Rendering a test reel
+  and running `ffmpeg -ss T -t 0.3 -i reel.mp4 -vn -af volumedetect -f null -`
+  at each expected frame showed -91 dB silence either side of a whoosh at
+  1.95 s, a tap at 2.5 s and a tick at 3.6 s — the timeline's frames, heard.
+  (In zsh, `for w in "a b"; set -- $w` does not word-split; write the calls out.)
+
 ## 3. Generators — one clip, one job each
 
 `engine/generators/`: `diagram`, `code`, `terminal`, `compare`, `data`,

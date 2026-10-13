@@ -9,6 +9,7 @@
 import type { Tokens } from "./tokens";
 import { nearestBeat, type BeatGrid } from "./beats";
 import { rampDuration, rampSource, type RampPoint } from "./ramp";
+import { zoomStartFrame, zoomTarget } from "./zoom";
 
 export type Frame = { w: number; h: number; fps: number };
 
@@ -170,6 +171,8 @@ export type Mark = {
    * same shape.
    */
   seed?: number;
+  /** Silence the look's automatic sound for this stroke. */
+  silent?: boolean;
 };
 
 /**
@@ -193,6 +196,21 @@ export type Pointer = {
   arrow?: boolean;
   /** Dim the rest of the picture around each click, so the eye lands on it. */
   spotlight?: boolean;
+  /**
+   * Push the picture in toward each click, hold, and ease back out — the
+   * screen-recording zoom that makes a small target legible on a phone. `true`
+   * uses the look's magnification; a number overrides it for this shot.
+   *
+   * The picture scales *about the click point*, so the clicked thing stays put
+   * while its surroundings grow. A real cursor in the recording scales with it,
+   * which is why the drawn `arrow` should stay off here; and `marks` are fixed
+   * to the frame, so a mark showing while the picture zooms would slide off its
+   * target (`verify.ts` warns about both). Only video is genuinely enlarged:
+   * `verify.ts` warns when the zoom would push a source past its native size.
+   */
+  zoom?: boolean | number;
+  /** Silence the look's automatic click/zoom sounds for this shot. */
+  silent?: boolean;
 };
 
 // ---------------------------------------------------------------------------
@@ -543,6 +561,18 @@ export type Shot = {
    * safe-zone gate does not apply; `verify.ts` checks positions and the look.
    */
   pointer?: Pointer;
+  /**
+   * Present the picture as a floating card — rounded, shadowed, over a blurred
+   * copy of itself — instead of edge to edge. The look for a screen recording:
+   * a 16:9 capture in a 9:16 frame otherwise has to be cropped hard or sit in
+   * dead bars. The card takes the aspect of what it shows (the reframe's
+   * `from`, or the whole source), at the look's width and height limit.
+   * `true` uses the look's placement; give `width` or `top` (fractions of the
+   * frame) to override it for this shot. Overlays, marks and the pointer are
+   * still positioned against the *frame*, not the card. Needs `Tokens.card`
+   * and a single source — it does nothing on a banded shot.
+   */
+  card?: boolean | { width?: number; top?: number };
   /**
    * A name/role identification card — who is on screen, quieter than a
    * `ribbon`. Shares the badge's zone: `verify.ts` fails a shot carrying
@@ -1357,6 +1387,42 @@ export const resolveTimeline = (spec: ReelSpec): Timeline => {
       const asked = startFrame + Math.round(d.at * fps);
       const frame = d.onBeat ? onBeatFrame(asked, "dip") : asked;
       dips.push({ frame, frames: d.frames, to: d.to });
+    }
+
+    // Sounds the look plays on its own when something happens on screen. They
+    // are ordinary hits by the time they leave here, placed from the same
+    // frames the picture uses, so a ring and its tap cannot drift apart.
+    // Clamped into the shot: an auto-zoom starts easing in before its click,
+    // and on a click in the shot's first moments that is before frame 0.
+    const events = spec.style.sounds;
+    if (events) {
+      const fire = (kind: keyof typeof events, atFrame: number) => {
+        const e = events[kind];
+        if (!e) return;
+        const frame = Math.min(startFrame + durationInFrames - 1, Math.max(startFrame, atFrame));
+        hits.push({ frame, sfx: e.sfx, volume: e.volume ?? 1, duck: e.duck ?? false });
+      };
+      if (shot.pointer && !shot.pointer.silent) {
+        const zoomStyle = spec.style.pointer?.zoom;
+        const zooming = spec.style.pointer ? zoomTarget(shot.pointer, spec.style.pointer) !== null : false;
+        // Two clicks close together are one continuous camera move — the zoom
+        // glides from one target to the next without easing out — so the sound
+        // of zooming plays once, for the first, not again for each.
+        let zoomedUntil = -Infinity;
+        for (const p of [...shot.pointer.path].sort((a, b) => a.at - b.at)) {
+          if (!p.click) continue;
+          const clickFrame = Math.round(p.at * fps);
+          fire("click", startFrame + clickFrame);
+          if (zooming && zoomStyle) {
+            const start = zoomStartFrame(clickFrame, zoomStyle);
+            if (start >= zoomedUntil) fire("zoom", startFrame + start);
+            zoomedUntil = clickFrame + zoomStyle.holdFrames + zoomStyle.outFrames;
+          }
+        }
+      }
+      for (const m of shot.marks ?? []) {
+        if (!m.silent) fire("mark", startFrame + Math.round((m.at ?? 0) * fps));
+      }
     }
 
     cursor = startFrame + durationInFrames;

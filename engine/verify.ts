@@ -3,6 +3,8 @@ import { wordsInShot } from "./spec";
 import type { TextStyle, Tokens } from "./tokens";
 import { primaryMediaKey } from "./moves/Captions";
 import { normalise } from "./words";
+import { cardBox } from "./card";
+import { coverRegion } from "./scale";
 
 /** Mirrors ShotView's own decision, so this gate can't drift from what renders. */
 const willShowCaptions = (spec: ReelSpec, resolved: ResolvedShot): boolean => {
@@ -149,6 +151,81 @@ export const verifySpec = (spec: ReelSpec, timeline: Timeline): Finding[] => {
           `Shot ${resolved.index} has a speedRamp keyframe with a speed of zero or less, or a negative time. ` +
           `Every keyframe needs \`speed\` above 0 and \`at\` from 0.`,
       });
+    }
+  }
+
+  // A floating card needs its look, a single source to show, and — checked
+  // here rather than discovered on screen — somewhere to draw.
+  for (const resolved of timeline.shots) {
+    const { shot, index } = resolved;
+    if (!shot.card) continue;
+    if (!t.card) {
+      findings.push({
+        level: "fail",
+        message: `Shot ${index} asks for a card, but the look defines no \`card\` style. Add one to the look's tokens.`,
+      });
+    }
+    if (shot.bands) {
+      findings.push({
+        level: "warn",
+        message: `Shot ${index} sets \`card\` alongside \`bands\`. A banded shot has no single picture to float; the card is ignored.`,
+      });
+    }
+  }
+
+  // An auto-zoom needs the look's zoom, and has three ways to look wrong that
+  // a render would only show: enlarging a source past what was captured,
+  // marks that slide off their target, and a drawn arrow that doesn't scale
+  // with the picture it points at.
+  for (const resolved of timeline.shots) {
+    const { shot, index } = resolved;
+    const pointer = shot.pointer;
+    if (!pointer?.zoom) continue;
+    if (!t.pointer?.zoom) {
+      findings.push({
+        level: "fail",
+        message: `Shot ${index} asks for an auto-zoom, but the look's \`pointer\` style has no \`zoom\`. Add one to the look's tokens.`,
+      });
+      continue;
+    }
+    if (!pointer.path.some((p) => p.click)) {
+      findings.push({
+        level: "warn",
+        message: `Shot ${index} asks for an auto-zoom but its pointer has no click — the zoom heads for clicks, so nothing will happen.`,
+      });
+    }
+    if (shot.marks?.length) {
+      findings.push({
+        level: "warn",
+        message: `Shot ${index} has marks and an auto-zoom. Marks are fixed to the frame, so any showing while the picture zooms will slide off what they mark.`,
+      });
+    }
+    if (pointer.arrow) {
+      findings.push({
+        level: "warn",
+        message: `Shot ${index} draws a pointer arrow under an auto-zoom. The arrow doesn't scale with the picture, so it drifts off its target; leave it off over a recording that already shows a cursor.`,
+      });
+    }
+
+    // Magnification past native: how many frame pixels each source pixel is
+    // already stretched to, times the zoom. Above 1 the picture is invented.
+    const source = typeof shot.src === "string" ? spec.media?.[shot.src] : undefined;
+    const target = typeof pointer.zoom === "number" ? pointer.zoom : t.pointer.zoom.to;
+    if (source && !shot.bands) {
+      const aspect = (shot.reframe?.from ?? { w: source.width, h: source.height });
+      const box = shot.card ? cardBox(spec, shot, aspect.w / aspect.h) : null;
+      const frame = box ? { ...spec.frame, w: box.width, h: box.height } : spec.frame;
+      const regions = [shot.reframe?.from, shot.reframe?.to].filter(Boolean) as { x: number; y: number; w: number; h: number }[];
+      if (regions.length === 0) regions.push({ x: 0, y: 0, w: source.width, h: source.height });
+      const worst = Math.max(...regions.map((r) => coverRegion(source.width, source.height, r, frame).sourceScale));
+      if (worst * target > 1) {
+        findings.push({
+          level: "warn",
+          message:
+            `Shot ${index}'s auto-zoom (${target}x) magnifies "${shot.src}" to ${(worst * target).toFixed(2)}x its native ` +
+            `size at the peak. That enlarges the source past what was captured; lower the zoom, or use a source with more resolution.`,
+        });
+      }
     }
   }
 

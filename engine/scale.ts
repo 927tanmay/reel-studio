@@ -37,7 +37,7 @@ export const coverRegion = (
     height: sourceH * scale,
     left: frame.w / 2 - regionCentreX * scale,
     top: frame.h / 2 - regionCentreY * scale,
-    /** Below 1 means the source is being enlarged past what was captured. */
+    /** Output pixels per source pixel. Above 1, the source is enlarged past what was captured. */
     sourceScale: scale,
   };
 };

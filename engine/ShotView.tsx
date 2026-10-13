@@ -24,6 +24,8 @@ import { Pointer } from "./moves/Pointer";
 import { Generated, generatedSize } from "./generators";
 import { gradeFilter, needsMatrix } from "./colour";
 import { rampPieces } from "./ramp";
+import { cardBox } from "./card";
+import { zoomState } from "./zoom";
 
 /** Shown instead of a black hole when a shotlist names media that is not there. */
 const Missing: React.FC<{ what: string }> = ({ what }) => (
@@ -162,6 +164,101 @@ const SourceView: React.FC<{
           ) : null}
         </Sequence>
       ))}
+    </AbsoluteFill>
+  );
+};
+
+/**
+ * Scales its children about one point — the click an auto-zoom is heading for —
+ * so the clicked thing stays where it is while its surroundings grow. With no
+ * zoom it is a plain pass-through.
+ */
+const Zoomed: React.FC<{
+  zoom: { scale: number } | null;
+  originX: number;
+  originY: number;
+  children: React.ReactNode;
+}> = ({ zoom, originX, originY, children }) => {
+  if (!zoom) return <>{children}</>;
+  return (
+    <AbsoluteFill style={{ transform: `scale(${zoom.scale})`, transformOrigin: `${originX}px ${originY}px` }}>
+      {children}
+    </AbsoluteFill>
+  );
+};
+
+/**
+ * The picture as a floating card: a blurred, dimmed copy of itself fills the
+ * frame behind, and the picture sits in front as a rounded, shadowed card at
+ * the look's size. The copy behind is muted and plays no sound; only the card
+ * carries audio. An auto-zoom happens *inside* the card, clipped by its
+ * corners, rather than scaling the card itself.
+ */
+const CardPicture: React.FC<{
+  spec: ReelSpec;
+  shot: Shot;
+  box: { left: number; top: number; width: number; height: number };
+  zoom: { scale: number; x: number; y: number } | null;
+  view: (spec: ReelSpec, carryAudio: boolean, volume: number) => React.ReactNode;
+  carryAudio: boolean;
+  audioVolume: number;
+}> = ({ spec, box, zoom, view, carryAudio, audioVolume }) => {
+  const frame = useCurrentFrame();
+  const style = spec.style.card!;
+  const size = (n: number) => px(spec.style, spec.frame, n);
+
+  const t = ease(frame / Math.max(1, style.enterFrames), "easeOut");
+  const enter = style.enterScale + (1 - style.enterScale) * t;
+
+  // The focus is in frame coordinates; inside the card it is relative to the
+  // card's own corner, and clamped to the card so a click near the frame edge
+  // cannot send the zoom's origin off the picture.
+  const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n));
+  const ox = zoom ? clamp(zoom.x * spec.frame.w - box.left, 0, box.width) : 0;
+  const oy = zoom ? clamp(zoom.y * spec.frame.h - box.top, 0, box.height) : 0;
+
+  return (
+    <AbsoluteFill>
+      <AbsoluteFill style={{ overflow: "hidden" }}>
+        <AbsoluteFill
+          style={{
+            transform: `scale(${style.background.scale})`,
+            filter: `blur(${size(style.background.blur)}px) brightness(${1 - style.background.dim}) saturate(${style.background.saturate})`,
+          }}
+        >
+          {view(spec, false, 0)}
+        </AbsoluteFill>
+      </AbsoluteFill>
+
+      <div
+        style={{
+          position: "absolute",
+          left: box.left,
+          top: box.top,
+          width: box.width,
+          height: box.height,
+          borderRadius: size(style.radius),
+          boxShadow: `0 ${size(style.shadow.y)}px ${size(style.shadow.blur)}px ${style.shadow.color}`,
+          opacity: t,
+          transform: `scale(${enter})`,
+        }}
+      >
+        <div style={{ position: "absolute", inset: 0, overflow: "hidden", borderRadius: size(style.radius) }}>
+          <Zoomed zoom={zoom} originX={ox} originY={oy}>
+            {view({ ...spec, frame: { ...spec.frame, w: box.width, h: box.height } }, carryAudio, audioVolume)}
+          </Zoomed>
+        </div>
+        {style.border ? (
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              borderRadius: size(style.radius),
+              boxShadow: `inset 0 0 0 ${size(style.border.weight)}px ${style.border.color}`,
+            }}
+          />
+        ) : null}
+      </div>
     </AbsoluteFill>
   );
 };
@@ -372,6 +469,22 @@ export const ShotView: React.FC<{
       .filter(Boolean)
       .join(" ") || undefined;
 
+  // The picture's auto-zoom toward a click, and — when the shot is a floating
+  // card — the card's own box, from the aspect of what it shows. Both are pure
+  // functions of the frame and the look, so any frame renders alone.
+  const zoom =
+    shot.pointer && spec.style.pointer
+      ? zoomState(frame, spec.frame.fps, shot.pointer, spec.style.pointer)
+      : null;
+  const aspect = (() => {
+    if (typeof shot.src !== "string") return spec.frame.w / spec.frame.h;
+    const entry = spec.media?.[shot.src];
+    if (!entry) return null;
+    const region = reframe?.from ?? fullFrame(entry.width, entry.height);
+    return region.w / region.h;
+  })();
+  const card = shot.card && !shot.bands && aspect ? cardBox(spec, shot, aspect) : null;
+
   // Captions default to on wherever a transcript exists; a shotlist opts out
   // with `captions: false` rather than opting in.
   const captionKey = primaryMediaKey(resolved);
@@ -411,16 +524,38 @@ export const ShotView: React.FC<{
       <AbsoluteFill style={{ transform: `scale(${scale})`, transformOrigin: "center center", filter }}>
         {shot.bands ? (
           <Bands spec={spec} resolved={resolved} bandAudioVolume={audioVolume} />
-        ) : (
-          <SourceView
-            source={shot.src}
+        ) : card ? (
+          <CardPicture
             spec={spec}
-            resolved={resolved}
-            reframe={reframe}
-            segments={resolved.segments}
+            shot={shot}
+            box={card}
+            zoom={zoom}
+            view={(viewSpec, carry, volume) => (
+              <SourceView
+                source={shot.src}
+                spec={viewSpec}
+                resolved={resolved}
+                reframe={reframe}
+                segments={resolved.segments}
+                carryAudio={carry}
+                audioVolume={volume}
+              />
+            )}
             carryAudio={carryAudio}
             audioVolume={audioVolume}
           />
+        ) : (
+          <Zoomed zoom={zoom} originX={zoom ? zoom.x * spec.frame.w : 0} originY={zoom ? zoom.y * spec.frame.h : 0}>
+            <SourceView
+              source={shot.src}
+              spec={spec}
+              resolved={resolved}
+              reframe={reframe}
+              segments={resolved.segments}
+              carryAudio={carryAudio}
+              audioVolume={audioVolume}
+            />
+          </Zoomed>
         )}
       </AbsoluteFill>
 

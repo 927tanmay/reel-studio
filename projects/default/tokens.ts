@@ -244,6 +244,33 @@ export const tokens: Tokens = {
     spotlightFrames: 8,
     fadeFrames: 5,
     lingerFrames: 18,
+    // Reaches its peak 4 frames before the click so the eye is already on the
+    // target when it lands; holds long enough to read, then eases out.
+    zoom: { to: 1.6, lead: 4, inFrames: 14, holdFrames: 28, outFrames: 16 },
+  },
+
+  // A screen recording as a floating card over a blurred copy of itself,
+  // instead of cropped to fill a vertical frame. 0.46 down puts a 16:9 card
+  // between the title (top) and the caption band (bottom).
+  card: {
+    width: 0.92,
+    top: 0.46,
+    maxHeight: 0.62,
+    radius: 28,
+    shadow: { color: "rgba(0,0,0,0.55)", blur: 60, y: 24 },
+    border: { color: "rgba(255,255,255,0.14)", weight: 2 },
+    background: { blur: 40, dim: 0.55, scale: 1.25, saturate: 1.2 },
+    enterFrames: 10,
+    enterScale: 0.94,
+  },
+
+  // Sounds the engine plays by itself on screen events, so a shotlist never
+  // has to name them. Small and quiet: a tap on a click, a tick as a mark
+  // draws, a soft whoosh as the picture pushes toward a click.
+  sounds: {
+    click: { sfx: "tap", volume: 0.75 },
+    mark: { sfx: "tick", volume: 0.4 },
+    zoom: { sfx: "whoosh", volume: 0.3 },
   },
 
   orb: {

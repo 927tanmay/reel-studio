@@ -366,6 +366,45 @@ by hand, and resuming is expected and supported.
    cannot show an orb and `verify.ts` says so. Every dot is a pure function of
    the frame, seeded, so it is identical on every render.
 
+34. **A screen recording is a card, not a crop.** A 16:9 capture in a 9:16
+   frame has two bad options: crop it hard to fill the frame (losing most of
+   what was on screen) or leave dead bars. `card: true` on a shot gives the
+   third: the whole picture as a rounded, shadowed card over a blurred, dimmed
+   copy of itself. The card takes the aspect of what it shows (the reframe's
+   `from`, or the whole source) at the look's width, shrinking if it would
+   exceed the look's height limit; `card: { width, top }` overrides placement.
+   It is for video — on a generated clip, which is already frame-shaped, it
+   only shrinks the clip — and does nothing on a banded shot. Everything
+   positioned against the frame (marks, pointer, captions, titles) stays
+   against the *frame*, not the card, so measure those on a still of the
+   finished card. The look is `Tokens.card`; the blurred copy plays muted, so
+   a card costs a second video decode, which is worth knowing on a long shot.
+35. **Zoom toward the click, and don't let it invent detail.** `pointer:
+   { zoom: true }` (or `zoom: 2.2` to override the look's magnification)
+   pushes the picture in about each click, holds, and eases back out, ending
+   its ramp-in a few frames *before* the click so the eye is already there;
+   two clicks close together glide from one target to the next instead of
+   zooming out between them. It scales about the click point, so the clicked
+   thing stays put. Inside a card the zoom is clipped by the card's corners.
+   Three things `verify.ts` warns about, because each is invisible until you
+   look: a zoom that magnifies a source past its native size (the real limit
+   — a 1080-wide card of a 1920 recording has headroom, a 1920 recording
+   cropped to fill a vertical frame already doesn't); `marks`, which are fixed
+   to the frame and slide off their target as the picture moves; and a drawn
+   `arrow`, which doesn't scale with the picture under it. Over a recording
+   that shows its own cursor, leave `arrow` off — the real one zooms with the
+   picture. Shape and speed are `Tokens.pointer.zoom`.
+36. **The look can play a sound on an event, so a shotlist never names it.**
+   `Tokens.sounds: { click, mark, zoom }`, each `{ sfx, volume?, duck? }`,
+   turns a pointer click, a mark drawing on and an auto-zoom starting into
+   ordinary hits, placed from the same frames the picture uses, so a ring and
+   its tap cannot drift apart. They default to `duck: false` — small sounds
+   sit fine on music, and a run of them would otherwise pump the bed. A shot's
+   `pointer.silent` or a mark's `silent` opts out; omit a key in the look and
+   that event is silent everywhere. Two clicks inside one zoom play its sound
+   once. Any name in `public/assets/sfx` works (`tap`, `tick`, `switch`,
+   `snap`, `whoosh`); picking which sound fits an event is a look decision.
+
 ## What stays human
 
 Take selection, where a cut lands emotionally, whether a crop reads at phone
@@ -403,6 +442,8 @@ size, and final playback. Offer comparisons and measurements; never choose.
 ```
 engine/          the moves and the contract — general, never show-specific
   spec.ts        the shotlist contract and timeline resolution
+  card.ts · zoom.ts · ramp.ts   pure geometry for cards, click zooms and speed ramps,
+                 shared by the renderer, the timeline and verify.ts
   scale.ts       crop-then-scale, and size tokens that survive a frame change
   words.ts       word anchoring, and the pauses/fillers a cut removes
   colour.ts      matching one clip's colour to another's
