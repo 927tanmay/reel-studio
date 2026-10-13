@@ -213,6 +213,31 @@ export type Pointer = {
   silent?: boolean;
 };
 
+/**
+ * A short, hard emphasis on the picture at one moment: the camera takes a hit
+ * (`shake`), the frame blows out and recovers (`flash`), or the picture tears
+ * and its colour channels part (`glitch`). For a beat that wants to land
+ * physically — a number revealed, a cut that should hurt — not for pacing:
+ * used on every line they stop meaning anything.
+ *
+ * Only the picture moves. Captions, titles and every other overlay stay put,
+ * because type that shakes or tears is unreadable and, at the edges, soft.
+ * Time one with `at` from `anchors()`; `0` is the shot's first frame, which is
+ * how a flash or glitch covers a hard cut. The look sets what each one looks
+ * like (`Tokens.impact`); here is only which, when, and how hard.
+ */
+export type Impact = {
+  kind: "shake" | "flash" | "glitch";
+  /** Seconds into the shot. Defaults to its first frame. */
+  at?: number;
+  /** Overrides how long it lasts, in frames. */
+  frames?: number;
+  /** Multiplies the look's amount. Defaults to 1. */
+  strength?: number;
+  /** Silence the look's automatic sound for this impact. */
+  silent?: boolean;
+};
+
 // ---------------------------------------------------------------------------
 // Generated sources
 // ---------------------------------------------------------------------------
@@ -561,6 +586,11 @@ export type Shot = {
    * safe-zone gate does not apply; `verify.ts` checks positions and the look.
    */
   pointer?: Pointer;
+  /**
+   * Shake, flash or glitch the picture at a moment — see `Impact`. Overlays
+   * are not touched.
+   */
+  impacts?: Impact[];
   /**
    * Present the picture as a floating card — rounded, shadowed, over a blurred
    * copy of itself — instead of edge to edge. The look for a screen recording:
@@ -1422,6 +1452,9 @@ export const resolveTimeline = (spec: ReelSpec): Timeline => {
       }
       for (const m of shot.marks ?? []) {
         if (!m.silent) fire("mark", startFrame + Math.round((m.at ?? 0) * fps));
+      }
+      for (const i of shot.impacts ?? []) {
+        if (!i.silent) fire(i.kind, startFrame + Math.round((i.at ?? 0) * fps));
       }
     }
 

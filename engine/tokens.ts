@@ -319,6 +319,36 @@ export type CardStyle = {
   enterScale: number;
 };
 
+/**
+ * The look of impact moves (`Shot.impacts`): a camera shake, a flash and a
+ * glitch. Optional — a look without it cannot show them, and `verify.ts` says
+ * so if a shot asks. Everything is a strength-1 baseline; a shot scales it.
+ */
+export type ImpactStyle = {
+  shake: {
+    /** Frames it takes to settle. */
+    frames: number;
+    /** Peak travel in design pixels. */
+    amount: number;
+    /** Peak tilt in degrees. */
+    rotation: number;
+  };
+  flash: {
+    /** A palette name or CSS colour. */
+    color: string;
+    /** 0..1 — opacity at the first frame. */
+    peak: number;
+    frames: number;
+  };
+  glitch: {
+    frames: number;
+    /** Horizontal tear, in design pixels, at the peak. */
+    slice: number;
+    /** How far the red and blue channels part, in design pixels. */
+    split: number;
+  };
+};
+
 /** A sound effect the look plays on an event, rather than a shotlist naming it each time. */
 export type EventSound = { sfx: string; volume?: number; duck?: boolean };
 
@@ -332,6 +362,9 @@ export type EventSounds = {
   click?: EventSound;
   mark?: EventSound;
   zoom?: EventSound;
+  shake?: EventSound;
+  flash?: EventSound;
+  glitch?: EventSound;
 };
 
 /**
@@ -384,6 +417,8 @@ export type Tokens = {
   orb?: OrbStyle;
   /** The look of a floating screen card. Omit and a shot cannot use one. */
   card?: CardStyle;
+  /** The look of shake, flash and glitch. Omit and a shot cannot use them. */
+  impact?: ImpactStyle;
   /** Sounds played automatically on events (clicks, marks, zooms). Omit for silence. */
   sounds?: EventSounds;
   /** The look for a feed thumbnail. Optional — see ThumbnailStyle. */

@@ -153,6 +153,13 @@ picture needs it:**
   mark at the same moment — the two don't mix on one beat, so choose which.
   Clicks, marks and zooms each get a small sound automatically; you don't
   ask for those.
+- **A physical hit** — the picture shakes, the frame flashes white, or the
+  picture glitches and tears, for one beat: "on 'obsolete', shake," "flash
+  as the screen-demo cuts in," "glitch on 'broken'." Reserve these for the
+  two or three moments in a reel that should *hurt* — a reveal, a
+  punchline, a failure. Said on every line they stop landing. Only the
+  picture moves; the text stays readable. Each gets a matching sound
+  automatically.
 - **A speed ramp** — a stretch of footage racing and then easing to normal
   speed to land on one line: "run the build log at 4x, ease down to normal
   on 'failed'." Ask for it when part of a capture is dull but you want the
@@ -413,6 +420,7 @@ Steps: <node set> on the word "<word>", ...
 - On the word "<word>" in screen-demo, circle <what, in words>      (optional)
 - On the word "<word>" in screen-demo, ring the click on <what>     (optional)
 - On the word "<word>" in screen-demo, zoom in on the click on <what> (optional)
+- On the word "<word>" in <take>, shake / flash / glitch                (optional)
 - Show screen-demo as a card                                        (optional)
 - In screen-demo, run <stretch> at <n>x, ease to normal on "<word>" (optional)
 

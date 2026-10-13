@@ -154,6 +154,49 @@ export const verifySpec = (spec: ReelSpec, timeline: Timeline): Finding[] => {
     }
   }
 
+  // Impacts need the look that says what they look like, and a moment that
+  // happens inside the shot.
+  for (const resolved of timeline.shots) {
+    const { shot, index, durationInFrames } = resolved;
+    if (!shot.impacts?.length) continue;
+    if (!t.impact) {
+      findings.push({
+        level: "fail",
+        message: `Shot ${index} has impacts, but the look defines no \`impact\` style. Add one to the look's tokens.`,
+      });
+      continue;
+    }
+    shot.impacts.forEach((im, i) => {
+      if ((im.strength ?? 1) <= 0 || (im.frames ?? 1) <= 0) {
+        findings.push({
+          level: "fail",
+          message: `Shot ${index} impact ${i} (${im.kind}) has a strength or length of zero or less.`,
+        });
+      }
+      if (Math.round((im.at ?? 0) * spec.frame.fps) >= durationInFrames) {
+        findings.push({
+          level: "warn",
+          message: `Shot ${index} impact ${i} (${im.kind}) is at ${im.at}s, after the shot has ended — it will never show.`,
+        });
+      }
+      // A flash is drawn over the shot, and a blend or push fades the whole
+      // shot in — flash included — so a flash inside that fade is dimmed by it.
+      const enter = shot.enter;
+      if (
+        im.kind === "flash" &&
+        (enter?.kind === "blend" || enter?.kind === "push") &&
+        Math.round((im.at ?? 0) * spec.frame.fps) < enter.frames
+      ) {
+        findings.push({
+          level: "warn",
+          message:
+            `Shot ${index}'s flash lands inside its own ${enter.kind} fade-in and will be dimmed by it. ` +
+            `Put a flash on a cut or a punch, or start it after the ${enter.kind} finishes.`,
+        });
+      }
+    });
+  }
+
   // A floating card needs its look, a single source to show, and — checked
   // here rather than discovered on screen — somewhere to draw.
   for (const resolved of timeline.shots) {

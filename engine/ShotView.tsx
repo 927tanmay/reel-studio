@@ -26,6 +26,7 @@ import { gradeFilter, needsMatrix } from "./colour";
 import { rampPieces } from "./ramp";
 import { cardBox } from "./card";
 import { zoomState } from "./zoom";
+import { impactState } from "./impact";
 
 /** Shown instead of a black hole when a shotlist names media that is not there. */
 const Missing: React.FC<{ what: string }> = ({ what }) => (
@@ -427,6 +428,7 @@ export const ShotView: React.FC<{
   const opacity = enterOpacity(frame, shot.enter);
 
   const translate = enterTranslate(frame, shot.enter, spec.frame.w, spec.frame.h);
+  // (pictureTransform is built below, once the impacts are known.)
 
   // Audio crossfades independently of picture: this shot's own sound fades
   // in across an incoming blend or push, and fades back out across its own
@@ -451,6 +453,20 @@ export const ShotView: React.FC<{
   const only = resolved.sounds.length === 1 ? resolved.sounds[0] : undefined;
   const carryAudio = Boolean(only?.own && only.segments[0]?.startFrame === 0);
 
+  // Shake, flash and glitch: what every impact on this shot does at this
+  // frame, summed. Pure functions of the frame, like everything else here.
+  const impact =
+    shot.impacts?.length && spec.style.impact
+      ? impactState(
+          frame,
+          spec.frame.fps,
+          shot.impacts,
+          spec.style.impact,
+          spec.frame.w / spec.style.designWidth,
+          (c) => spec.style.palette[c] ?? c,
+        )
+      : null;
+
   // Grading and push motion blur both sit on the picture layer, inside the
   // scale and outside the overlays — a correction or a blur that touched a
   // caption sitting on top of the picture would make it harder to read for
@@ -464,8 +480,11 @@ export const ShotView: React.FC<{
   const blur = pushMotionBlur(frame, shot.enter, spec.frame.w, spec.frame.h);
   const hasBlur = blur.x > 0.5 || blur.y > 0.5;
 
+  const glitchId = `glitch-${resolved.key}`;
+  const glitchOn = Boolean(impact?.glitch);
+
   const filter =
-    [gradeFilterValue, hasBlur ? `url(#${blurId})` : null, extraFilter ?? null]
+    [gradeFilterValue, hasBlur ? `url(#${blurId})` : null, glitchOn ? `url(#${glitchId})` : null, extraFilter ?? null]
       .filter(Boolean)
       .join(" ") || undefined;
 
@@ -484,6 +503,19 @@ export const ShotView: React.FC<{
     return region.w / region.h;
   })();
   const card = shot.card && !shot.bands && aspect ? cardBox(spec, shot, aspect) : null;
+
+  // A shake moves the picture only, and enlarges it just enough that the
+  // travel and tilt never uncover an edge — by exactly what the current frame
+  // needs, so there is no pop in scale as the shake begins.
+  const shaken = impact?.shake;
+  const coverFactor = shaken
+    ? 1 +
+      (2 * shaken.cover) / spec.frame.w +
+      ((Math.abs(shaken.rotate) * Math.PI) / 180) * Math.max(spec.frame.h / spec.frame.w, spec.frame.w / spec.frame.h)
+    : 1;
+  const pictureTransform = shaken
+    ? `translate(${shaken.x}px, ${shaken.y}px) rotate(${shaken.rotate}deg) scale(${scale * coverFactor})`
+    : `scale(${scale})`;
 
   // Captions default to on wherever a transcript exists; a shotlist opts out
   // with `captions: false` rather than opting in.
@@ -521,7 +553,29 @@ export const ShotView: React.FC<{
         </svg>
       ) : null}
 
-      <AbsoluteFill style={{ transform: `scale(${scale})`, transformOrigin: "center center", filter }}>
+      {impact?.glitch ? (
+        <svg width={0} height={0} style={{ position: "absolute" }}>
+          <defs>
+            {/* A horizontal tear — noise stretched along x, so it displaces in
+                bands — and the red and blue channels pulled apart. The seed
+                changes every frame, so the tear jumps instead of drifting. */}
+            <filter id={glitchId} x="-6%" y="0%" width="112%" height="100%" colorInterpolationFilters="sRGB">
+              <feTurbulence type="fractalNoise" baseFrequency="0.002 0.045" numOctaves={1} seed={impact.glitch.seed} result="noise" />
+              <feColorMatrix in="noise" type="matrix" values="1 0 0 0 0  0 0 0 0 0.5  0 0 0 0 0  0 0 0 0 1" result="tear" />
+              <feDisplacementMap in="SourceGraphic" in2="tear" scale={impact.glitch.slice * 2} xChannelSelector="R" yChannelSelector="G" result="torn" />
+              <feColorMatrix in="torn" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="red" />
+              <feColorMatrix in="torn" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" result="green" />
+              <feColorMatrix in="torn" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="blue" />
+              <feOffset in="red" dx={impact.glitch.split} dy={0} result="redShift" />
+              <feOffset in="blue" dx={-impact.glitch.split} dy={0} result="blueShift" />
+              <feBlend in="redShift" in2="green" mode="screen" result="rg" />
+              <feBlend in="rg" in2="blueShift" mode="screen" />
+            </filter>
+          </defs>
+        </svg>
+      ) : null}
+
+      <AbsoluteFill style={{ transform: pictureTransform, transformOrigin: "center center", filter }}>
         {shot.bands ? (
           <Bands spec={spec} resolved={resolved} bandAudioVolume={audioVolume} />
         ) : card ? (
@@ -558,6 +612,10 @@ export const ShotView: React.FC<{
           </Zoomed>
         )}
       </AbsoluteFill>
+
+      {impact?.flash ? (
+        <AbsoluteFill style={{ backgroundColor: impact.flash.color, opacity: impact.flash.opacity, pointerEvents: "none" }} />
+      ) : null}
 
       {carryAudio
         ? null

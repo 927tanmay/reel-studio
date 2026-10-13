@@ -405,6 +405,22 @@ by hand, and resuming is expected and supported.
    once. Any name in `public/assets/sfx` works (`tap`, `tick`, `switch`,
    `snap`, `whoosh`); picking which sound fits an event is a look decision.
 
+37. **A beat can land physically: shake, flash, glitch.** `impacts: [{ kind,
+   at?, frames?, strength? }]` on a shot hits the *picture* — `shake` jolts it
+   (travel and a little tilt, settling over about ten frames), `flash` blows
+   the frame out and recovers, `glitch` tears it in horizontal bands and parts
+   the red and blue channels. For a number revealed, a punchline, a cut that
+   should hurt; used on every line they stop meaning anything, so propose a
+   few per reel, not one per shot. Captions, titles and every other overlay
+   are untouched — type that shakes or tears is unreadable. `at: 0` is the
+   shot's first frame, which is how a flash or glitch covers a hard cut; time
+   any other one from `anchors()`. A shake enlarges the picture by exactly what
+   the current frame's travel needs, so no edge is ever uncovered and there is
+   no pop at its start. Put a flash on a cut or a punch: on a blend or push the
+   shot's own fade-in dims it, and `verify.ts` warns. What each looks like is
+   `Tokens.impact`; each also plays its look's sound (`Tokens.sounds.shake/
+   flash/glitch`) unless `silent`, and a shake's sound ducks the music.
+
 ## What stays human
 
 Take selection, where a cut lands emotionally, whether a crop reads at phone
@@ -442,7 +458,7 @@ size, and final playback. Offer comparisons and measurements; never choose.
 ```
 engine/          the moves and the contract — general, never show-specific
   spec.ts        the shotlist contract and timeline resolution
-  card.ts · zoom.ts · ramp.ts   pure geometry for cards, click zooms and speed ramps,
+  card.ts · zoom.ts · ramp.ts · impact.ts   pure geometry for cards, click zooms, speed ramps and impacts,
                  shared by the renderer, the timeline and verify.ts
   scale.ts       crop-then-scale, and size tokens that survive a frame change
   words.ts       word anchoring, and the pauses/fillers a cut removes

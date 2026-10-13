@@ -264,6 +264,15 @@ export const tokens: Tokens = {
     enterScale: 0.94,
   },
 
+  // Shake, flash and glitch. Short and hard: a shake settles in about a third
+  // of a second, a flash is gone in 8 frames, a glitch in 7. The flash is
+  // warm white rather than pure, so it reads as light and not a missing frame.
+  impact: {
+    shake: { frames: 10, amount: 26, rotation: 1.2 },
+    flash: { color: "#FFF6E0", peak: 0.9, frames: 8 },
+    glitch: { frames: 7, slice: 38, split: 14 },
+  },
+
   // Sounds the engine plays by itself on screen events, so a shotlist never
   // has to name them. Small and quiet: a tap on a click, a tick as a mark
   // draws, a soft whoosh as the picture pushes toward a click.
@@ -271,6 +280,11 @@ export const tokens: Tokens = {
     click: { sfx: "tap", volume: 0.75 },
     mark: { sfx: "tick", volume: 0.4 },
     zoom: { sfx: "whoosh", volume: 0.3 },
+    // An impact is a heavier event than a click: the shake gets the punch
+    // sound and does duck the music, the flash a whoosh, the glitch a switch.
+    shake: { sfx: "snap", volume: 0.8, duck: true },
+    flash: { sfx: "whoosh", volume: 0.45 },
+    glitch: { sfx: "switch", volume: 0.5 },
   },
 
   orb: {

@@ -398,6 +398,31 @@ with a 1920×1080 test-pattern clip as the "screen recording":
   1.95 s, a tap at 2.5 s and a tick at 3.6 s — the timeline's frames, heard.
   (In zsh, `for w in "a b"; set -- $w` does not word-split; write the calls out.)
 
+### Shake, flash and glitch
+
+`impacts` (CLAUDE.md rule 37). Found on the smoke test's stills, comparing a
+frame before each impact with a frame inside it:
+
+- **Compare a frame before with a frame inside.** A glitch is invisible as a
+  single still unless you know what the clean frame looked like; a shake at
+  one frame is just an offset picture. Two stills a few frames apart, side by
+  side, is the check.
+- **A flash inherits its shot's fade.** The flash is drawn inside the shot, and
+  a blend or push fades the whole shot in, flash included — a flash at frame 1
+  of a blend rendered about a fifth as bright as asked. Put it on a cut or a
+  punch. (`verify.ts` warns.)
+- **The glitch is one SVG filter, seeded per frame.** Noise stretched along x
+  tears the picture in bands, the red and blue channels are split and
+  screen-blended back together, and the noise seed changes every frame so the
+  tear jumps instead of drifting. A deterministic flicker makes alternate
+  frames weaker, which is what reads as a stutter rather than a slide.
+- **Shake cover is computed per frame.** The picture is enlarged by exactly the
+  travel and tilt that frame needs, so the shake can start sharp with no
+  visible scale pop and never uncovers an edge.
+- **The screen is not the only channel.** Each impact plays its look's sound
+  automatically; a shake's ducks the bed, the other two do not. Turn one off
+  per impact with `silent: true`.
+
 ## 3. Generators — one clip, one job each
 
 `engine/generators/`: `diagram`, `code`, `terminal`, `compare`, `data`,

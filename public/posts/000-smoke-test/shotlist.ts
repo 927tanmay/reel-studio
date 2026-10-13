@@ -57,6 +57,8 @@ export default reel({
       // Proves the floating card: this generated clip sits as a rounded card
       // over a blurred copy of itself instead of filling the frame.
       card: true,
+      // A flash on the cut: the frame blows out as the shot lands and recovers.
+      impacts: [{ kind: "flash", at: 0 }],
       note: "In a real reel these steps would be pinned to spoken words.",
     },
 
@@ -84,6 +86,7 @@ export default reel({
       enter: blend({ to: 1.12, frames: 8 }),
       // Proves the pointer: an arrow glides to a line and clicks it, with a
       // ring and a spotlight. Positions are measured off a still.
+      impacts: [{ kind: "glitch", at: 3.2 }],
       pointer: {
         path: [
           { at: 0.8, x: 0.8, y: 0.75 },
@@ -128,6 +131,7 @@ export default reel({
       enter: push({ direction: "left", frames: 10 }),
       badge: "1080x1920 · 30fps",
       marks: [{ kind: "underline", region: { x: 0.04, y: 0.5, w: 0.5, h: 0.028 }, at: 2.8 }],
+      impacts: [{ kind: "shake", at: 2.4 }],
     },
 
     {
