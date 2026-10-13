@@ -556,8 +556,13 @@ export type Shot = {
    * at exactly the second written — needs `ReelSpec.beatGrid` and `bed` both
    * set, and only reaches as far as this shot's own frames; either missing,
    * and it plays at its own `at` with a warning explaining why.
+   *
+   * A hit ducks the music bed for a few frames so it lands clear. `duck: false`
+   * turns that off for a small sound (a tap, a tick) that sits fine on top of
+   * the music — a run of them would otherwise pump the bed in time with
+   * themselves.
    */
-  hits?: { at: number; sfx: string; volume?: number; onBeat?: boolean }[];
+  hits?: { at: number; sfx: string; volume?: number; onBeat?: boolean; duck?: boolean }[];
   /**
    * Duck the music bed to near-silence for `frames` frames, `at` seconds into
    * this shot. A `hit` already ducks the bed for a moment as a side effect;
@@ -831,7 +836,7 @@ export type ResolvedShot = {
   overlayFadeOutFrames?: number;
 };
 
-export type ResolvedHit = { frame: number; sfx: string; volume: number };
+export type ResolvedHit = { frame: number; sfx: string; volume: number; duck?: boolean };
 export type ResolvedDip = { frame: number; frames: number; to?: number };
 
 /** The source-time range one segment plays, in the source's own seconds. */
@@ -1346,7 +1351,7 @@ export const resolveTimeline = (spec: ReelSpec): Timeline => {
     for (const h of shot.hits ?? []) {
       const asked = startFrame + Math.round(h.at * fps);
       const frame = h.onBeat ? onBeatFrame(asked, `hit "${h.sfx}"`) : asked;
-      hits.push({ frame, sfx: h.sfx, volume: h.volume ?? 1 });
+      hits.push({ frame, sfx: h.sfx, volume: h.volume ?? 1, duck: h.duck });
     }
     for (const d of shot.dips ?? []) {
       const asked = startFrame + Math.round(d.at * fps);

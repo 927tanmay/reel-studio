@@ -41,6 +41,7 @@ export const Bed: React.FC<{ spec: ReelSpec; timeline: Timeline }> = ({ spec, ti
     let level = speaking ? speechLevel : silenceLevel;
 
     for (const hit of timeline.hits) {
+      if (hit.duck === false) continue;
       if (frame >= hit.frame && frame < hit.frame + mix.dipFrames) {
         level = Math.min(level, mix.dipTo);
       }

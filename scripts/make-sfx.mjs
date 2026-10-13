@@ -36,6 +36,27 @@ const sounds = {
     "-f", "lavfi", "-i", "sine=frequency=2200:duration=0.05:sample_rate=48000",
     "-af", "afade=t=out:st=0.004:d=0.045:curve=exp,volume=0.6",
   ],
+  /**
+   * A soft UI tap: a dry transient on a short, low body, like a finger on glass
+   * over wood. Quieter and rounder than `tick`, which is a pitched beep.
+   */
+  tap: [
+    "-f", "lavfi",
+    "-i", "aevalsrc=exprs='0.9*sin(2*PI*210*t)*exp(-90*t)+0.35*sin(2*PI*1500*t)*exp(-420*t)':d=0.09:s=48000",
+    "-af", "afade=t=out:st=0.05:d=0.04,volume=0.95",
+  ],
+  /**
+   * A toggle switch: two clicks a few milliseconds apart, the second a little
+   * lower and heavier — the throw, then the stop. For a state flipping from
+   * one thing to another.
+   */
+  switch: [
+    "-f", "lavfi",
+    "-i",
+      "aevalsrc=exprs='0.8*sin(2*PI*2600*t)*exp(-700*t)+0.5*sin(2*PI*320*t)*exp(-110*t)" +
+      "+if(gte(t,0.055),0.9*sin(2*PI*1700*(t-0.055))*exp(-600*(t-0.055))+0.7*sin(2*PI*190*(t-0.055))*exp(-85*(t-0.055)),0)':d=0.2:s=48000",
+    "-af", "afade=t=out:st=0.14:d=0.06,volume=0.9",
+  ],
 };
 
 fmt.head("Generating default sound effects");
