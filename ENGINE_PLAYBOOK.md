@@ -497,6 +497,27 @@ CLAUDE.md rule 39. What stills showed:
   per line break; a sentence will shrink until it is unreadable. If a slam's
   type looks timid, the copy is too long for a slam — that is a caption.
 
+### Card tilt
+
+`Tokens.card.tilt` (CLAUDE.md rule 41), checked on a landscape test clip:
+
+- **Judge it on a landscape card.** On a tall, frame-shaped generated clip the
+  swing is barely visible; on the 16:9 recording it is made for, the trapezoid
+  reads at once. Don't tune the angles on the smoke test's diagram card.
+- **The camera sits at the card's own centre.** `perspective-origin` is the
+  card's centre, so it turns about itself instead of swinging round the frame
+  — which is what makes it read as a card turning, not the frame tilting.
+- **The ease is cubic out.** It turns fast at first and finishes slowly; a
+  linear ease reads as a mechanical hinge. The remaining angle reaches exactly
+  zero, and the transform drops the rotation entirely once it is, so a settled
+  card is as sharp as a flat one.
+- **Overlays don't tilt with it.** Marks, the pointer, captions and titles are
+  frame-positioned, so while the card is angled they sit where the *flat* card
+  would be. That is why the default settles inside 22 frames and why
+  `verify.ts` warns on a mark starting earlier.
+- **Alternate the direction.** Two cards that both swing from the right look
+  like a template; a positive `y`, then a negative one, reads as camera work.
+
 ## 3. Generators — one clip, one job each
 
 `engine/generators/`: `diagram`, `code`, `terminal`, `compare`, `data`,

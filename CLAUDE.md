@@ -472,6 +472,19 @@ by hand, and resuming is expected and supported.
    whose block reaches the platform's covered zones. Plays the look's `slam`
    sound, which ducks the music, unless `silent`. Look: `Tokens.slam`.
 
+41. **A card can swing in from an angle and come flat.** `Tokens.card.tilt`
+   (`{ x, y, perspective, settleFrames, parallax }`) turns the floating card in
+   3D — as if the camera is coming round to face it — and eases it flat over
+   `settleFrames`, with the blurred copy behind sliding the opposite way for
+   depth. It is CSS perspective on the card alone, no 3D library. A shot turns
+   it off with `card: { tilt: false }` or sets its own angles with `card: {
+   tilt: { x, y } }`; turn alternate cards opposite ways (`y` positive, then
+   negative) so a run of them does not all swing the same direction. Marks and
+   pointer positions are measured on the *flat* frame, so they line up only
+   once the card has settled: `verify.ts` warns if one starts before then, or
+   if the look's tilt never settles (omit `settleFrames`) and the shot has any.
+   Leave a tilt that stays angled for a card with nothing pinned to it.
+
 ## What stays human
 
 Take selection, where a cut lands emotionally, whether a crop reads at phone

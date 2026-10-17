@@ -262,6 +262,11 @@ export const tokens: Tokens = {
     background: { blur: 40, dim: 0.55, scale: 1.25, saturate: 1.2 },
     enterFrames: 10,
     enterScale: 0.94,
+    // The card swings in turned about 16 degrees and tipped back a little, and
+    // comes flat in under a second — settled before a mark or a click lands on
+    // it, since those are measured on the flat frame. The blurred copy behind
+    // slides 3px a degree the other way, which is where the depth comes from.
+    tilt: { x: 6, y: -16, perspective: 1800, settleFrames: 22, parallax: 3 },
   },
 
   // Shake, flash and glitch. Short and hard: a shake settles in about a third

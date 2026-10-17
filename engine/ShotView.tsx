@@ -25,7 +25,7 @@ import { Slams } from "./moves/Slams";
 import { Generated, generatedSize } from "./generators";
 import { gradeFilter, needsMatrix } from "./colour";
 import { rampPieces } from "./ramp";
-import { cardBox } from "./card";
+import { cardBox, cardTilt, tiltAt } from "./card";
 import { zoomState } from "./zoom";
 import { impactState } from "./impact";
 
@@ -204,13 +204,20 @@ const CardPicture: React.FC<{
   view: (spec: ReelSpec, carryAudio: boolean, volume: number) => React.ReactNode;
   carryAudio: boolean;
   audioVolume: number;
-}> = ({ spec, box, zoom, view, carryAudio, audioVolume }) => {
+}> = ({ spec, shot, box, zoom, view, carryAudio, audioVolume }) => {
   const frame = useCurrentFrame();
   const style = spec.style.card!;
   const size = (n: number) => px(spec.style, spec.frame, n);
 
   const t = ease(frame / Math.max(1, style.enterFrames), "easeOut");
   const enter = style.enterScale + (1 - style.enterScale) * t;
+
+  // The 3D swing: a perspective camera at the card's own centre, so it turns
+  // about itself rather than swinging round the frame, and the blurred copy
+  // behind slides the opposite way a little — depth from parallax, nothing more.
+  const tiltSpec = cardTilt(spec, shot);
+  const tilt = tiltSpec ? tiltAt(tiltSpec, frame) : null;
+  const parallax = tiltSpec && tilt ? -tilt.y * size(tiltSpec.parallax) : 0;
 
   // The focus is in frame coordinates; inside the card it is relative to the
   // card's own corner, and clamped to the card so a click near the frame edge
@@ -224,7 +231,7 @@ const CardPicture: React.FC<{
       <AbsoluteFill style={{ overflow: "hidden" }}>
         <AbsoluteFill
           style={{
-            transform: `scale(${style.background.scale})`,
+            transform: `translateX(${parallax}px) scale(${style.background.scale})`,
             filter: `blur(${size(style.background.blur)}px) brightness(${1 - style.background.dim}) saturate(${style.background.saturate})`,
           }}
         >
@@ -232,6 +239,12 @@ const CardPicture: React.FC<{
         </AbsoluteFill>
       </AbsoluteFill>
 
+      <AbsoluteFill
+        style={{
+          perspective: tiltSpec ? size(tiltSpec.perspective) : undefined,
+          perspectiveOrigin: `${box.left + box.width / 2}px ${box.top + box.height / 2}px`,
+        }}
+      >
       <div
         style={{
           position: "absolute",
@@ -242,7 +255,9 @@ const CardPicture: React.FC<{
           borderRadius: size(style.radius),
           boxShadow: `0 ${size(style.shadow.y)}px ${size(style.shadow.blur)}px ${style.shadow.color}`,
           opacity: t,
-          transform: `scale(${enter})`,
+          transform: tilt && (tilt.x !== 0 || tilt.y !== 0)
+            ? `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) scale(${enter})`
+            : `scale(${enter})`,
         }}
       >
         <div style={{ position: "absolute", inset: 0, overflow: "hidden", borderRadius: size(style.radius) }}>
@@ -261,6 +276,7 @@ const CardPicture: React.FC<{
           />
         ) : null}
       </div>
+      </AbsoluteFill>
     </AbsoluteFill>
   );
 };

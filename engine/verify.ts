@@ -3,7 +3,7 @@ import { wordsInShot } from "./spec";
 import type { TextStyle, Tokens } from "./tokens";
 import { primaryMediaKey } from "./moves/Captions";
 import { normalise } from "./words";
-import { cardBox } from "./card";
+import { cardBox, cardTilt } from "./card";
 import { coverRegion } from "./scale";
 
 /** Mirrors ShotView's own decision, so this gate can't drift from what renders. */
@@ -310,6 +310,30 @@ export const verifySpec = (spec: ReelSpec, timeline: Timeline): Finding[] => {
         level: "fail",
         message: `Shot ${index} asks for a card, but the look defines no \`card\` style. Add one to the look's tokens.`,
       });
+    }
+    // Marks and pointer positions are measured on the flat frame. A tilted
+    // card moves its picture, so anything pinned to the frame lines up only
+    // once the card has come flat — or never, if it doesn't.
+    const tilt = cardTilt(spec, shot);
+    if (tilt && (shot.marks?.length || shot.pointer)) {
+      const fps = spec.frame.fps;
+      if (tilt.settleFrames === null) {
+        findings.push({
+          level: "warn",
+          message: `Shot ${index} has a card that stays tilted and marks or a pointer measured on the flat frame; they will not line up with it. Let the tilt settle, or turn it off with \`card: { tilt: false }\`.`,
+        });
+      } else {
+        const early = [
+          ...(shot.marks ?? []).map((m) => Math.round((m.at ?? 0) * fps)),
+          ...(shot.pointer?.path ?? []).map((p) => Math.round(p.at * fps)),
+        ].some((f) => f < tilt.settleFrames!);
+        if (early) {
+          findings.push({
+            level: "warn",
+            message: `Shot ${index} puts a mark or pointer on a card that is still swinging flat (it settles at frame ${tilt.settleFrames}). They are measured on the flat frame, so they will sit off the picture until then; start them after it settles.`,
+          });
+        }
+      }
     }
     if (shot.bands) {
       findings.push({

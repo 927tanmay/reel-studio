@@ -364,6 +364,28 @@ export type CardStyle = {
   /** Frames the card takes to settle in, and the scale it settles from. */
   enterFrames: number;
   enterScale: number;
+  /**
+   * A 3D swing: the card starts turned in space and eases flat, as if the
+   * viewer's camera is coming round to face it. Optional — absent, a card is
+   * flat from its first frame. Angles are degrees; a shot may override or turn
+   * it off (`card: { tilt }`).
+   */
+  tilt?: {
+    /** Starting rotation about the horizontal axis (positive tips the top away). */
+    x: number;
+    /** Starting rotation about the vertical axis (positive turns the right edge away). */
+    y: number;
+    /** Distance of the viewer, in design pixels. Smaller is more dramatic. */
+    perspective: number;
+    /**
+     * Frames it takes to come flat. Absent, the tilt never settles — a card
+     * that stays angled for the whole shot, which no mark or pointer position
+     * measured on the flat frame will line up with.
+     */
+    settleFrames?: number;
+    /** Design pixels the blurred background slides per degree, opposite the turn, for depth. */
+    parallax: number;
+  };
 };
 
 /**

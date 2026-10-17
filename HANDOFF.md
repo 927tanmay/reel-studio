@@ -145,7 +145,9 @@ picture needs it:**
   recording to fill the vertical frame, show the whole thing as a rounded
   card floating over a soft blurred copy of itself. Ask for it on any
   screen capture where the viewer needs to see more than a slice of it —
-  "show screen-demo as a card." Nothing else is needed from you.
+  "show screen-demo as a card." Nothing else is needed from you. The card
+  swings in with a slight 3D turn and comes flat; the editor alternates the
+  direction between cards, so no need to ask for it.
 - **Zoom in on the click** — the picture pushes in toward a click so a small
   target is legible on a phone, then eases back out: "on 'deploy', zoom in
   on the Deploy button click." It needs a recording with real resolution

@@ -669,7 +669,21 @@ export type Shot = {
    * still positioned against the *frame*, not the card. Needs `Tokens.card`
    * and a single source — it does nothing on a banded shot.
    */
-  card?: boolean | { width?: number; top?: number };
+  card?:
+    | boolean
+    | {
+        width?: number;
+        top?: number;
+        /**
+         * The 3D swing: `false` keeps this card flat; `{ x, y }` (degrees)
+         * starts it turned that far instead of the look's angles and eases it
+         * flat. Turn alternate cards opposite ways (`y` positive, then
+         * negative) so a run of them doesn't all swing the same way. Marks and
+         * pointer positions are measured on the flat frame, so they line up
+         * only once the card has settled — `verify.ts` warns if one lands first.
+         */
+        tilt?: false | { x?: number; y?: number };
+      };
   /**
    * A name/role identification card — who is on screen, quieter than a
    * `ribbon`. Shares the badge's zone: `verify.ts` fails a shot carrying
