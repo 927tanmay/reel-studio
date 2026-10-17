@@ -8,6 +8,7 @@ import { Data } from "./Data";
 import { Callout } from "./Callout";
 import { ImageGen } from "./Image";
 import { Orb } from "./Orb";
+import { LottieGen } from "./Lottie";
 import type { WordTiming } from "../spec";
 
 /**
@@ -52,6 +53,8 @@ export const Generated: React.FC<GenProps> = ({ spec, reel, durationInFrames, wo
       return <Callout spec={spec} reel={reel} durationInFrames={durationInFrames} />;
     case "image":
       return <ImageGen spec={spec} reel={reel} durationInFrames={durationInFrames} />;
+    case "lottie":
+      return <LottieGen spec={spec} reel={reel} durationInFrames={durationInFrames} />;
     case "orb":
       return <Orb spec={spec} reel={reel} durationInFrames={durationInFrames} words={words} />;
   }

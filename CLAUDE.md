@@ -439,6 +439,22 @@ by hand, and resuming is expected and supported.
    did; prefer `"shiki"` for new ones. Highlighting loads asynchronously, so
    the render is held with `delayRender`, like fonts.
 
+39. **Icons draw themselves on, and an imported animation plays where an icon
+   would sit.** With `Tokens.generators.iconDrawFrames` set, the eight
+   built-in diagram icons draw on when their node arrives — a check as one
+   stroke, a cross as two in turn, a lock body then shackle, a warning's
+   triangle then bar then a dot that pops — using path data in
+   `engine/icons.ts` and `evolvePath` from `@remotion/paths`. Left out of the
+   look, icons simply appear, as they always did; fully drawn they are
+   identical either way. `visual: { lottie: "assets/….json" }` on a node plays
+   an imported Lottie at the icon footprint from the moment the node arrives,
+   and `src: { type: "lottie", src, seconds }` plays one centred in the frame
+   at `Tokens.lottie`'s size (looping unless `loop: false`). A Lottie keeps the
+   colours it was drawn with — a look cannot recolour it — and its own length
+   is not measured for you, so set `seconds`. Check the licence of any file you
+   did not draw: free Lottie libraries differ file by file, and the repository
+   ships only the one we made (`ring-pulse.json`).
+
 ## What stays human
 
 Take selection, where a cut lands emotionally, whether a crop reads at phone
@@ -476,6 +492,7 @@ size, and final playback. Offer comparisons and measurements; never choose.
 ```
 engine/          the moves and the contract — general, never show-specific
   spec.ts        the shotlist contract and timeline resolution
+  icons.ts       the built-in icons as drawable path segments
   codeMorph.ts   code as positioned tokens, and how one version becomes the next
   card.ts · zoom.ts · ramp.ts · impact.ts   pure geometry for cards, click zooms, speed ramps and impacts,
                  shared by the renderer, the timeline and verify.ts
@@ -484,7 +501,7 @@ engine/          the moves and the contract — general, never show-specific
   colour.ts      matching one clip's colour to another's
   verify.ts      gates that need no render
   moves/         punch · blend · push · captions · title · badge · marks · pointer · bed · hits
-  generators/    diagram · code · terminal · compare · data · callout · orb
+  generators/    diagram · code · terminal · compare · data · callout · lottie · orb
 projects/        one look per channel; copy default/ and change everything
 public/posts/    one folder per reel, self-contained
 public/assets/   fonts and sound effects are committed, so those renders are

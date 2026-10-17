@@ -34,9 +34,9 @@ export default reel({
         layout: "row",
         window: 2,
         nodes: [
-          { id: "ingest", label: "Ingest", sub: "measure" },
-          { id: "cut", label: "Shotlist", sub: "decide" },
-          { id: "compose", label: "Compose", sub: "render" },
+          { id: "ingest", label: "Ingest", sub: "measure", visual: "check" },
+          { id: "cut", label: "Shotlist", sub: "decide", visual: "arrow-right" },
+          { id: "compose", label: "Compose", sub: "render", visual: { lottie: "assets/lottie/ring-pulse.json" } },
         ],
         edges: [
           { from: "ingest", to: "cut" },
@@ -158,6 +158,13 @@ export default reel({
       src: { type: "orb", state: "working", seconds: 3 },
       enter: blend({ to: 1.06, frames: 8 }),
       title: "Generated, not recorded.",
+    },
+
+    {
+      // Proves the standalone Lottie: an imported animation, centred at the
+      // look's size, looping to fill the shot.
+      src: { type: "lottie", src: "assets/lottie/ring-pulse.json", seconds: 2 },
+      title: "Imported, not drawn.",
     },
   ],
 });

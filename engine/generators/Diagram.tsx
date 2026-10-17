@@ -1,10 +1,13 @@
 import React from "react";
-import { AbsoluteFill, Img, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
+import { AbsoluteFill, Img, Sequence, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import type { DiagramNode, Frame, GenSpec } from "../spec";
 import type { Tokens } from "../tokens";
 import { px } from "../scale";
 import type { GenProps } from "./index";
 import { currentStep } from "./index";
+import { evolvePath } from "@remotion/paths";
+import { ICONS, iconProgress, segmentProgress, type IconName } from "../icons";
+import { LottieIcon } from "./Lottie";
 
 type DiagramSpec = Extract<GenSpec, { type: "diagram" }>;
 
@@ -22,10 +25,23 @@ const NodeVisual: React.FC<{
   tokens: Tokens;
   frameSize: Frame;
   scale: number;
-}> = ({ variant, frame, tokens, frameSize, scale }) => {
+  /** The frame this node arrived on, which an icon draws itself on from. */
+  startFrame: number;
+}> = ({ variant, frame, tokens, frameSize, scale, startFrame }) => {
   const P = tokens.palette;
   const accent = P.accent ?? "#4FD1C5";
   const u = (n: number) => px(tokens, frameSize, n * scale);
+
+  if (typeof variant === "object" && "lottie" in variant) {
+    // An imported animation, at the same footprint, starting when the node
+    // arrives (the Sequence shifts the clock the animation reads).
+    const size = u(52);
+    return (
+      <Sequence from={startFrame} layout="none">
+        <LottieIcon path={variant.lottie} width={size} height={size} />
+      </Sequence>
+    );
+  }
 
   if (typeof variant === "object") {
     // A custom mark — a logo, a brand icon — drawn at the same footprint the
@@ -36,73 +52,29 @@ const NodeVisual: React.FC<{
 
   // The general icon set: single-colour line-art, one viewBox size and
   // stroke weight shared across all eight, so none of them reads heavier or
-  // lighter than the rest sitting in the same row of nodes.
-  const ICON_STROKE = 3.6;
-  const iconSvg = (children: React.ReactNode, viewBox = "0 0 48 48") => (
-    <svg width={u(44)} height={u(44)} viewBox={viewBox}>
-      <g
-        fill="none"
-        stroke={accent}
-        strokeWidth={ICON_STROKE}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        {children}
-      </g>
-    </svg>
-  );
-
-  switch (variant) {
-    case "check":
-      return iconSvg(<path d="M10 25 L19 34 L38 13" />);
-    case "cross":
-      return iconSvg(
-        <>
-          <path d="M12 12 L36 36" />
-          <path d="M36 12 L12 36" />
-        </>,
-      );
-    case "arrow-right":
-      return iconSvg(
-        <>
-          <path d="M8 24 L40 24" />
-          <path d="M27 11 L40 24 L27 37" />
-        </>,
-      );
-    case "star":
-      return iconSvg(
-        <path d="M24 5 L29.5 18 L43 19.5 L33 29 L36 43 L24 36 L12 43 L15 29 L5 19.5 L18.5 18 Z" strokeLinejoin="round" />,
-      );
-    case "lock":
-      return iconSvg(
-        <>
-          <rect x="10" y="21" width="28" height="20" rx="4" />
-          <path d="M15 21 V14 a9 9 0 0 1 18 0 V21" />
-        </>,
-      );
-    case "warning":
-      return iconSvg(
-        <>
-          <path d="M24 6 L44 40 L4 40 Z" strokeLinejoin="round" />
-          <path d="M24 19 V29" />
-          <circle cx="24" cy="34.5" r="0.6" fill={accent} />
-        </>,
-      );
-    case "info":
-      return iconSvg(
-        <>
-          <circle cx="24" cy="24" r="18" />
-          <path d="M24 22 V33" />
-          <circle cx="24" cy="14.5" r="0.6" fill={accent} />
-        </>,
-      );
-    case "trend-up":
-      return iconSvg(
-        <>
-          <path d="M6 34 L18 22 L26 28 L42 10" />
-          <path d="M30 10 L42 10 L42 22" />
-        </>,
-      );
+  // lighter than the rest sitting in the same row of nodes. Each draws itself
+  // on when its node arrives if the look asks (`generators.iconDrawFrames`);
+  // fully drawn, it is the same picture the static icons always were.
+  if (variant in ICONS) {
+    const ICON_STROKE = 3.6;
+    const overall = iconProgress(frame, startFrame + 4, tokens.generators?.iconDrawFrames);
+    return (
+      <svg width={u(44)} height={u(44)} viewBox="0 0 48 48">
+        <g fill="none" stroke={accent} strokeWidth={ICON_STROKE} strokeLinecap="round" strokeLinejoin="round">
+          {ICONS[variant as IconName].map((segment, i) => {
+            const p = segmentProgress(overall, segment);
+            if (segment.dot) {
+              // A point pops in at the end rather than drawing.
+              return p > 0 ? (
+                <circle key={i} cx={segment.dot.cx} cy={segment.dot.cy} r={segment.dot.r} fill={accent} opacity={p} />
+              ) : null;
+            }
+            if (p <= 0) return null;
+            return <path key={i} d={segment.d} {...(p < 1 ? evolvePath(p, segment.d) : {})} />;
+          })}
+        </g>
+      </svg>
+    );
   }
 
   if (variant === "button" || variant === "debounce") {
@@ -339,7 +311,14 @@ export const Diagram: React.FC<GenProps<DiagramSpec>> = ({ spec, reel }) => {
                 }}
               >
                 {node.visual ? (
-                  <NodeVisual variant={node.visual} frame={frame} tokens={tokens} frameSize={reel.frame} scale={g} />
+                  <NodeVisual
+                    variant={node.visual}
+                    frame={frame}
+                    tokens={tokens}
+                    frameSize={reel.frame}
+                    scale={g}
+                    startFrame={Math.round(appearAt * fps)}
+                  />
                 ) : null}
                 <div
                   style={{

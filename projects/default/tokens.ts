@@ -287,6 +287,13 @@ export const tokens: Tokens = {
     glitch: { sfx: "switch", volume: 0.5 },
   },
 
+  // Built-in diagram icons draw themselves on over about half a second when
+  // their node arrives; leave this out and they simply appear.
+  generators: { iconDrawFrames: 14 },
+
+  // Where a standalone Lottie sits: half the frame wide, above the caption band.
+  lottie: { size: 0.5, top: 0.42 },
+
   // The code generator's morphs: long enough to follow the tokens that move,
   // short enough that the change still feels like it lands on the word.
   code: { morphFrames: 16, dim: 0.32 },

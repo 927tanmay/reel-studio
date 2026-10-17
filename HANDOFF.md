@@ -231,7 +231,7 @@ graphic should get; the rest works the same as any other generated clip
 
 ## 5. Write generated clips out in full
 
-Eight kinds of clip can be generated. If you ask for one, supply all of its
+Nine kinds of clip can be generated. If you ask for one, supply all of its
 content. Half a diagram is a question, not a brief.
 
 **diagram** — nodes that assemble and pan. The one worth reaching for
@@ -282,6 +282,14 @@ dimmed
 > instead of cutting to black or holding on a title card. Ask for this
 > explicitly as a closing option; the default without it is the reel simply
 > ending on the last word.
+
+**lottie** — an imported animation (an animated check, a burst, a loader)
+> Supply the `.json` file and say it is yours or give its licence — free
+> Lottie libraries differ file by file. It keeps its own colours, so choose
+> one that already suits the channel, and say how long it should be on
+> screen. A node in a diagram can also carry one instead of a plain icon.
+> The plain built-in icons now draw themselves on as their node arrives; that
+> needs nothing from you.
 
 **orb** — a dotted sphere of light that reads as "an AI is working"
 > Which of five motions: *working* (particles on orbits), *searching* (a

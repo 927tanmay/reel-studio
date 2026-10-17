@@ -154,6 +154,17 @@ export const verifySpec = (spec: ReelSpec, timeline: Timeline): Finding[] => {
     }
   }
 
+  // A standalone Lottie is placed by the look.
+  if (!t.lottie) {
+    const lottieShot = timeline.shots.find((r) => typeof r.shot.src === "object" && r.shot.src.type === "lottie");
+    if (lottieShot) {
+      findings.push({
+        level: "fail",
+        message: `Shot ${lottieShot.index} uses a lottie, but the look defines no \`lottie\` style. Add one to the look's tokens.`,
+      });
+    }
+  }
+
   // Code morphs need the Shiki highlighter (they work on real tokens) and the
   // look's morph timing.
   for (const resolved of timeline.shots) {

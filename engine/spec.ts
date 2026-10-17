@@ -278,9 +278,11 @@ export type DiagramNode = {
    * brand icon, anything not already covered — as `{ src: "assets/..." }`,
    * a path under public/. A custom image is drawn at the same size and
    * position the built-in icons use, so swapping one for the other moves
-   * nothing else in the layout.
+   * nothing else in the layout. `{ lottie: "assets/..." }` plays an imported
+   * Lottie animation there, starting when the node arrives; it keeps the
+   * colours it was drawn with, which a look cannot change.
    */
-  visual?: DiagramVisual | { src: string };
+  visual?: DiagramVisual | { src: string } | { lottie: string };
 };
 export type DiagramEdge = { from: string; to: string; label?: string };
 
@@ -373,6 +375,21 @@ export type GenSpec =
       focus: Rect;
       label?: string;
       dim?: number;
+      seconds?: number;
+    }
+  | {
+      /**
+       * An imported Lottie animation — an animated check, a burst, a loader —
+       * centred in the frame at the look's size (`Tokens.lottie`). `src` is a
+       * `.json` under public/. It plays from the start of the shot and, unless
+       * `loop` is false, repeats to fill it; set `seconds` to what the shot
+       * needs, since the file's own length is not measured for you. A Lottie
+       * keeps its own colours — a look cannot recolour it. Check the licence
+       * of any file you did not draw: most free Lottie libraries differ per file.
+       */
+      type: "lottie";
+      src: string;
+      loop?: boolean;
       seconds?: number;
     }
   | {

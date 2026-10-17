@@ -449,6 +449,32 @@ frame before each impact with a frame inside it:
   engine, so there is no WASM to load or go missing in a render. If a grammar
   ever misbehaves under it, the engine option is in `generators/shiki.ts`.
 
+### Animated icons and Lottie
+
+CLAUDE.md rule 39. What stills showed:
+
+- **Draw-on is per segment, not per icon.** Each icon is a list of strokes with
+  its own slice of the 0..1 progress, so a cross draws one diagonal and then
+  the other. One `evolvePath` over a joined path would draw them as a single
+  line. A `dot` segment is a point, so it pops rather than draws.
+- **Fully drawn must equal the old icon.** The static icons were rewritten as
+  data; at progress 1 the segments render the identical picture, and a look
+  without `iconDrawFrames` takes that path from frame 0 — so no earlier reel
+  changes.
+- **Icons start a few frames after the card.** The node rises first and the
+  icon begins drawing about four frames in; drawn at the same instant, the
+  first frames of a stroke land on a card that is still fading in and are lost.
+- **A Lottie plays from its node's arrival** because it sits in a `Sequence`
+  from that frame; without one it would have been mid-animation or finished
+  before the node became visible.
+- **Loading holds the render.** The JSON is fetched under `delayRender` and
+  cached by path; a missing file logs an error and renders empty rather than
+  hanging. The hand-made `ring-pulse.json` is a minimal valid example (one
+  stroked ellipse, scale and opacity animated) if you need a template.
+- **No recolouring.** A Lottie's colours are inside the file. To match a look,
+  edit the file (or pick one drawn in the right colours) — the engine does not
+  rewrite them.
+
 ## 3. Generators — one clip, one job each
 
 `engine/generators/`: `diagram`, `code`, `terminal`, `compare`, `data`,

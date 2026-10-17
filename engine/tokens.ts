@@ -233,6 +233,17 @@ export type CodeStyle = {
 };
 
 /**
+ * The look of the `lottie` generator: where an imported animation sits. Optional
+ * — a look without it cannot show a standalone Lottie, and `verify.ts` says so.
+ */
+export type LottieStyle = {
+  /** Width as a fraction of frame width. */
+  size: number;
+  /** Vertical centre as a fraction of frame height — clear of title and captions. */
+  top: number;
+};
+
+/**
  * The look of the `orb` generator: a dotted sphere of light. Optional — a look
  * with none cannot show an orb, and `verify.ts` says so if a shot asks.
  */
@@ -426,6 +437,8 @@ export type Tokens = {
   pointer?: PointerStyle;
   /** The look of the code generator's morphs. Omit and `states` cannot be used. */
   code?: CodeStyle;
+  /** Where a standalone Lottie sits. Omit and a `lottie` shot cannot be used. */
+  lottie?: LottieStyle;
   /** The look of the orb generator. Omit and a shot cannot use one. */
   orb?: OrbStyle;
   /** The look of a floating screen card. Omit and a shot cannot use one. */
@@ -451,6 +464,11 @@ export type Tokens = {
   generators?: {
     /** Multiplies the type in diagram, compare and data clips. 1 is unchanged. */
     textScale?: number;
+    /**
+     * Frames the built-in diagram icons take to draw themselves on when their
+     * node arrives. Absent, they simply appear drawn, as they always did.
+     */
+    iconDrawFrames?: number;
   };
   /** Named punch presets. Shotlists may use these or pass their own numbers. */
   punches?: Record<string, { to: number; frames: number; hit?: string }>;
