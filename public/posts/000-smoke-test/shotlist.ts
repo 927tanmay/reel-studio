@@ -66,6 +66,8 @@ export default reel({
       src: {
         type: "code",
         title: "shotlist.ts",
+        language: "typescript",
+        highlighter: "shiki",
         typeSpeed: 34,
         code: [
           "{",
@@ -79,6 +81,22 @@ export default reel({
           { at: 0, lines: [] },
           { at: 2.6, lines: [3] },
         ],
+        // The snippet changes a value and gains a line: tokens that survive
+        // glide, new ones fade in. Proves the morph.
+        states: [
+          {
+            at: 3.4,
+            code: [
+              "{",
+              "  src: 'screen-a',",
+              "  reframe: { from: wide, to: tight },",
+              "  enter: blend({ to: 1.12, frames: 8 }),",
+              "  card: true,",
+              "  badge: 'the generated file',",
+              "}",
+            ].join("\n"),
+          },
+        ],
         seconds: 4.5,
       },
       // A real cross-dissolve: starts 8 frames before the diagram would have
@@ -86,7 +104,6 @@ export default reel({
       enter: blend({ to: 1.12, frames: 8 }),
       // Proves the pointer: an arrow glides to a line and clicks it, with a
       // ring and a spotlight. Positions are measured off a still.
-      impacts: [{ kind: "glitch", at: 3.2 }],
       pointer: {
         path: [
           { at: 0.8, x: 0.8, y: 0.75 },
@@ -113,6 +130,7 @@ export default reel({
       // Proves hand-drawn marks: a stroke that draws itself on after the wipe
       // lands, then fades. Region is a guess at first and corrected by looking.
       marks: [{ kind: "circle", region: { x: 0.06, y: 0.385, w: 0.15, h: 0.04 }, at: 2.2, hold: 1 }],
+      impacts: [{ kind: "glitch", at: 3.2 }],
       note: "Unpaired blend: the previous shot gets its zoom-out for free, not because anyone wrote it.",
     },
 

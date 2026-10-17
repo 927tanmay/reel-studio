@@ -222,6 +222,17 @@ export type Watermark = {
 };
 
 /**
+ * The look of the `code` generator's Shiki highlighter and its morphs. Optional
+ * — a look without it cannot use `states`, and `verify.ts` says so.
+ */
+export type CodeStyle = {
+  /** Frames a morph between two versions of a snippet takes. */
+  morphFrames: number;
+  /** 0..1 — opacity of lines that are not the highlighted ones. */
+  dim: number;
+};
+
+/**
  * The look of the `orb` generator: a dotted sphere of light. Optional — a look
  * with none cannot show an orb, and `verify.ts` says so if a shot asks.
  */
@@ -413,6 +424,8 @@ export type Tokens = {
   marks?: MarksStyle;
   /** The look of the pointer overlay. Omit and shots cannot carry a `pointer`. */
   pointer?: PointerStyle;
+  /** The look of the code generator's morphs. Omit and `states` cannot be used. */
+  code?: CodeStyle;
   /** The look of the orb generator. Omit and a shot cannot use one. */
   orb?: OrbStyle;
   /** The look of a floating screen card. Omit and a shot cannot use one. */

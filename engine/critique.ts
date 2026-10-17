@@ -84,6 +84,7 @@ export const critiqueTimeline = (
     if (src && typeof src === "object") {
       if (src.type === "diagram") for (const s of src.steps ?? []) push(at(s.at), "step", r.index, "diagram step");
       if (src.type === "code") for (const h of src.highlight ?? []) push(at(h.at), "step", r.index, "code highlight");
+      if (src.type === "code") for (const st of src.states ?? []) push(at(st.at), "step", r.index, "code morph");
       if (src.type === "terminal") for (const l of src.lines) push(at(l.at), "step", r.index, "terminal line");
       if (src.type === "compare" && src.wipeAt !== undefined) push(at(src.wipeAt), "wipe", r.index, "compare wipe");
     }

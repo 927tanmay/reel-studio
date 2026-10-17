@@ -252,7 +252,9 @@ few seconds of talking head.
 
 **code** — a snippet that types itself
 > The exact code, the language, which lines highlight and on which word, and an
-> optional heading.
+> optional heading. If the script says "now change this to…", give the
+> *second* version too and the word it appears on: the code morphs into it,
+> so the viewer sees what changed rather than two screens swapping.
 
 **terminal** — a shell session
 > Each line: the prompt, the command typed, the output that follows.

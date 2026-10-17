@@ -421,6 +421,24 @@ by hand, and resuming is expected and supported.
    `Tokens.impact`; each also plays its look's sound (`Tokens.sounds.shake/
    flash/glitch`) unless `silent`, and a shake's sound ducks the music.
 
+38. **Code reads as code, and a change reads as a change.** A `code` generator
+   with `highlighter: "shiki"` colours the snippet with a real grammar (any
+   language Shiki knows — set `language`; an unknown one falls back to plain
+   text rather than failing) using the *look's* palette: `keyword`, `string`,
+   `number`, `muted`, `code`, `accent`, and optional `function`/`type`. That is
+   what keeps code from looking pasted in from another tool. `states: [{ at,
+   code }]` then morphs the snippet into a later version at `at`: tokens that
+   survive glide to their new place, new ones fade in, removed ones fade out,
+   matched by a longest-common-subsequence over token text so order is kept.
+   Use it where the script says "now change this to…" — the viewer sees *what
+   changed* instead of two screens of code swapping. Anchor `at` to the word
+   that names the change. `highlight` line steps refer to lines of the
+   version showing at that moment. Needs `Tokens.code` (`morphFrames`, `dim`);
+   `verify.ts` fails `states` without the highlighter or the look. The default
+   highlighter is still `"simple"`, so a reel cut before this renders as it
+   did; prefer `"shiki"` for new ones. Highlighting loads asynchronously, so
+   the render is held with `delayRender`, like fonts.
+
 ## What stays human
 
 Take selection, where a cut lands emotionally, whether a crop reads at phone
@@ -458,6 +476,7 @@ size, and final playback. Offer comparisons and measurements; never choose.
 ```
 engine/          the moves and the contract — general, never show-specific
   spec.ts        the shotlist contract and timeline resolution
+  codeMorph.ts   code as positioned tokens, and how one version becomes the next
   card.ts · zoom.ts · ramp.ts · impact.ts   pure geometry for cards, click zooms, speed ramps and impacts,
                  shared by the renderer, the timeline and verify.ts
   scale.ts       crop-then-scale, and size tokens that survive a frame change

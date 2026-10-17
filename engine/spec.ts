@@ -308,6 +308,21 @@ export type GenSpec =
       type: "code";
       code: string;
       language?: string;
+      /**
+       * `"shiki"` highlights with a real grammar (any language Shiki knows,
+       * coloured from the look's palette) and unlocks `states`. `"simple"` — the
+       * default, so a reel cut earlier renders as it did — is the small built-in
+       * highlighter. Prefer `"shiki"` for new reels and name the `language`.
+       */
+      highlighter?: "simple" | "shiki";
+      /**
+       * Later versions of the snippet, each reached at `at` seconds by morphing
+       * the code you already have: tokens that survive glide to their new
+       * place, new ones fade in, removed ones fade out — so the viewer sees
+       * *what changed*, which two swapped screenfuls of code never show. `code`
+       * is the first version. Needs `highlighter: "shiki"`.
+       */
+      states?: { at: number; code: string }[];
       /** Characters per second while typing. 0 means appear instantly. */
       typeSpeed?: number;
       highlight?: { at?: number; lines: number[] }[];

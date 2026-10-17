@@ -287,6 +287,10 @@ export const tokens: Tokens = {
     glitch: { sfx: "switch", volume: 0.5 },
   },
 
+  // The code generator's morphs: long enough to follow the tokens that move,
+  // short enough that the change still feels like it lands on the word.
+  code: { morphFrames: 16, dim: 0.32 },
+
   orb: {
     // The accent, not the caption yellow: the orb is a standing graphic that
     // fills the frame for seconds, and the warmer colours are reserved for

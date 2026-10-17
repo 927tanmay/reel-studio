@@ -423,6 +423,32 @@ frame before each impact with a frame inside it:
   automatically; a shake's ducks the bed, the other two do not. Turn one off
   per impact with `silent: true`.
 
+### Shiki highlighting and code morphs
+
+`highlighter: "shiki"` and `states` (CLAUDE.md rule 38):
+
+- **Tokens are placed in `ch` units.** Each token is its own absolutely
+  positioned span at `left: <col>ch`, so a monospace font lands it exactly and
+  a token can slide to a fractional column mid-morph. No measuring, no layout
+  pass — which is also why the font must stay monospace.
+- **The matching is a diff, not a guess.** Old and new tokens are paired by
+  longest common subsequence over their text, so a line pushed down by an
+  inserted one *moves* rather than being deleted and retyped. Checked on a
+  fixture: an unchanged `return x` slides down a row while the one changed
+  value and the five new tokens are the only things that fade.
+- **Leaving fades first, arriving fades second.** Over the morph, removed
+  tokens are gone by the halfway point and added ones only start then, so old
+  and new never sit on top of each other at the same strength.
+- **Judge it mid-morph.** The start and end states are ordinary code; whether
+  the morph reads is only visible at about a third of the way through. Render a
+  still there (shot start + `at` + about half `morphFrames`).
+- **The simple highlighter is kept on purpose.** Posts cut before this
+  existed (and set a `language`) would change appearance if the default
+  switched. It is the default until that is a decision, not a side effect.
+- **The JS regex engine, not WASM.** Shiki runs here with its JavaScript
+  engine, so there is no WASM to load or go missing in a render. If a grammar
+  ever misbehaves under it, the engine option is in `generators/shiki.ts`.
+
 ## 3. Generators — one clip, one job each
 
 `engine/generators/`: `diagram`, `code`, `terminal`, `compare`, `data`,

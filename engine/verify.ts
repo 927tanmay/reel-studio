@@ -154,6 +154,34 @@ export const verifySpec = (spec: ReelSpec, timeline: Timeline): Finding[] => {
     }
   }
 
+  // Code morphs need the Shiki highlighter (they work on real tokens) and the
+  // look's morph timing.
+  for (const resolved of timeline.shots) {
+    const { shot, index, durationInFrames } = resolved;
+    const src = shot.src;
+    if (!src || typeof src !== "object" || src.type !== "code" || !src.states?.length) continue;
+    if (src.highlighter !== "shiki") {
+      findings.push({
+        level: "fail",
+        message: `Shot ${index} has code \`states\` but not \`highlighter: "shiki"\`. Morphing works on real tokens; set it.`,
+      });
+    }
+    if (!t.code) {
+      findings.push({
+        level: "fail",
+        message: `Shot ${index} has code \`states\`, but the look defines no \`code\` style. Add one to the look's tokens.`,
+      });
+    }
+    src.states.forEach((st, i) => {
+      if (Math.round(st.at * spec.frame.fps) >= durationInFrames) {
+        findings.push({
+          level: "warn",
+          message: `Shot ${index} code state ${i} is at ${st.at}s, after the shot has ended — it will never show.`,
+        });
+      }
+    });
+  }
+
   // Impacts need the look that says what they look like, and a moment that
   // happens inside the shot.
   for (const resolved of timeline.shots) {
