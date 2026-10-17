@@ -79,12 +79,15 @@ channels without them contaminating each other.
 
 ## Documentation
 
-Six files, each for a different reader:
+Seven files, each for a different reader:
 
 - **`README.md`** (this file) — setup, and the shortest path to a rendered file.
 - **`GUIDE.md`** — a full worked walkthrough, one real reel start to finish.
 - **`CLAUDE.md`** — the rules an agent driving this repo follows; read this
   first if you're pairing with one.
+- **`ENGINE.md`** — a digest of what the editor can and cannot do, for whoever
+  writes scripts and briefs in another project; paste it there with `HANDOFF.md`
+  and `STYLE.md`.
 - **`STYLE.md`** — restraint: which moves are quiet, medium or loud, which pair
   and which clash, and how many a reel can carry. Read before proposing effects.
 - **`ENGINE_PLAYBOOK.md`** — practical detail found by rendering, for an agent
