@@ -379,6 +379,8 @@ A brief is ready to hand over when every one of these is true.
 - [ ] Every generated clip is specified in full
 - [ ] Title, badge and lower-third copy is written out (captions need no
       copy — automatic)
+- [ ] No more than two or three *loud* moments (slam, shake, flash, glitch, orb)
+      for a 30-second reel — `STYLE.md` explains why, and what to use instead
 - [ ] Any mark, click highlight, zoom, card or speed ramp names *what* it points at or
       *where it settles*, in words and against a spoken word — not coordinates
 - [ ] Every name, tool and filename you will speak is listed as it should

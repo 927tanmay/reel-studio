@@ -4,7 +4,10 @@ A general-purpose short-form video editor driven from Claude Code. The engine
 knows how to cut, punch, caption, reframe, band and mix. It knows nothing about
 any particular show. Every creative decision arrives as input, per reel.
 
-Read this file, then `DIRECTION.md` when a brief arrives.
+Read this file, then `DIRECTION.md` when a brief arrives. Read `STYLE.md` before
+proposing effects: it is the one place that says *how much* — which moves are
+quiet, medium or loud, which pair and which clash, and how many a reel can
+carry. The rules below say what exists; that file says how to resist using it.
 
 `HANDOFF.md` is the contract for whoever writes the briefs upstream. When a brief
 arrives incomplete, point at the checklist in it rather than guessing.
@@ -321,7 +324,11 @@ by hand, and resuming is expected and supported.
    rules of thumb for short-form, not findings, and are flags precisely so a
    reel that is deliberately slow can say so. Continuous motion — a slow
    reframe, typing — is invisible to it, so a flagged gap over one is a
-   question, not a defect. Offer the numbers; whether the opening earns the
+   question, not a defect. It also counts *emphasis* against `STYLE.md`: loud beats (slams,
+   shakes, flashes, glitches, the orb — a slam and a shake on one word are one
+   beat), how close two of them sit, and a tally of the medium effects. Its
+   defaults (three loud beats per 30 s, three seconds apart) are flags like the
+   rest. Offer the numbers; whether the opening earns the
    next five seconds stays the human's call.
 
 31. **Show what was clicked, and let the caption arrive just ahead of its

@@ -31,6 +31,18 @@ export type Critique = {
   changesPer10s: number;
   /** Stretches between changes, longest first — including the lead-in and the tail. */
   gaps: (Gap & { startsAfter: Change | null })[];
+  /**
+   * How much the reel is asking the viewer to notice. A "loud" beat is a slam,
+   * an impact (shake, flash, glitch) or an orb; those landing together on one
+   * word are a single beat. "Medium" counts the effects that point at things.
+   * See `STYLE.md` for what these numbers are measured against.
+   */
+  emphasis: {
+    loud: { seconds: number; kinds: string[] }[];
+    /** The shortest gap between two loud beats, or null with fewer than two. */
+    closestLoudGap: number | null;
+    medium: { marks: number; clicks: number; cards: number; ramps: number; ribbons: number };
+  };
   /** Present only when a shot's sound has a transcript. */
   speech: null | {
     words: number;
@@ -89,6 +101,35 @@ export const critiqueTimeline = (
       if (src.type === "terminal") for (const l of src.lines) push(at(l.at), "step", r.index, "terminal line");
       if (src.type === "compare" && src.wipeAt !== undefined) push(at(src.wipeAt), "wipe", r.index, "compare wipe");
     }
+  }
+
+  // Loud beats and medium counts, collected from the same resolved shots. A
+  // slam and a shake on one word are one beat, so loud events are grouped by
+  // the same quarter-second the picture changes are.
+  const loudRaw: { seconds: number; kind: string }[] = [];
+  const medium = { marks: 0, clicks: 0, cards: 0, ramps: 0, ribbons: 0 };
+  for (const r of timeline.shots) {
+    const start = r.startFrame / fps;
+    for (const sl of r.shot.slams ?? []) loudRaw.push({ seconds: start + (sl.at ?? 0), kind: "slam" });
+    for (const im of r.shot.impacts ?? []) loudRaw.push({ seconds: start + (im.at ?? 0), kind: im.kind });
+    if (typeof r.shot.src === "object" && r.shot.src?.type === "orb") loudRaw.push({ seconds: start, kind: "orb" });
+    medium.marks += r.shot.marks?.length ?? 0;
+    medium.clicks += (r.shot.pointer?.path ?? []).filter((p) => p.click).length;
+    if (r.shot.card) medium.cards++;
+    if (r.shot.speedRamp?.length) medium.ramps++;
+    if (r.shot.ribbon) medium.ribbons++;
+  }
+  loudRaw.sort((a, b) => a.seconds - b.seconds);
+  const loud: Critique["emphasis"]["loud"] = [];
+  for (const e of loudRaw) {
+    const last = loud[loud.length - 1];
+    if (last && e.seconds - last.seconds < opts.coalesceSeconds) last.kinds.push(e.kind);
+    else loud.push({ seconds: e.seconds, kinds: [e.kind] });
+  }
+  let closestLoudGap: number | null = null;
+  for (let i = 1; i < loud.length; i++) {
+    const gap = loud[i].seconds - loud[i - 1].seconds;
+    if (closestLoudGap === null || gap < closestLoudGap) closestLoudGap = gap;
   }
 
   raw.sort((a, b) => a.seconds - b.seconds);
@@ -193,6 +234,7 @@ export const critiqueTimeline = (
     changesInHook: changes.filter((c) => c.seconds > 0 && c.seconds <= opts.hookSeconds).length,
     changesPer10s: (changes.filter((c) => c.seconds > 0).length / runtimeSeconds) * 10,
     gaps,
+    emphasis: { loud, closestLoudGap, medium },
     speech,
     blind,
   };

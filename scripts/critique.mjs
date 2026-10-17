@@ -12,6 +12,7 @@
  *
  *   npm run critique 001-my-reel
  *   npm run critique 001-my-reel -- --max-gap 4 --hook 3 --dead-air 0.6
+ *   npm run critique 001-my-reel -- --max-loud 2 --loud-gap 4
  */
 import { spawn } from "node:child_process";
 import { ROOT, fmt, requirePost } from "./lib.mjs";
@@ -28,6 +29,8 @@ const maxGap = flag("max-gap", 3); // seconds the picture may sit unchanged
 const hook = flag("hook", 3); // seconds that count as the opening
 const deadAir = flag("dead-air", 0.5); // a silence longer than this is not breathing
 const firstChangeBy = flag("first-change", 2); // seconds until something should happen
+const maxLoudPer30 = flag("max-loud", 3); // loud beats allowed per 30 seconds of runtime
+const minLoudGap = flag("loud-gap", 3); // seconds between two loud beats
 const coalesce = 0.25; // a cut that also starts a mark is one change, not two
 
 const dump = () =>
@@ -91,6 +94,33 @@ for (const g of long.slice(0, 5)) {
   fmt.warn(`${s(g.seconds)} with no change, ${s(g.from)} → ${s(g.to)} (${after}).`);
 }
 if (long.length > 5) console.log(`  …and ${long.length - 5} more.`);
+
+fmt.head("Emphasis (what the reel asks the viewer to notice — see STYLE.md)");
+const e = r.emphasis;
+const loudAllowed = Math.max(1, Math.round((maxLoudPer30 * r.runtimeSeconds) / 30));
+if (e.loud.length === 0) {
+  fmt.ok("No loud beats — a quiet reel.");
+} else if (e.loud.length > loudAllowed) {
+  fmt.warn(
+    `${e.loud.length} loud beats in ${s(r.runtimeSeconds)} — about ${((e.loud.length / r.runtimeSeconds) * 30).toFixed(1)} per 30s ` +
+      `(flagged past ${maxLoudPer30}). Loud: slams, shakes, flashes, glitches, the orb.`,
+  );
+} else {
+  fmt.ok(`${e.loud.length} loud beat${e.loud.length === 1 ? "" : "s"} in ${s(r.runtimeSeconds)}.`);
+}
+for (const b of e.loud) console.log(`    ${s(b.seconds)}  ${[...new Set(b.kinds)].join(" + ")}`);
+if (e.closestLoudGap !== null) {
+  if (e.closestLoudGap < minLoudGap) {
+    fmt.warn(`Two loud beats ${s(e.closestLoudGap)} apart (flagged under ${s(minLoudGap)}). Closer than that, they read as texture, not events.`);
+  } else {
+    fmt.ok(`Loud beats at least ${s(e.closestLoudGap)} apart.`);
+  }
+}
+const m = e.medium;
+console.log(
+  `  Medium: ${m.marks} mark${m.marks === 1 ? "" : "s"}, ${m.clicks} click${m.clicks === 1 ? "" : "s"}, ` +
+    `${m.cards} card${m.cards === 1 ? "" : "s"}, ${m.ramps} speed ramp${m.ramps === 1 ? "" : "s"}, ${m.ribbons} ribbon${m.ribbons === 1 ? "" : "s"}.`,
+);
 
 if (r.speech) {
   fmt.head("Speech");
