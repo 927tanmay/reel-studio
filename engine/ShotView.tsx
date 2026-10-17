@@ -21,6 +21,7 @@ import { Ribbon } from "./moves/Ribbon";
 import { LowerThird } from "./moves/LowerThird";
 import { Marks } from "./moves/Marks";
 import { Pointer } from "./moves/Pointer";
+import { Slams } from "./moves/Slams";
 import { Generated, generatedSize } from "./generators";
 import { gradeFilter, needsMatrix } from "./colour";
 import { rampPieces } from "./ramp";
@@ -630,6 +631,7 @@ export const ShotView: React.FC<{
 
       {overlays === "full" && exitOverlayVisible(frame, resolved.durationInFrames, resolved.overlayFadeOutFrames) ? (
         <>
+          {shot.slams ? <Slams spec={spec} slams={shot.slams} /> : null}
           {showCaptions ? <Captions spec={spec} resolved={resolved} /> : null}
           {shot.title ? <Title spec={spec} title={shot.title} /> : null}
           {shot.badge ? <Badge spec={spec} badge={shot.badge} /> : null}

@@ -455,6 +455,23 @@ by hand, and resuming is expected and supported.
    did not draw: free Lottie libraries differ file by file, and the repository
    ships only the one we made (`ring-pulse.json`).
 
+40. **A key word can land big, on the beat that names it.** `slams: [{ text,
+   at?, hold?, color?, centre? }]` puts a word (or two or three) in the middle
+   of the frame — the punchline, the number, the verdict — arriving larger and
+   soft, snapping to size with a small bounce, resting over a dimmed picture,
+   and going. A run of them with later `at`s ("NO CODE. NO TEST.") is a rhythm
+   of its own; time each from `anchors()`. Its size is *fitted*: `fitText` (from
+   `@remotion/layout-utils`) finds the largest type that keeps the longest line
+   inside the look's `width`, capped at the look's `size`, so a short word is
+   big and a long one still fits — leave the font size alone and keep the copy
+   to a few words. It is the one place type scales on purpose (rule 9 holds
+   everywhere else), and only during the seven frames of arrival: it ends at
+   exactly 1 and carries no transform once it rests, so edges stay sharp.
+   Captions stay where they are, above the dim; `verify.ts` warns on a slam
+   beside a title (two things said at once) or on two at once, and fails one
+   whose block reaches the platform's covered zones. Plays the look's `slam`
+   sound, which ducks the music, unless `silent`. Look: `Tokens.slam`.
+
 ## What stays human
 
 Take selection, where a cut lands emotionally, whether a crop reads at phone

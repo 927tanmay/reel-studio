@@ -160,6 +160,13 @@ picture needs it:**
   punchline, a failure. Said on every line they stop landing. Only the
   picture moves; the text stays readable. Each gets a matching sound
   automatically.
+- **A key-word slam** — one word (or two or three) lands huge in the middle
+  of the frame on the beat that names it: the punchline, the number, the
+  verdict. "On 'free', slam FREE." A run of short ones is a rhythm ("No code.
+  No test. No problem."). Use it for the one or two lines that *are* the
+  point; the type is sized to fit the frame, so keep the words few. It
+  isn't for a sentence — that's a caption — and it doesn't share a shot with
+  a title.
 - **A speed ramp** — a stretch of footage racing and then easing to normal
   speed to land on one line: "run the build log at 4x, ease down to normal
   on 'failed'." Ask for it when part of a capture is dull but you want the
@@ -431,6 +438,7 @@ Steps: <node set> on the word "<word>", ...
 - On the word "<word>" in screen-demo, ring the click on <what>     (optional)
 - On the word "<word>" in screen-demo, zoom in on the click on <what> (optional)
 - On the word "<word>" in <take>, shake / flash / glitch                (optional)
+- On the word "<word>" in <take>, slam "<the big word(s)>"              (optional)
 - Show screen-demo as a card                                        (optional)
 - In screen-demo, run <stretch> at <n>x, ease to normal on "<word>" (optional)
 

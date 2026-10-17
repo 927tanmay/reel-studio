@@ -475,6 +475,28 @@ CLAUDE.md rule 39. What stills showed:
   edit the file (or pick one drawn in the right colours) — the engine does not
   rewrite them.
 
+### Key-word slams
+
+`slams` (CLAUDE.md rule 40):
+
+- **Fit once per word, not per frame.** `fitText` measures text, which is the
+  expensive part, and its answer never changes frame to frame — so it is
+  memoised on the word and the look. It also needs the font loaded first; the
+  reel already holds the render until fonts are in, so measuring inside the
+  component is safe.
+- **Centre it with a box, not a transform.** The word sits in a flex box whose
+  own centre is the target height, so at rest there is no `translate(-50%)` to
+  put its edges on a half pixel. Scale is dropped entirely once it lands.
+- **`easeOutBack` dips under 1.** The bounce is the scale briefly passing
+  below 1 on its way to settling — which is why the resting check is "arrival
+  finished", not "scale equals 1".
+- **Look at five frames, not one.** The arrival (large and blurred), the first
+  sharp frame, the rest, the fade and the next word's entrance are all
+  different pictures; only side by side do they read as a stamp.
+- **A long phrase gets small, not wrapped.** The word is fitted on one line
+  per line break; a sentence will shrink until it is unreadable. If a slam's
+  type looks timid, the copy is too long for a slam — that is a caption.
+
 ## 3. Generators — one clip, one job each
 
 `engine/generators/`: `diagram`, `code`, `terminal`, `compare`, `data`,

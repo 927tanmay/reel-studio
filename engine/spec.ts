@@ -238,6 +238,35 @@ export type Impact = {
   silent?: boolean;
 };
 
+/**
+ * One big word (or two or three) landing in the middle of the frame on the
+ * moment the script names it: the punchline, the number, the verdict. It
+ * arrives with a stamp — larger and soft, snapping to size with a small
+ * bounce — rests for a beat over a dimmed picture, and goes. A run of them
+ * ("NO. CODE. NO. TEST.") is a rhythm in its own right.
+ *
+ * This is the one place type deliberately scales (rule 9 holds everywhere
+ * else): only during the few frames of arrival, ending at exactly 1, so it is
+ * never resting on a fractional scale. Captions and titles are untouched. The
+ * size is fitted to the frame width from the word's own length, so a short
+ * word is big and a long one still fits. Time it with `at` from `anchors()`;
+ * the look (`Tokens.slam`) sets the type, the fit, the stamp and the dim.
+ */
+export type Slam = {
+  /** The word(s). A line break splits it over lines; keep it to a few words. */
+  text: string;
+  /** Seconds into the shot it lands. Defaults to the shot's first frame. */
+  at?: number;
+  /** Seconds it rests after landing. Defaults to the look's. */
+  hold?: number;
+  /** A palette name or CSS colour for this word. Defaults to the look's. */
+  color?: string;
+  /** Vertical centre as a fraction of frame height, for this word only. */
+  centre?: number;
+  /** Silence the look's automatic sound for this slam. */
+  silent?: boolean;
+};
+
 // ---------------------------------------------------------------------------
 // Generated sources
 // ---------------------------------------------------------------------------
@@ -618,6 +647,12 @@ export type Shot = {
    * safe-zone gate does not apply; `verify.ts` checks positions and the look.
    */
   pointer?: Pointer;
+  /**
+   * Key words that land big in the centre of the frame on a spoken beat — see
+   * `Slam`. The picture behind is dimmed while one is up; captions stay where
+   * they are, above the dim.
+   */
+  slams?: Slam[];
   /**
    * Shake, flash or glitch the picture at a moment — see `Impact`. Overlays
    * are not touched.
@@ -1484,6 +1519,9 @@ export const resolveTimeline = (spec: ReelSpec): Timeline => {
       }
       for (const m of shot.marks ?? []) {
         if (!m.silent) fire("mark", startFrame + Math.round((m.at ?? 0) * fps));
+      }
+      for (const sl of shot.slams ?? []) {
+        if (!sl.silent) fire("slam", startFrame + Math.round((sl.at ?? 0) * fps));
       }
       for (const i of shot.impacts ?? []) {
         if (!i.silent) fire(i.kind, startFrame + Math.round((i.at ?? 0) * fps));

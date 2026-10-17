@@ -25,6 +25,7 @@
     "@remotion/captions": "^4.0.523",
     "@remotion/cli": "^4.0.523",
     "@remotion/fonts": "^4.0.523",
+    "@remotion/layout-utils": "^4.0.523",
     "@remotion/lottie": "^4.0.523",
     "@remotion/media-utils": "^4.0.523",
     "@remotion/paths": "^4.0.523",

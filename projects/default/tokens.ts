@@ -285,6 +285,36 @@ export const tokens: Tokens = {
     shake: { sfx: "snap", volume: 0.8, duck: true },
     flash: { sfx: "whoosh", volume: 0.45 },
     glitch: { sfx: "switch", volume: 0.5 },
+    // A slam is the loudest thing a reel does on screen, so it gets the punch
+    // sound and ducks the music.
+    slam: { sfx: "snap", volume: 0.8, duck: true },
+  },
+
+  // A key word landing big in the middle of the frame. 230 is the size a short
+  // word gets; longer ones are fitted down to 86% of the frame width. It lands
+  // larger and soft (1.5x, blurred) with a bounce, rests a beat over a dimmed
+  // picture, and is gone in five frames.
+  slam: {
+    fontFamily: '"Inter", -apple-system, "Helvetica Neue", Arial, sans-serif',
+    size: 230,
+    weight: 800,
+    color: "#FFFFFF",
+    tracking: -0.025,
+    lineHeight: 1,
+    textAlign: "center",
+    uppercase: true,
+    shadow: [
+      { color: "rgba(0,0,0,0.65)", blur: 6, y: 3 },
+      { color: "rgba(0,0,0,0.45)", blur: 40, y: 14 },
+    ],
+    width: 0.86,
+    centre: 0.42,
+    enterFrames: 7,
+    enterScale: 1.5,
+    enterBlur: 14,
+    holdFrames: 14,
+    exitFrames: 5,
+    scrim: { color: "#000000", opacity: 0.45 },
   },
 
   // Built-in diagram icons draw themselves on over about half a second when

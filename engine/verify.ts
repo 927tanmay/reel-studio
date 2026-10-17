@@ -193,6 +193,70 @@ export const verifySpec = (spec: ReelSpec, timeline: Timeline): Finding[] => {
     });
   }
 
+  // A slam is one big word, so it needs the look that sizes it, a word, a
+  // place inside the safe zones, a moment inside the shot, and — the one thing
+  // that goes wrong in use — room not to be stacked on another slam or a title.
+  for (const resolved of timeline.shots) {
+    const { shot, index, durationInFrames } = resolved;
+    if (!shot.slams?.length) continue;
+    if (!t.slam) {
+      findings.push({
+        level: "fail",
+        message: `Shot ${index} has slams, but the look defines no \`slam\` style. Add one to the look's tokens.`,
+      });
+      continue;
+    }
+    const fps = spec.frame.fps;
+    const style = t.slam;
+    const windows: { from: number; to: number }[] = [];
+    shot.slams.forEach((sl, i) => {
+      if (sl.text.trim().length === 0) {
+        findings.push({ level: "fail", message: `Shot ${index} slam ${i} has no text.` });
+        return;
+      }
+      const from = Math.round((sl.at ?? 0) * fps);
+      const hold = sl.hold !== undefined ? Math.round(sl.hold * fps) : style.holdFrames;
+      const to = from + style.enterFrames + hold + style.exitFrames;
+      if (from >= durationInFrames) {
+        findings.push({
+          level: "warn",
+          message: `Shot ${index} slam ${i} ("${sl.text}") is at ${sl.at}s, after the shot has ended — it will never show.`,
+        });
+      }
+      windows.push({ from, to });
+
+      // The word's block, in frame fractions: its centre, plus half its lines.
+      const lines = sl.text.split("\n").length;
+      const half = (style.size * (style.lineHeight ?? 1) * lines * (spec.frame.w / t.designWidth)) / spec.frame.h / 2;
+      const centre = sl.centre ?? style.centre;
+      if (centre - half < t.safe.top || centre + half > 1 - t.safe.bottom) {
+        findings.push({
+          level: "fail",
+          message:
+            `Shot ${index} slam ${i} ("${sl.text}") spans ${((centre - half) * 100).toFixed(0)}%–` +
+            `${((centre + half) * 100).toFixed(0)}% of the frame height at its largest, reaching into the area ` +
+            `the platform interface covers. Move its centre or shorten the word.`,
+        });
+      }
+    });
+    windows.sort((a, b) => a.from - b.from);
+    for (let i = 1; i < windows.length; i++) {
+      if (windows[i].from < windows[i - 1].to) {
+        findings.push({
+          level: "warn",
+          message: `Shot ${index} has two slams on screen at once. One word at a time; give the second a later \`at\`.`,
+        });
+        break;
+      }
+    }
+    if (shot.title) {
+      findings.push({
+        level: "warn",
+        message: `Shot ${index} has both a title and a slam. That is two things said at once — keep the slam, or the title.`,
+      });
+    }
+  }
+
   // Impacts need the look that says what they look like, and a moment that
   // happens inside the shot.
   for (const resolved of timeline.shots) {

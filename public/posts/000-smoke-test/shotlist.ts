@@ -150,6 +150,11 @@ export default reel({
       badge: "1080x1920 · 30fps",
       marks: [{ kind: "underline", region: { x: 0.04, y: 0.5, w: 0.5, h: 0.028 }, at: 2.8 }],
       impacts: [{ kind: "shake", at: 2.4 }],
+      // A run of key words, one at a time, each landing on its beat.
+      slams: [
+        { text: "No code.", at: 0.6, hold: 0.5 },
+        { text: "No test.", at: 1.5, hold: 0.5 },
+      ],
     },
 
     {

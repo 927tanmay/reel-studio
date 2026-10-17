@@ -233,6 +233,31 @@ export type CodeStyle = {
 };
 
 /**
+ * The look of a key-word slam (`Shot.slams`): one big word landing in the
+ * centre of the frame for a beat. `size` is the type size a *short* word gets;
+ * a longer word is fitted down so it never exceeds `width` of the frame.
+ * Optional — a look without it cannot show a slam, and `verify.ts` says so.
+ */
+export type SlamStyle = TextStyle & {
+  /** Fraction of frame width a word is fitted within. */
+  width: number;
+  /** Vertical centre as a fraction of frame height. */
+  centre: number;
+  /** Frames the word takes to land. */
+  enterFrames: number;
+  /** The scale it lands from; it settles to exactly 1. */
+  enterScale: number;
+  /** Design pixels of blur it lands from, sharpening as it settles. */
+  enterBlur: number;
+  /** Frames it rests when a slam doesn't name its own hold. */
+  holdFrames: number;
+  /** Frames it takes to go. */
+  exitFrames: number;
+  /** A dim over the picture behind the word, or null for none. */
+  scrim: { color: string; opacity: number } | null;
+};
+
+/**
  * The look of the `lottie` generator: where an imported animation sits. Optional
  * — a look without it cannot show a standalone Lottie, and `verify.ts` says so.
  */
@@ -387,6 +412,7 @@ export type EventSounds = {
   shake?: EventSound;
   flash?: EventSound;
   glitch?: EventSound;
+  slam?: EventSound;
 };
 
 /**
@@ -437,6 +463,8 @@ export type Tokens = {
   pointer?: PointerStyle;
   /** The look of the code generator's morphs. Omit and `states` cannot be used. */
   code?: CodeStyle;
+  /** The look of a key-word slam. Omit and a shot cannot use one. */
+  slam?: SlamStyle;
   /** Where a standalone Lottie sits. Omit and a `lottie` shot cannot be used. */
   lottie?: LottieStyle;
   /** The look of the orb generator. Omit and a shot cannot use one. */
