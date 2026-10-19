@@ -4,6 +4,8 @@
   "private": true,
   "description": "A general-purpose short-form video editor driven by a coding agent: footage and a brief in, a verified vertical video out.",
   "license": "MIT",
+  "repository": { "type": "git", "url": "git+https://github.com/927tanmay/reel-studio.git" },
+  "homepage": "https://github.com/927tanmay/reel-studio#readme",
   "engines": { "node": ">=22" },
   "scripts": {
     "studio": "remotion studio",
