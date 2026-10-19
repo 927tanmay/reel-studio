@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # Remotion needs ffmpeg on the machine to encode and to measure.
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Unit tests
+        run: npm test
+
+      # The engine's own proof it works from a clean checkout: it uses only
+      # generated sources, so it needs no footage and no transcript. It ends in
+      # `verify`, so passing here means the gates passed, not just that a file
+      # was written.
+      - name: Render the smoke test
+        run: npm run render 000-smoke-test
+
+      - name: Keep the render
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-test-reel
+          path: out/000-smoke-test/reel.mp4
+          retention-days: 7

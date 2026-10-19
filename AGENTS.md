@@ -576,6 +576,7 @@ npm run render 001-my-reel   # render, normalise, verify — auto-saves a take
 npm run thumbnail 001-my-reel  # freeze a shot's own picture pipeline into a feed thumbnail
 npm run takes 001-my-reel    # list, restore, diff or forget past takes
 npm run typecheck
+npm test                     # unit tests for the pure maths, no render
 node scripts/make-sfx.mjs    # regenerate the default sound effects
 node scripts/make-music.mjs  # write the default music bed (not committed)
 npm run beats <track>        # tempo, confidence, real start points for a music file
@@ -591,4 +592,7 @@ returns a clip at frame size; it may read `reel.words` so it can advance on a
 spoken word, which is the thing no conventional editor makes easy.
 
 After any engine change, run `npm run render 000-smoke-test`. It uses only
-generated sources, so it proves the chain with no footage.
+generated sources, so it proves the chain with no footage. Run `npm test` too:
+it checks the pure maths (speed ramps, code morph matching, click zoom, card
+geometry, impact envelopes, event-sound placement, the pacing counts) in under a
+second, with no render. Both run in CI on every push.

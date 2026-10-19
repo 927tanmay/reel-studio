@@ -17,5 +17,5 @@
       "@projects/*": ["projects/*"]
     }
   },
-  "include": ["engine", "projects", "public/posts", "posts.ts", "remotion.config.ts"]
+  "include": ["engine", "projects", "public/posts", "test", "posts.ts", "remotion.config.ts"]
 }

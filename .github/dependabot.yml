@@ -1,0 +1,18 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      # Every remotion and @remotion/* package must be the same version, so they
+      # update together or not at all.
+      remotion:
+        patterns:
+          - "remotion"
+          - "@remotion/*"
+    open-pull-requests-limit: 5
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

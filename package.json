@@ -23,6 +23,7 @@
     "takes": "node scripts/takes.mjs",
     "export-timeline": "node scripts/export-timeline.mjs",
     "new": "node scripts/new-post.mjs",
+    "test": "node --experimental-strip-types --experimental-loader ./scripts/ts-resolve-hook.mjs --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test \"test/*.test.ts\"",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
