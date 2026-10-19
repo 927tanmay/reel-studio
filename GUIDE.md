@@ -105,7 +105,7 @@ ceiling, you find out here rather than after cutting.
 
 ## 6. Build the shotlist
 
-Either open the folder in Claude Code and say:
+Either open the folder in a coding agent (Claude Code, Codex, Gemini CLI…) and say:
 
 ```
 /cut 001-first
@@ -317,6 +317,6 @@ first time.
 npm run new 002-next -- --frame 1080x1920 --max 45
 # footage into raw/, brief.md filled in
 npm run ingest 002-next && npm run transcribe 002-next
-# /cut 002-next  in Claude Code
+# /cut 002-next  in Claude Code (other agents: just say "cut post 002-next")
 npm run render 002-next
 ```

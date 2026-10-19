@@ -9,7 +9,7 @@ The engine is general. Every creative decision is input. Your job is to turn a
 brief and a folder of footage into a shotlist the user agrees with, then render
 and verify it.
 
-Read `CLAUDE.md` for the rules and `DIRECTION.md` for the brief templates.
+Read `AGENTS.md` for the rules and `DIRECTION.md` for the brief templates.
 
 ## Order of work
 

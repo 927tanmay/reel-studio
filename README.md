@@ -1,11 +1,11 @@
 # Reel Studio
 
-A general-purpose short-form video editor you drive from Claude Code. Footage
-and a brief go in; a verified, delivery-spec MP4 comes out. Every creative
-decision is input, so it cuts a hook reel one week and a split-screen
-walkthrough the next without changing the tool.
+A short-form video editor you drive with a coding agent. Footage and a brief go
+in; a verified, delivery-spec vertical MP4 comes out. Every creative decision is
+input, so it cuts a hook reel one week and a screen-recording walkthrough the
+next without changing the tool.
 
-Nothing in it costs money.
+It runs locally. Nothing in it costs money, calls an API, or needs an account.
 
 ## Requirements
 
@@ -40,16 +40,27 @@ npm run studio                 # live preview while you iterate
 npm run render 001-my-reel     # render, normalise loudness, verify
 ```
 
-Or open the folder in Claude Code and say "cut post 001". `CLAUDE.md` carries
-the whole procedure, so any session knows it without you explaining anything.
+## Using it with an AI agent
+
+The only part that needs an AI is writing the shotlist — the file that says
+which move sits at which word. Everything else (measuring, transcribing,
+rendering, verifying) is plain code and costs no tokens.
+
+Open the folder in any coding agent — Claude Code, Codex, Gemini CLI, Cursor —
+and say "cut post 001". `AGENTS.md` carries the whole procedure and every rule,
+so the agent knows it without you explaining anything. Claude Code reads it
+through the one-line `CLAUDE.md` that points at it; other agents read
+`AGENTS.md` directly. The slash commands in `.claude/` are a Claude Code
+convenience, not a requirement.
 
 ## Where briefs come from
 
-If scripts are written somewhere else, hand that project `HANDOFF.md`. It
-specifies exactly what a complete brief contains, including the word-count
-budget that keeps a script inside its runtime, and a checklist to run before
-handing anything over. A complete brief is cut in one pass; an incomplete one
-becomes three rounds of questions.
+If scripts are written somewhere else, hand that project `ENGINE.md` (what the
+editor can do), `HANDOFF.md` (exactly what a brief contains, including the
+word-count budget that keeps a script inside its runtime, and a checklist to run
+before handing anything over) and `STYLE.md` (how many effects a reel can
+carry). A complete brief is cut in one pass; an incomplete one becomes three
+rounds of questions.
 
 ## What it does
 
@@ -57,25 +68,46 @@ becomes three rounds of questions.
 under-budget speaking time badly, so no scripted timing is ever trusted.
 
 **Anchors edits to spoken words.** `at.start("generated")` survives a re-cut; a
-timecode does not.
+timecode does not. Captions, titles, marks, zooms and slams all land on the word
+that names them.
+
+**Cuts like an editor.** Punches, matched zooms, blends, slides, split edits
+(sound changing before or after the picture), B-roll that keeps the voice
+running underneath, dead air and "um"s removed from the actual recording,
+music that ducks under speech and can start on a real beat.
+
+**Presents screen recordings properly.** A recording can float as a rounded
+card over a blurred copy of itself and swing in with a 3D turn; hand-drawn
+circles, underlines and highlights draw themselves over one thing; clicks get a
+ring and an optional spotlight; the picture zooms toward a click; footage can
+race and ease back to normal speed.
+
+**Makes moments land.** A key word slams into the middle of the frame, sized to
+fit; the picture can shake, flash or glitch. Small sounds play on clicks, marks
+and zooms by themselves. `STYLE.md` says how few of the loud ones a reel should
+carry, and `npm run critique` counts them.
+
+**Generates picture when you have none.** Diagrams whose icons draw
+themselves on, code with real syntax colouring that morphs from one version to
+the next, terminals, comparisons, counters and trends, callouts, imported
+Lottie animations, and a dotted "thinking" orb — all rendered from the same
+program as the word timings, so a diagram advances on the word you say it.
 
 **Fixes round-trip drift.** Audio that went through an external repair tool comes
 back a frame or two out. `npm run align` measures the offset by correlation and
 corrects it.
 
-**Generates picture when you have none.** Diagrams, code, terminals,
-comparisons, counters and callouts, all rendered from the same program as the
-word timings, so a diagram can advance on the word you say it.
-
 **Verifies the file, not the intention.** Frame size, rate, runtime ceiling,
-codec, file size and measured loudness, plus frames pulled out to look at.
+codec, file size and measured loudness, plus frames pulled out to look at. Every
+render is also saved as a take you can list, diff and restore.
 
 ## Making it yours
 
 Copy `projects/default/tokens.ts`, change every value in it, and point your
-shotlists at the copy. That file holds the whole look: palette, type, caption
-style, safe zones, punch presets, mix levels. One repository can serve several
-channels without them contaminating each other.
+shotlists at the copy. That file holds the whole look: palette, fonts, caption
+style, safe zones, punch presets, mix levels, and the style of every overlay
+and effect. One repository can serve several channels without them
+contaminating each other.
 
 ## Documentation
 
@@ -83,7 +115,7 @@ Seven files, each for a different reader:
 
 - **`README.md`** (this file) — setup, and the shortest path to a rendered file.
 - **`GUIDE.md`** — a full worked walkthrough, one real reel start to finish.
-- **`CLAUDE.md`** — the rules an agent driving this repo follows; read this
+- **`AGENTS.md`** — the rules an agent driving this repo follows; read this
   first if you're pairing with one.
 - **`ENGINE.md`** — a digest of what the editor can and cannot do, for whoever
   writes scripts and briefs in another project; paste it there with `HANDOFF.md`
@@ -97,9 +129,17 @@ Seven files, each for a different reader:
 
 ## Licence
 
-MIT — see `LICENSE`. Two things it doesn't cover:
+MIT — see `LICENSE`. Things it doesn't cover:
 
 - **Remotion**, which does the compositing, is free for individuals and
-  organisations up to three people; see `remotion.dev/license`.
-- **The bundled font** (`public/assets/fonts/Inter-Variable.woff2`) ships
-  under the SIL Open Font License; see `Inter-OFL.txt` in the same folder.
+  organisations up to three people; see `remotion.dev/license`. It is a
+  dependency, not part of this repository.
+- **The bundled fonts** (`public/assets/fonts/`) are Inter and Poppins under the
+  SIL Open Font License; the licence text sits beside each file.
+- **Other dependencies** (Shiki, lottie-web, rough-notation and the rest) are
+  installed from npm under their own licences — permissive ones (almost all MIT,
+  plus ISC, BSD, Apache-2.0 and a few MPL-2.0 transitive packages) apart from
+  Remotion's. Nothing GPL or otherwise copyleft-at-the-whole-project is in the tree.
+- **Anything you import** — a Lottie animation, a music track, a font — carries
+  its own licence. The repository ships one Lottie file, drawn for it, and no
+  music.

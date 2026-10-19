@@ -3,7 +3,7 @@
 The engine can do a great deal. That is the risk. Every effect says "this
 moment matters", and a reel where everything matters has no moments at all.
 This file is for whoever is choosing moves — an agent proposing a shotlist, or a
-person reading one — and it answers the question the rules in `CLAUDE.md`
+person reading one — and it answers the question the rules in `AGENTS.md`
 deliberately don't: *how much*.
 
 Read it before proposing effects, then check the result with

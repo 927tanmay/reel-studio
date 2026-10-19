@@ -2,7 +2,7 @@
 
 Everything the engine can actually do, and what using it on a real reel — many
 rounds of feedback, many re-renders — taught about which capability fits which
-moment in a script. `CLAUDE.md` is the rules and stays authoritative; this is
+moment in a script. `AGENTS.md` is the rules and stays authoritative; this is
 the practical layer on top: a capability catalog, and the judgment calls that
 came out of applying it.
 
@@ -288,7 +288,7 @@ licence text belongs in the same folder as the file it covers, not assumed.
 
 ### Hand-drawn marks on a screen recording
 
-`Shot.marks` (CLAUDE.md rule 29) is built on `@remotion/rough-notation`, and
+`Shot.marks` (AGENTS.md rule 29) is built on `@remotion/rough-notation`, and
 three things found by rendering it are worth knowing before writing one:
 
 - **Region is in pixels of the finished frame, not the source.** The library
@@ -311,7 +311,7 @@ shot trying to say two things (the same reasoning as rule 15).
 
 ### Pointer and click highlights on a screen recording
 
-`Shot.pointer` (CLAUDE.md rule 31). What rendering it showed:
+`Shot.pointer` (AGENTS.md rule 31). What rendering it showed:
 
 - **The spotlight is a radial dim, not a mask.** A soft falloff from the lit
   radius to 1.7× that, so the edge reads as light rather than a hole. It
@@ -331,7 +331,7 @@ shot trying to say two things (the same reasoning as rule 15).
 
 ### Speed ramps
 
-`Shot.speedRamp` (CLAUDE.md rule 32). Found by rendering a test clip with a
+`Shot.speedRamp` (AGENTS.md rule 32). Found by rendering a test clip with a
 frame counter burned into it, and reading the counter off stills:
 
 - **The mapping is exact, so test it that way.** A synthetic clip with its
@@ -351,7 +351,7 @@ frame counter burned into it, and reading the counter off stills:
 
 ### The orb generator
 
-`src: { type: "orb" }` (CLAUDE.md rule 33), inspired by the dotted
+`src: { type: "orb" }` (AGENTS.md rule 33), inspired by the dotted
 thought-orb loaders in AI interfaces — the maths is our own, not their code.
 
 - **Look at it in motion terms, not a still.** A single frame of `searching`
@@ -373,7 +373,7 @@ thought-orb loaders in AI interfaces — the maths is our own, not their code.
 
 ### Card, click zoom and event sounds
 
-`card`, `pointer.zoom` and `Tokens.sounds` (CLAUDE.md rules 34–36), checked
+`card`, `pointer.zoom` and `Tokens.sounds` (AGENTS.md rules 34–36), checked
 with a 1920×1080 test-pattern clip as the "screen recording":
 
 - **The card needs a source with a real aspect.** It sizes itself from the
@@ -400,7 +400,7 @@ with a 1920×1080 test-pattern clip as the "screen recording":
 
 ### Shake, flash and glitch
 
-`impacts` (CLAUDE.md rule 37). Found on the smoke test's stills, comparing a
+`impacts` (AGENTS.md rule 37). Found on the smoke test's stills, comparing a
 frame before each impact with a frame inside it:
 
 - **Compare a frame before with a frame inside.** A glitch is invisible as a
@@ -425,7 +425,7 @@ frame before each impact with a frame inside it:
 
 ### Shiki highlighting and code morphs
 
-`highlighter: "shiki"` and `states` (CLAUDE.md rule 38):
+`highlighter: "shiki"` and `states` (AGENTS.md rule 38):
 
 - **Tokens are placed in `ch` units.** Each token is its own absolutely
   positioned span at `left: <col>ch`, so a monospace font lands it exactly and
@@ -451,7 +451,7 @@ frame before each impact with a frame inside it:
 
 ### Animated icons and Lottie
 
-CLAUDE.md rule 39. What stills showed:
+AGENTS.md rule 39. What stills showed:
 
 - **Draw-on is per segment, not per icon.** Each icon is a list of strokes with
   its own slice of the 0..1 progress, so a cross draws one diagonal and then
@@ -477,7 +477,7 @@ CLAUDE.md rule 39. What stills showed:
 
 ### Key-word slams
 
-`slams` (CLAUDE.md rule 40):
+`slams` (AGENTS.md rule 40):
 
 - **Fit once per word, not per frame.** `fitText` measures text, which is the
   expensive part, and its answer never changes frame to frame — so it is
@@ -499,7 +499,7 @@ CLAUDE.md rule 39. What stills showed:
 
 ### Card tilt
 
-`Tokens.card.tilt` (CLAUDE.md rule 41), checked on a landscape test clip:
+`Tokens.card.tilt` (AGENTS.md rule 41), checked on a landscape test clip:
 
 - **Judge it on a landscape card.** On a tall, frame-shaped generated clip the
   swing is barely visible; on the 16:9 recording it is made for, the trapezoid
@@ -611,7 +611,7 @@ footage — cut, punched, reframed, captioned, banded.
 - **`code` / `terminal` / `compare` / `data`** — reach for these when the
   script names something abstract that has no footage of it (a metric, a
   before/after, a snippet) rather than trying to screen-record it. Per
-  `CLAUDE.md`: captured footage first, generated second, stock third, a video
+  `AGENTS.md`: captured footage first, generated second, stock third, a video
   model last — a generator is what fills the gap when nothing was captured
   and stock would be generic.
 
@@ -939,7 +939,7 @@ render-and-check cycle.
 ## 8. Reading a script for engine fit
 
 A rough pass to make before writing a shotlist, beyond the moment-by-moment
-transition/emphasis calls `CLAUDE.md` already asks for:
+transition/emphasis calls `AGENTS.md` already asks for:
 
 - **Any line that names a short list of things** (two or three named items,
   a sequence of steps) — candidate for `diagram` with word-anchored steps,

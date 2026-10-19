@@ -2,7 +2,9 @@
   "name": "reel-studio",
   "version": "0.1.0",
   "private": true,
-  "description": "A general-purpose short-form video editing workflow driven from Claude Code.",
+  "description": "A general-purpose short-form video editor driven by a coding agent: footage and a brief in, a verified vertical video out.",
+  "license": "MIT",
+  "engines": { "node": ">=22" },
   "scripts": {
     "studio": "remotion studio",
     "ingest": "node scripts/ingest.mjs",

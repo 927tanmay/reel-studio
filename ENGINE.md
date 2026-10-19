@@ -3,7 +3,7 @@
 > Paste this into the context of whatever project writes your scripts and
 > briefs. It says what the reel editor can do, what it cannot, and what that
 > means for how you write. It is a digest: the full rules are in the editor's
-> own repository (`CLAUDE.md`), and the exact brief format is `HANDOFF.md`.
+> own repository (`AGENTS.md`), and the exact brief format is `HANDOFF.md`.
 > Read `STYLE.md` for how many effects a reel can carry.
 
 ## 1. What it is
