@@ -37,7 +37,7 @@ jobs:
         run: npm run render 000-smoke-test
 
       - name: Keep the render
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: smoke-test-reel
           path: out/000-smoke-test/reel.mp4
