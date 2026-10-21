@@ -253,7 +253,8 @@ few seconds of talking head.
 > and the picture holds still while the second arrives, instead of gliding
 > across to it. A node can carry a small icon instead of being text-only —
 > either a plain one (a checkmark, a cross, an arrow, a star, a lock, a
-> warning, an info mark, a trend line — for a node naming a concept, which
+> warning, an info mark, a trend line, a phone, Bluetooth, a map pin, a key,
+> a cloud — for a node naming a concept, which
 > is most of them) or a UI mockup (a button, a loading spinner, a debouncing
 > button, a checkout card, a receipt, a booking calendar — for a node naming
 > a *specific interface state* a label alone would leave abstract). A custom
@@ -298,7 +299,9 @@ dimmed
 > one that already suits the channel, and say how long it should be on
 > screen. A node in a diagram can also carry one instead of a plain icon.
 > The plain built-in icons now draw themselves on as their node arrives; that
-> needs nothing from you.
+> needs nothing from you. Four animations ship ready to use, in the default
+> cyan: a radar pulse (for "your lost phone"), a padlock snapping shut, a
+> key swap (for key rotation) and a single expanding ring.
 
 **orb** — a dotted sphere of light that reads as "an AI is working"
 > Which of five motions: *working* (particles on orbits), *searching* (a

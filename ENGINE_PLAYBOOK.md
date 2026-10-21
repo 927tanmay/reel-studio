@@ -474,6 +474,20 @@ AGENTS.md rule 39. What stills showed:
 - **No recolouring.** A Lottie's colours are inside the file. To match a look,
   edit the file (or pick one drawn in the right colours) — the engine does not
   rewrite them.
+- **Hand-drawn Lottie is practical for simple marks.** `radar-pulse`,
+  `lock-snap` and `key-swap` are plain JSON (strokes, ellipses, a few bezier
+  points, eased keyframes), written from a short script rather than exported
+  from an editor. What the stills showed: draw the end state first, because a
+  node holds the last frame (the radar keeps a dot and a faint ring so it still
+  reads after its pulses fade); keep every moving part inside the 100×100
+  canvas at its *start* pose too (the padlock's lifted shackle clipped against
+  the top edge until its starting height was lowered); and keep a shackle's
+  arc as separate bezier points, since one cubic cannot approximate a half
+  circle. A node plays a Lottie once; set `loop: true` for a pulse.
+- **Icons at node size are small.** A Lottie in a node sits at the same 52px
+  footprint as a plain icon, which is why these designs use thick strokes and
+  almost no fine detail. A detailed animation belongs in a `lottie` clip, not
+  a node.
 
 ### Key-word slams
 

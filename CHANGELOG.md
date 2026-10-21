@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Five more plain diagram icons that draw themselves on: phone, Bluetooth,
+  map pin, key and cloud (thirteen in all).
+- Three Lottie animations drawn for the repository, in the default look's cyan
+  and MIT-licensed: `radar-pulse`, `lock-snap` and `key-swap`.
+- A node's `visual: { lottie }` can now `loop`.
+
 ## 0.1.0 — first public release
 
 A general-purpose short-form video editor driven by a coding agent. Footage and

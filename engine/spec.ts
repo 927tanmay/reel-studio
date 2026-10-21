@@ -295,7 +295,12 @@ export type DiagramVisual =
   | "lock"
   | "warning"
   | "info"
-  | "trend-up";
+  | "trend-up"
+  | "phone"
+  | "bluetooth"
+  | "map-pin"
+  | "key"
+  | "cloud";
 
 export type DiagramNode = {
   id: string;
@@ -311,7 +316,7 @@ export type DiagramNode = {
    * Lottie animation there, starting when the node arrives; it keeps the
    * colours it was drawn with, which a look cannot change.
    */
-  visual?: DiagramVisual | { src: string } | { lottie: string };
+  visual?: DiagramVisual | { src: string } | { lottie: string; loop?: boolean };
 };
 export type DiagramEdge = { from: string; to: string; label?: string };
 

@@ -38,7 +38,7 @@ const NodeVisual: React.FC<{
     const size = u(52);
     return (
       <Sequence from={startFrame} layout="none">
-        <LottieIcon path={variant.lottie} width={size} height={size} />
+        <LottieIcon path={variant.lottie} width={size} height={size} loop={variant.loop} />
       </Sequence>
     );
   }

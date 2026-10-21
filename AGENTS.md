@@ -217,8 +217,8 @@ by hand, and resuming is expected and supported.
    guess which fits.** The built-in set is two families: `button` /
    `spinner` / `debounce` / `checkout` / `receipt` / `booking` for a script
    naming a specific interface state, and `check` / `cross` / `arrow-right`
-   / `star` / `lock` / `warning` / `info` / `trend-up` for a plain concept
-   with no UI attached. `{ src: "assets/..." }` drops in anything else — a
+   / `star` / `lock` / `warning` / `info` / `trend-up` / `phone` / `bluetooth`
+   / `map-pin` / `key` / `cloud` for a plain concept with no UI attached. `{ src: "assets/..." }` drops in anything else — a
    logo, a brand mark — at the same footprint the built-ins use, so swapping
    one for another moves nothing else in the layout.
 23. **A `data` shot is either independent figures or one trend — the
@@ -449,20 +449,24 @@ by hand, and resuming is expected and supported.
    the render is held with `delayRender`, like fonts.
 
 39. **Icons draw themselves on, and an imported animation plays where an icon
-   would sit.** With `Tokens.generators.iconDrawFrames` set, the eight
-   built-in diagram icons draw on when their node arrives — a check as one
+   would sit.** With `Tokens.generators.iconDrawFrames` set, the thirteen
+   plain built-in diagram icons draw on when their node arrives — a check as one
    stroke, a cross as two in turn, a lock body then shackle, a warning's
    triangle then bar then a dot that pops — using path data in
    `engine/icons.ts` and `evolvePath` from `@remotion/paths`. Left out of the
    look, icons simply appear, as they always did; fully drawn they are
    identical either way. `visual: { lottie: "assets/….json" }` on a node plays
-   an imported Lottie at the icon footprint from the moment the node arrives,
+   an imported Lottie at the icon footprint from the moment the node arrives
+   (once; add `loop: true` for one that should keep going),
    and `src: { type: "lottie", src, seconds }` plays one centred in the frame
    at `Tokens.lottie`'s size (looping unless `loop: false`). A Lottie keeps the
    colours it was drawn with — a look cannot recolour it — and its own length
    is not measured for you, so set `seconds`. Check the licence of any file you
-   did not draw: free Lottie libraries differ file by file, and the repository
-   ships only the one we made (`ring-pulse.json`).
+   did not draw: free Lottie libraries differ file by file. The repository
+   ships four we drew ourselves, in the default look's cyan, under the MIT
+   licence: `ring-pulse` (one ring expanding), `radar-pulse` (a dot with rings
+   pulsing out, loops well), `lock-snap` (a padlock's shackle dropping shut) and
+   `key-swap` (a new key taking an old key's place, the old one dimming).
 
 40. **A key word can land big, on the beat that names it.** `slams: [{ text,
    at?, hold?, color?, centre? }]` puts a word (or two or three) in the middle

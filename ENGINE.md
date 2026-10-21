@@ -90,7 +90,9 @@ Grouped by how loud they are (see §4). Each line is a thing a brief can say.
   footage's own sound is dropped under it, so say which voice continues.
 - **Generated clips** (full content in `HANDOFF.md` §5):
   - **diagram** — nodes that assemble on your words; each can carry a plain icon
-    (these draw themselves on), a UI mockup, a logo, or an imported animation;
+    (these draw themselves on; there are thirteen, including phone, Bluetooth,
+    map pin, key and cloud), a UI mockup, a logo, or an imported animation
+    (a radar pulse, a padlock snapping shut and a key swap ship ready to use);
   - **code** — a snippet that types itself with real syntax colouring; give a
     *second version* and the word it appears on and the code morphs into it,
     showing what changed;

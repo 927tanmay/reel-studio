@@ -155,5 +155,5 @@ MIT — see `LICENSE`. Things it doesn't cover:
   plus ISC, BSD, Apache-2.0 and a few MPL-2.0 transitive packages) apart from
   Remotion's. Nothing GPL or otherwise copyleft-at-the-whole-project is in the tree.
 - **Anything you import** — a Lottie animation, a music track, a font — carries
-  its own licence. The repository ships one Lottie file, drawn for it, and no
-  music.
+  its own licence. The repository ships four Lottie files, drawn for it and
+  MIT-licensed, and no music.
