@@ -322,6 +322,11 @@ export const tokens: Tokens = {
     scrim: { color: "#000000", opacity: 0.45 },
   },
 
+  // A dot riding a diagram arrow — the data going somewhere. Warn-coloured, so
+  // it reads as the thing worth watching rather than part of the chrome, with a
+  // short comet trail; a trip takes under a second unless the shot says more.
+  packet: { color: "warn", size: 30, glow: 22, seconds: 0.9, trail: 3, labelSize: 26, fadeFrames: 4 },
+
   // Built-in diagram icons draw themselves on over about half a second when
   // their node arrives; leave this out and they simply appear.
   generators: { iconDrawFrames: 14 },

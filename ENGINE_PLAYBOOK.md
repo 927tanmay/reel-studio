@@ -532,6 +532,43 @@ AGENTS.md rule 39. What stills showed:
 - **Alternate the direction.** Two cards that both swing from the right look
   like a template; a positive `y`, then a negative one, reads as camera work.
 
+### Travelling dots, chat mockups and the hidden-text page
+
+AGENTS.md rules 42–44, checked from stills on a scratch reel:
+
+- **The dot lives in the strip, drawn last.** It is positioned in the same
+  coordinate system as the cards, so it pans with the strip, and it is drawn
+  after the nodes so its label is never hidden behind a card — the gap between
+  two nodes is shorter than a tag like `?data=…`, so the label has to float
+  above the dot and overlap the card edges. The trail is the same trip sampled
+  a couple of frames earlier, not separate state.
+- **A dot on an arrow that is not drawn is invisible, silently.** The arrow only
+  appears once both its nodes do, so a trip sent before that shows nothing and
+  gives no error. That is why `verify.ts` checks each trip against the shot's
+  own steps.
+- **Chat and page are content, not configuration.** There is deliberately no
+  look token for either: they read the palette (`surface`, `chrome`, `accent`,
+  `warn`, `muted`) like the other generators, so a new look restyles them for
+  free. If they ever need their own style, add it then.
+- **The click-to-load slot shows the outcome a few frames after the press.** The
+  button dips for five frames and the placeholder swaps for `Blocked` or the
+  loaded image six frames after the press, so the press reads as the cause.
+  Without the gap, the two happen on one frame and look like a cut.
+- **Reserve the space.** Bubbles that have not arrived are laid out at opacity
+  zero, so the stack never reflows when one lands. A chat that grows by
+  re-centring looks like a UI glitch rather than a conversation.
+- **The hidden text sits at 3% contrast.** At 5% it was faintly readable in a
+  still on a dark background, which spoils "invisible". The reveal is a second,
+  clipped copy of the body with the same layout, so it lands exactly on top of
+  the faint one and nothing needs to be measured.
+- **Look at three frames of the scan:** just started (the scan bar over the
+  title), mid-way (the bar between paragraphs, hidden text still faint) and
+  done (revealed, highlighted). The first two are what sell it.
+- **Lottie paths are relative to the layer.** Two of the new animations first
+  rendered low and to the right because their paths were in canvas coordinates
+  while the layer position added another offset. Draw each shape around the
+  origin and let the layer's position place it.
+
 ## 3. Generators — one clip, one job each
 
 `engine/generators/`: `diagram`, `code`, `terminal`, `compare`, `data`,

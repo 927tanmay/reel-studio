@@ -218,7 +218,9 @@ by hand, and resuming is expected and supported.
    `spinner` / `debounce` / `checkout` / `receipt` / `booking` for a script
    naming a specific interface state, and `check` / `cross` / `arrow-right`
    / `star` / `lock` / `warning` / `info` / `trend-up` / `phone` / `bluetooth`
-   / `map-pin` / `key` / `cloud` for a plain concept with no UI attached. `{ src: "assets/..." }` drops in anything else — a
+   / `map-pin` / `key` / `cloud` / `document` / `globe` / `image` / `eye-off`
+   / `server` / `sparkle` / `shield` / `user` / `clock` / `database` for a
+   plain concept with no UI attached. `{ src: "assets/..." }` drops in anything else — a
    logo, a brand mark — at the same footprint the built-ins use, so swapping
    one for another moves nothing else in the layout.
 23. **A `data` shot is either independent figures or one trend — the
@@ -449,7 +451,7 @@ by hand, and resuming is expected and supported.
    the render is held with `delayRender`, like fonts.
 
 39. **Icons draw themselves on, and an imported animation plays where an icon
-   would sit.** With `Tokens.generators.iconDrawFrames` set, the thirteen
+   would sit.** With `Tokens.generators.iconDrawFrames` set, the twenty-three
    plain built-in diagram icons draw on when their node arrives — a check as one
    stroke, a cross as two in turn, a lock body then shackle, a warning's
    triangle then bar then a dot that pops — using path data in
@@ -463,10 +465,12 @@ by hand, and resuming is expected and supported.
    colours it was drawn with — a look cannot recolour it — and its own length
    is not measured for you, so set `seconds`. Check the licence of any file you
    did not draw: free Lottie libraries differ file by file. The repository
-   ships four we drew ourselves, in the default look's cyan, under the MIT
+   ships six we drew ourselves, in the default look's cyan, under the MIT
    licence: `ring-pulse` (one ring expanding), `radar-pulse` (a dot with rings
-   pulsing out, loops well), `lock-snap` (a padlock's shackle dropping shut) and
-   `key-swap` (a new key taking an old key's place, the old one dimming).
+   pulsing out, loops well), `lock-snap` (a padlock's shackle dropping shut),
+   `key-swap` (a new key taking an old key's place, the old one dimming),
+   `shield-close` (two halves closing, then a tick drawn inside) and
+   `check-tick` (a ring and a tick that draw themselves).
 
 40. **A key word can land big, on the beat that names it.** `slams: [{ text,
    at?, hold?, color?, centre? }]` puts a word (or two or three) in the middle
@@ -497,6 +501,40 @@ by hand, and resuming is expected and supported.
    once the card has settled: `verify.ts` warns if one starts before then, or
    if the look's tilt never settles (omit `settleFrames`) and the shot has any.
    Leave a tilt that stays angled for a card with nothing pinned to it.
+
+42. **Data can ride an arrow.** `edges: [{ from, to, travel: [{ at, seconds?,
+   label?, color? }] }]` on a diagram sends a dot from the `from` node's edge to
+   the `to` node's, with a short glowing trail and an optional tag riding with
+   it (`label: "?data=…"`) — the request leaving, the user's data going
+   somewhere it should not. Time each trip from `anchors()` so it sets off on the
+   word that names it; a round trip is two trips on one edge, the second after
+   the first ends. The arrow is only drawn while both its nodes are, so a dot
+   sent earlier is invisible — `verify.ts` warns, as it does for a trip after
+   the shot ends or an edge to a node that does not exist. It eases (leaves and
+   arrives gently; constant speed reads as a progress bar). Style, trip length
+   and trail are `Tokens.packet`, warn-coloured by default so it reads as the
+   thing worth watching rather than part of the chrome.
+43. **A safeguard can be shown as the real interface.** `src: { type: "chat",
+   messages }` draws a chat window: user and AI bubbles arriving in order
+   (`at`), and inside an AI reply either an image slot that asks before it loads
+   (`image: { host, pressAt, outcome }` — the placeholder, "Load image from
+   {host}?", a button pressed at `pressAt`, then `"loaded"` or `"blocked"`) or
+   buttons (`buttons: [{ label, kind, pressAt }]`, the pressed one lit and the
+   others dimmed). Use it where the fix is something the user *sees* — an
+   assistant asking before it fetches a remote image, an approve/deny prompt —
+   instead of narrating code. Colours and type come from the look's palette.
+   Space is reserved for bubbles not yet arrived, so nothing already on screen
+   moves when a new one lands.
+44. **Text that is there but cannot be seen, until something finds it.**
+   `src: { type: "page", url, title?, lines, hidden, at?, sweep? }` draws a web
+   page in a browser frame with a sentence concealed in it at near-zero
+   contrast, then a scan sweeps down the page and reveals it in the warning
+   colour, the revealed part staying revealed. It is "an attacker hid a note in
+   invisible text" shown literally, and works for any prompt-injection line. The
+   reveal is a clipped second copy of the body laid out identically, so it needs
+   no measuring of where the hidden text landed and cannot drift from the faint
+   copy beneath it. `verify.ts` fails a page with no visible lines or no hidden
+   text and warns if the scan outlasts the shot.
 
 ## What stays human
 
@@ -537,14 +575,14 @@ engine/          the moves and the contract — general, never show-specific
   spec.ts        the shotlist contract and timeline resolution
   icons.ts       the built-in icons as drawable path segments
   codeMorph.ts   code as positioned tokens, and how one version becomes the next
-  card.ts · zoom.ts · ramp.ts · impact.ts   pure geometry for cards, click zooms, speed ramps and impacts,
+  card.ts · zoom.ts · ramp.ts · impact.ts · packet.ts   pure geometry for cards, click zooms, speed ramps and impacts,
                  shared by the renderer, the timeline and verify.ts
   scale.ts       crop-then-scale, and size tokens that survive a frame change
   words.ts       word anchoring, and the pauses/fillers a cut removes
   colour.ts      matching one clip's colour to another's
   verify.ts      gates that need no render
   moves/         punch · blend · push · captions · title · badge · marks · pointer · bed · hits
-  generators/    diagram · code · terminal · compare · data · callout · lottie · orb
+  generators/    diagram · code · terminal · compare · data · callout · chat · page · lottie · orb
 projects/        one look per channel; copy default/ and change everything
 public/posts/    one folder per reel, self-contained
 public/assets/   fonts and sound effects are committed, so those renders are

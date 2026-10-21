@@ -90,16 +90,23 @@ Grouped by how loud they are (see §4). Each line is a thing a brief can say.
   footage's own sound is dropped under it, so say which voice continues.
 - **Generated clips** (full content in `HANDOFF.md` §5):
   - **diagram** — nodes that assemble on your words; each can carry a plain icon
-    (these draw themselves on; there are thirteen, including phone, Bluetooth,
-    map pin, key and cloud), a UI mockup, a logo, or an imported animation
-    (a radar pulse, a padlock snapping shut and a key swap ship ready to use);
+    (these draw themselves on; there are twenty-three, including phone,
+    Bluetooth, map pin, key, cloud, document, globe, image, hidden-eye, server,
+    AI sparkle, shield, user, clock and database), a UI mockup, a logo, or an
+    imported animation (a radar pulse, a padlock snapping shut, a key swap, a
+    shield closing and a self-ticking check ship ready to use); a **dot can
+    travel along an arrow** between nodes, carrying a tag like `?data=…`, to
+    trace how data moves;
   - **code** — a snippet that types itself with real syntax colouring; give a
     *second version* and the word it appears on and the code morphs into it,
     showing what changed;
   - **terminal**, **compare** (two states, wipe on a word), **data** (counters,
     bars, or a line/area trend), **callout** (focus box on a still), **image**
     (a freeze-frame close), **lottie** (an imported animation; supply the file
-    and its licence).
+    and its licence), **chat** (a chat window with an AI reply that asks before
+    loading an image, or shows approve/deny buttons — a safeguard as the real
+    interface) and **page** (a web page with invisible text that a scan sweeps
+    across and reveals — "an attacker hid a note", shown literally).
 - **Split frame** — you visible in a band while a generated graphic advances in
   another, for when the viewer must see your face *and* the graphic.
 

@@ -154,6 +154,91 @@ export const verifySpec = (spec: ReelSpec, timeline: Timeline): Finding[] => {
     }
   }
 
+  // A dot travelling an arrow needs the look, an edge between nodes that
+  // exist, a moment inside the shot, and an arrow that is on screen then.
+  for (const resolved of timeline.shots) {
+    const { shot, index, durationInFrames } = resolved;
+    const src = shot.src;
+    if (!src || typeof src !== "object" || src.type !== "diagram") continue;
+    const travelling = (src.edges ?? []).filter((e) => e.travel?.length);
+    if (travelling.length === 0) continue;
+    if (!t.packet) {
+      findings.push({
+        level: "fail",
+        message: `Shot ${index} has a dot travelling an arrow, but the look defines no \`packet\` style. Add one to the look's tokens.`,
+      });
+      continue;
+    }
+    const ids = new Set(src.nodes.map((n) => n.id));
+    for (const edge of travelling) {
+      if (!ids.has(edge.from) || !ids.has(edge.to)) {
+        findings.push({
+          level: "fail",
+          message: `Shot ${index} has a travelling dot on an edge ${edge.from} → ${edge.to}, but one of those nodes does not exist.`,
+        });
+        continue;
+      }
+      for (const trip of edge.travel!) {
+        if (Math.round(trip.at * spec.frame.fps) >= durationInFrames) {
+          findings.push({
+            level: "warn",
+            message: `Shot ${index}'s dot on ${edge.from} → ${edge.to} sets off at ${trip.at}s, after the shot has ended — it will never show.`,
+          });
+        }
+        // The arrow is only drawn while both its nodes are, so a dot sent
+        // before that is silently invisible.
+        if (src.steps?.length) {
+          let current = src.steps[0];
+          for (const st of src.steps) if ((st.at ?? 0) <= trip.at) current = st;
+          if (!current.show.includes(edge.from) || !current.show.includes(edge.to)) {
+            findings.push({
+              level: "warn",
+              message: `Shot ${index}'s dot on ${edge.from} → ${edge.to} sets off at ${trip.at}s, when both nodes are not on screen yet — the arrow is hidden then, so the dot will not show.`,
+            });
+          }
+        }
+      }
+    }
+  }
+
+  // Chat and page clips are content only; what can go wrong is timing.
+  for (const resolved of timeline.shots) {
+    const { shot, index, durationInFrames } = resolved;
+    const src = shot.src;
+    if (!src || typeof src !== "object") continue;
+    const fps = spec.frame.fps;
+    const late = (seconds: number | undefined, what: string) => {
+      if (seconds !== undefined && Math.round(seconds * fps) >= durationInFrames) {
+        findings.push({ level: "warn", message: `Shot ${index} ${what} at ${seconds}s, after the shot has ended — it will never show.` });
+      }
+    };
+    if (src.type === "chat") {
+      if (src.messages.length === 0) findings.push({ level: "fail", message: `Shot ${index} is a chat with no messages.` });
+      src.messages.forEach((m, i) => {
+        late(m.at, `chat message ${i} arrives`);
+        if (m.image) {
+          late(m.image.pressAt, `chat message ${i}'s button is pressed`);
+          if (m.image.pressAt !== undefined && m.image.pressAt * fps < (m.image.at ?? (m.at ?? 0) + 0.4) * fps) {
+            findings.push({ level: "warn", message: `Shot ${index} chat message ${i} presses its image button before the slot has appeared.` });
+          }
+        }
+        for (const b of m.buttons ?? []) late(b.pressAt, `chat message ${i}'s "${b.label}" is pressed`);
+      });
+    }
+    if (src.type === "page") {
+      if (src.lines.length === 0 || src.hidden.trim().length === 0) {
+        findings.push({ level: "fail", message: `Shot ${index} is a page with no visible lines or no hidden text.` });
+      }
+      const end = (src.at ?? 0.5) + (src.sweep ?? 1.6);
+      if (Math.round(end * fps) > durationInFrames) {
+        findings.push({
+          level: "warn",
+          message: `Shot ${index}'s page scan ends at ${end.toFixed(1)}s, after the shot does — the hidden text is never fully revealed.`,
+        });
+      }
+    }
+  }
+
   // A standalone Lottie is placed by the look.
   if (!t.lottie) {
     const lottieShot = timeline.shots.find((r) => typeof r.shot.src === "object" && r.shot.src.type === "lottie");

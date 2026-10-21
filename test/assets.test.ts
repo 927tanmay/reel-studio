@@ -8,7 +8,7 @@ const dir = path.join(import.meta.dirname ?? ".", "..", "public", "assets", "lot
 
 test("every shipped Lottie file is a well-formed animation", () => {
   const files = readdirSync(dir).filter((f) => f.endsWith(".json"));
-  assert.ok(files.length >= 4, `expected at least four, found ${files.join(", ")}`);
+  assert.ok(files.length >= 6, `expected at least four, found ${files.join(", ")}`);
   for (const file of files) {
     const data = JSON.parse(readFileSync(path.join(dir, file), "utf8"));
     for (const key of ["fr", "ip", "op", "w", "h"]) assert.equal(typeof data[key], "number", `${file}.${key}`);
@@ -20,8 +20,12 @@ test("every shipped Lottie file is a well-formed animation", () => {
   }
 });
 
-test("the plain icon set includes the phone, Bluetooth, map-pin, key and cloud", () => {
-  for (const name of ["phone", "bluetooth", "map-pin", "key", "cloud"]) {
+test("the plain icon set includes every icon the docs promise", () => {
+  const promised = [
+    "phone", "bluetooth", "map-pin", "key", "cloud",
+    "document", "globe", "image", "eye-off", "server", "sparkle", "shield", "user", "clock", "database",
+  ];
+  for (const name of promised) {
     assert.ok(name in ICONS, name);
     assert.ok(ICONS[name as keyof typeof ICONS].length > 0);
   }

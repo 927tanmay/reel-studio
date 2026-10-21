@@ -96,6 +96,11 @@ export const critiqueTimeline = (
     const src = r.shot.src;
     if (src && typeof src === "object") {
       if (src.type === "diagram") for (const s of src.steps ?? []) push(at(s.at), "step", r.index, "diagram step");
+      if (src.type === "diagram") {
+        for (const e of src.edges ?? []) for (const trip of e.travel ?? []) push(at(trip.at), "step", r.index, "dot sets off");
+      }
+      if (src.type === "chat") for (const m of src.messages) if ((m.at ?? 0) > 0) push(at(m.at), "step", r.index, "chat message");
+      if (src.type === "page") push(at(src.at ?? 0.5), "step", r.index, "page scan");
       if (src.type === "code") for (const h of src.highlight ?? []) push(at(h.at), "step", r.index, "code highlight");
       if (src.type === "code") for (const st of src.states ?? []) push(at(st.at), "step", r.index, "code morph");
       if (src.type === "terminal") for (const l of src.lines) push(at(l.at), "step", r.index, "terminal line");

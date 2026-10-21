@@ -240,7 +240,7 @@ graphic should get; the rest works the same as any other generated clip
 
 ## 5. Write generated clips out in full
 
-Nine kinds of clip can be generated. If you ask for one, supply all of its
+Eleven kinds of clip can be generated. If you ask for one, supply all of its
 content. Half a diagram is a question, not a brief.
 
 **diagram** — nodes that assemble and pan. The one worth reaching for
@@ -251,11 +251,17 @@ few seconds of talking head.
 > nodes are visible at each step, and the word each step lands on. If it is
 > two alternatives shown together rather than a sequence, say "side by side"
 > and the picture holds still while the second arrives, instead of gliding
-> across to it. A node can carry a small icon instead of being text-only —
+> across to it. **A dot can travel along an arrow**, from one node to the
+> next, optionally carrying a small tag like `?data=…`: say which arrow and on
+> which word it sets off ("on 'sends', a dot rides from the page to the
+> attacker with `?data=…`"). Use it for tracing how data moves — a request,
+> a cache fill, a leak. The arrow has to be showing when it goes. A node can
+> carry a small icon instead of being text-only —
 > either a plain one (a checkmark, a cross, an arrow, a star, a lock, a
 > warning, an info mark, a trend line, a phone, Bluetooth, a map pin, a key,
-> a cloud — for a node naming a concept, which
-> is most of them) or a UI mockup (a button, a loading spinner, a debouncing
+> a cloud, a document, a globe, an image, a hidden-eye, a server, a sparkle
+> for AI, a shield, a user, a clock, a database — for a node naming a
+> concept, which is most of them) or a UI mockup (a button, a loading spinner, a debouncing
 > button, a checkout card, a receipt, a booking calendar — for a node naming
 > a *specific interface state* a label alone would leave abstract). A custom
 > logo or brand mark can go on a node too, if you have the file.
@@ -299,9 +305,25 @@ dimmed
 > one that already suits the channel, and say how long it should be on
 > screen. A node in a diagram can also carry one instead of a plain icon.
 > The plain built-in icons now draw themselves on as their node arrives; that
-> needs nothing from you. Four animations ship ready to use, in the default
+> needs nothing from you. Six animations ship ready to use, in the default
 > cyan: a radar pulse (for "your lost phone"), a padlock snapping shut, a
-> key swap (for key rotation) and a single expanding ring.
+> key swap (for key rotation), a shield closing (for "fixed" or "blocked"), a
+> check that ticks itself (for an answer reveal) and a single expanding ring.
+
+**chat** — a chat window, for showing a safeguard as the real interface
+> The messages in order (user or AI), the word each lands on, and what the
+> AI reply holds: either an image slot that asks first ("Load image from
+> attacker.example?" with a button — say when the button is pressed and
+> whether the image then loads or is blocked), or approve/deny buttons (say
+> which is pressed and when). Use it where the fix is something the viewer
+> should *see*: an assistant asking before it fetches an image, an approval
+> prompt. Not a transcript; keep it to a few short messages.
+
+**page** — a web page with text you cannot see, until a scan finds it
+> The address, an optional page title, the visible paragraphs, the
+> hidden sentence, and the word the scan starts on. "An attacker hid a note in
+> invisible text", shown literally. Works for any prompt-injection line. One
+> hidden sentence per page, and keep it short enough to read as it appears.
 
 **orb** — a dotted sphere of light that reads as "an AI is working"
 > Which of five motions: *working* (particles on orbits), *searching* (a

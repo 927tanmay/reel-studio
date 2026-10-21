@@ -258,6 +258,27 @@ export type SlamStyle = TextStyle & {
 };
 
 /**
+ * The look of a dot travelling along a diagram arrow (`DiagramEdge.travel`).
+ * Optional — a look without it cannot show one, and `verify.ts` says so.
+ */
+export type PacketStyle = {
+  /** A palette name or CSS colour. */
+  color: string;
+  /** Dot diameter in design pixels. */
+  size: number;
+  /** Soft glow radius in design pixels. */
+  glow: number;
+  /** Trip length when a shot doesn't name one. */
+  seconds: number;
+  /** Ghost dots trailing behind, fading — 0 for none. */
+  trail: number;
+  /** Size of the label's type, in design pixels. */
+  labelSize: number;
+  /** Frames it fades in and out. */
+  fadeFrames: number;
+};
+
+/**
  * The look of the `lottie` generator: where an imported animation sits. Optional
  * — a look without it cannot show a standalone Lottie, and `verify.ts` says so.
  */
@@ -487,6 +508,8 @@ export type Tokens = {
   code?: CodeStyle;
   /** The look of a key-word slam. Omit and a shot cannot use one. */
   slam?: SlamStyle;
+  /** The look of a dot travelling along a diagram arrow. Omit and `travel` cannot be used. */
+  packet?: PacketStyle;
   /** Where a standalone Lottie sits. Omit and a `lottie` shot cannot be used. */
   lottie?: LottieStyle;
   /** The look of the orb generator. Omit and a shot cannot use one. */

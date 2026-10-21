@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- A dot can travel along a diagram arrow (`edges[].travel`), with a trail and an
+  optional label, to trace how data moves.
+- Two new generated clips: `chat` (a chat window with a click-to-load image slot
+  or approval buttons) and `page` (invisible text that a scan reveals).
+- Ten more plain icons: document, globe, image, eye-off, server, sparkle, shield,
+  user, clock, database (twenty-three in all), and two more Lottie animations,
+  `shield-close` and `check-tick`.
+
 - Five more plain diagram icons that draw themselves on: phone, Bluetooth,
   map pin, key and cloud (thirteen in all).
 - Three Lottie animations drawn for the repository, in the default look's cyan

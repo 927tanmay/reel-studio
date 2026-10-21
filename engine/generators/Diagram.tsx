@@ -8,6 +8,7 @@ import { currentStep } from "./index";
 import { evolvePath } from "@remotion/paths";
 import { ICONS, iconProgress, segmentProgress, type IconName } from "../icons";
 import { LottieIcon } from "./Lottie";
+import { packetAt } from "../packet";
 
 type DiagramSpec = Extract<GenSpec, { type: "diagram" }>;
 
@@ -345,6 +346,76 @@ export const Diagram: React.FC<GenProps<DiagramSpec>> = ({ spec, reel }) => {
               </div>
             );
           })}
+          {/* Dots riding the arrows, drawn last so they sit over the cards' edges
+              and their labels are never hidden behind a node. */}
+          {tokens.packet
+            ? (spec.edges ?? []).flatMap((edge, ei) => {
+                const from = spec.nodes.findIndex((n) => n.id === edge.from);
+                const to = spec.nodes.findIndex((n) => n.id === edge.to);
+                if (from < 0 || to < 0 || !(shown.has(edge.from) && shown.has(edge.to))) return [];
+                const span = column ? cardH : cardW;
+                const start = position(from) + span;
+                const length = position(to) - position(from) - span;
+                const style = tokens.packet!;
+                const size = px(tokens, reel.frame, style.size);
+
+                return (edge.travel ?? []).flatMap((travel, ti) => {
+                  const state = packetAt(frame, fps, travel, style.seconds, style.fadeFrames);
+                  if (!state) return [];
+                  const colour = P[travel.color ?? style.color] ?? travel.color ?? P[style.color] ?? style.color;
+                  // The head, then ghosts at earlier points of the same trip.
+                  const dots = Array.from({ length: style.trail + 1 }, (_, g) => {
+                    const back = Math.max(0, state.local - g * 2);
+                    const behind = packetAt(back + Math.round(travel.at * fps), fps, travel, style.seconds, style.fadeFrames);
+                    return { g, p: behind ? behind.progress : 0 };
+                  });
+                  const centre = (p: number) => start + length * p;
+                  const cross = (column ? cardW : cardH) / 2;
+
+                  return [
+                    ...dots.map(({ g, p }) => (
+                      <div
+                        key={`pk${ei}-${ti}-${g}`}
+                        style={{
+                          position: "absolute",
+                          width: size * (1 - g * 0.14),
+                          height: size * (1 - g * 0.14),
+                          borderRadius: "50%",
+                          backgroundColor: colour,
+                          opacity: state.opacity * (g === 0 ? 1 : 0.5 / g),
+                          boxShadow: g === 0 ? `0 0 ${px(tokens, reel.frame, style.glow)}px ${colour}` : undefined,
+                          ...(column
+                            ? { left: cross - (size * (1 - g * 0.14)) / 2, top: centre(p) - (size * (1 - g * 0.14)) / 2 }
+                            : { top: cross - (size * (1 - g * 0.14)) / 2, left: centre(p) - (size * (1 - g * 0.14)) / 2 }),
+                        }}
+                      />
+                    )),
+                    travel.label ? (
+                      <div
+                        key={`pl${ei}-${ti}`}
+                        style={{
+                          position: "absolute",
+                          fontFamily: tokens.fonts.mono,
+                          fontSize: px(tokens, reel.frame, style.labelSize),
+                          color: colour,
+                          whiteSpace: "nowrap",
+                          opacity: state.opacity,
+                          backgroundColor: tokens.bg,
+                          padding: `${px(tokens, reel.frame, 2)}px ${px(tokens, reel.frame, 8)}px`,
+                          borderRadius: px(tokens, reel.frame, 6),
+                          transform: column ? "translate(0, -50%)" : "translate(-50%, 0)",
+                          ...(column
+                            ? { left: cross + size, top: centre(state.progress) }
+                            : { left: centre(state.progress), top: cross - size * 1.9 }),
+                        }}
+                      >
+                        {travel.label}
+                      </div>
+                    ) : null,
+                  ];
+                });
+              })
+            : null}
         </div>
       </AbsoluteFill>
     </AbsoluteFill>

@@ -1,6 +1,6 @@
 {
   "frame": { "w": 1080, "h": 1920, "fps": 30 },
-  "target": { "maxSeconds": 30 },
+  "target": { "maxSeconds": 40 },
   "_targetLufs": "null because this reel has one sound effect and no dialogue. A near-silent track cannot be brought to an integrated -14 LUFS without making that one sound absurd. Real reels should leave this at -14.",
   "targetLufs": null,
   "maxMegabytes": 250

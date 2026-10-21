@@ -36,7 +36,17 @@ export type IconName =
   | "bluetooth"
   | "map-pin"
   | "key"
-  | "cloud";
+  | "cloud"
+  | "document"
+  | "globe"
+  | "image"
+  | "eye-off"
+  | "server"
+  | "sparkle"
+  | "shield"
+  | "user"
+  | "clock"
+  | "database";
 
 export const ICONS: Record<IconName, IconSegment[]> = {
   check: [{ d: "M10 25 L19 34 L38 13", from: 0, to: 1 }],
@@ -89,6 +99,56 @@ export const ICONS: Record<IconName, IconSegment[]> = {
       from: 0,
       to: 1,
     },
+  ],
+  document: [
+    { d: "M12 5 H28 L38 15 V41 a2 2 0 0 1 -2 2 H12 a2 2 0 0 1 -2 -2 V7 a2 2 0 0 1 2 -2 Z", from: 0, to: 0.5 },
+    { d: "M28 5 V15 H38", from: 0.45, to: 0.62 },
+    { d: "M17 25 H31", from: 0.6, to: 0.76 },
+    { d: "M17 31 H31", from: 0.72, to: 0.88 },
+    { d: "M17 37 H25", from: 0.85, to: 1 },
+  ],
+  globe: [
+    { d: "M24 6 a18 18 0 1 1 0 36 a18 18 0 1 1 0 -36", from: 0, to: 0.5 },
+    { d: "M24 6 C16 14 16 34 24 42 C32 34 32 14 24 6", from: 0.4, to: 0.75 },
+    { d: "M6 24 H42", from: 0.7, to: 1 },
+  ],
+  image: [
+    { d: "M10 8 H38 a3 3 0 0 1 3 3 V37 a3 3 0 0 1 -3 3 H10 a3 3 0 0 1 -3 -3 V11 a3 3 0 0 1 3 -3 Z", from: 0, to: 0.55 },
+    { d: "M32 14 a3 3 0 1 1 0 6 a3 3 0 1 1 0 -6", from: 0.5, to: 0.7 },
+    { d: "M7 34 L18 22 L27 31 L32 26 L41 35", from: 0.65, to: 1 },
+  ],
+  "eye-off": [
+    { d: "M4 24 C9 14 16 10 24 10 C32 10 39 14 44 24 C39 34 32 38 24 38 C16 38 9 34 4 24 Z", from: 0, to: 0.5 },
+    { d: "M24 19 a5 5 0 1 1 0 10 a5 5 0 1 1 0 -10", from: 0.45, to: 0.65 },
+    { d: "M9 40 L39 8", from: 0.65, to: 1 },
+  ],
+  server: [
+    { d: "M9 8 H39 a2 2 0 0 1 2 2 V20 a2 2 0 0 1 -2 2 H9 a2 2 0 0 1 -2 -2 V10 a2 2 0 0 1 2 -2 Z", from: 0, to: 0.4 },
+    { d: "M9 26 H39 a2 2 0 0 1 2 2 V38 a2 2 0 0 1 -2 2 H9 a2 2 0 0 1 -2 -2 V28 a2 2 0 0 1 2 -2 Z", from: 0.35, to: 0.75 },
+    { d: "", from: 0.8, to: 0.9, dot: { cx: 14, cy: 15, r: 0.6 } },
+    { d: "", from: 0.9, to: 1, dot: { cx: 14, cy: 33, r: 0.6 } },
+  ],
+  sparkle: [
+    { d: "M24 6 C25 16 32 23 42 24 C32 25 25 32 24 42 C23 32 16 25 6 24 C16 23 23 16 24 6 Z", from: 0, to: 0.7 },
+    { d: "M39 6 V12", from: 0.65, to: 0.82 },
+    { d: "M36 9 H42", from: 0.8, to: 1 },
+  ],
+  shield: [
+    { d: "M24 5 L39 11 V23 C39 33 32 39 24 43 C16 39 9 33 9 23 V11 Z", from: 0, to: 0.65 },
+    { d: "M17 24 L22 29 L31 19", from: 0.6, to: 1 },
+  ],
+  user: [
+    { d: "M24 8 a8 8 0 1 1 0 16 a8 8 0 1 1 0 -16", from: 0, to: 0.5 },
+    { d: "M8 42 C8 32 15 28 24 28 C33 28 40 32 40 42", from: 0.45, to: 1 },
+  ],
+  clock: [
+    { d: "M24 6 a18 18 0 1 1 0 36 a18 18 0 1 1 0 -36", from: 0, to: 0.6 },
+    { d: "M24 14 V24 L31 28", from: 0.55, to: 1 },
+  ],
+  database: [
+    { d: "M10 12 a14 5 0 1 1 28 0 a14 5 0 1 1 -28 0", from: 0, to: 0.4 },
+    { d: "M10 12 V36 a14 5 0 0 0 28 0 V12", from: 0.35, to: 0.8 },
+    { d: "M10 24 a14 5 0 0 0 28 0", from: 0.75, to: 1 },
   ],
   "trend-up": [
     { d: "M6 34 L18 22 L26 28 L42 10", from: 0, to: 0.75 },

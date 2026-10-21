@@ -300,7 +300,17 @@ export type DiagramVisual =
   | "bluetooth"
   | "map-pin"
   | "key"
-  | "cloud";
+  | "cloud"
+  | "document"
+  | "globe"
+  | "image"
+  | "eye-off"
+  | "server"
+  | "sparkle"
+  | "shield"
+  | "user"
+  | "clock"
+  | "database";
 
 export type DiagramNode = {
   id: string;
@@ -318,12 +328,89 @@ export type DiagramNode = {
    */
   visual?: DiagramVisual | { src: string } | { lottie: string; loop?: boolean };
 };
-export type DiagramEdge = { from: string; to: string; label?: string };
+/**
+ * One trip of a dot along an arrow, from the edge's `from` node to its `to`
+ * node — the data going somewhere. The arrow has to be showing (both its nodes
+ * on screen) for the dot to be drawn. A round trip is two trips on the same
+ * edge, the second starting after the first ends.
+ */
+export type Travel = {
+  /** Seconds into the shot it sets off. Pin it to the word that names it. */
+  at: number;
+  /** How long the trip takes. Defaults to the look's `packet.seconds`. */
+  seconds?: number;
+  /** A small tag riding with the dot, like `?data=…`. */
+  label?: string;
+  /** A palette name or CSS colour for this trip. Defaults to the look's. */
+  color?: string;
+};
+export type DiagramEdge = { from: string; to: string; label?: string; travel?: Travel[] };
 
 /** A step the generator advances to, optionally pinned to a spoken word. */
 export type Step = { at?: number; show: string[] };
 
+/** One message in a `chat` clip. */
+export type ChatMessage = {
+  from: "user" | "ai";
+  text: string;
+  /** Seconds into the shot the bubble arrives. Defaults to the start. */
+  at?: number;
+  /**
+   * An image slot in an AI reply that asks before it loads — the click-to-load
+   * placeholder: a picture icon, "Load image from {host}?" and a button. The
+   * button is pressed at `pressAt`, and `outcome` says what happens next.
+   */
+  image?: {
+    host: string;
+    /** Replaces the default "Load image from {host}?". */
+    prompt?: string;
+    /** Seconds the slot appears. Defaults to just after the bubble. */
+    at?: number;
+    /** Seconds the button is pressed. Omit and it waits, unpressed. */
+    pressAt?: number;
+    /** What the press does: load the image, or refuse it. Defaults to loaded. */
+    outcome?: "loaded" | "blocked";
+  };
+  /**
+   * Buttons under the reply — an approval prompt, a confirmation. One may be
+   * pressed at `pressAt`; the others dim.
+   */
+  buttons?: { label: string; kind?: "primary" | "danger" | "neutral"; pressAt?: number }[];
+};
+
 export type GenSpec =
+  | {
+      /**
+       * A chat window: user and AI bubbles arriving in order, with an optional
+       * click-to-load image slot or approval buttons inside an AI reply. For
+       * showing a safeguard as the real interface rather than as code — an
+       * assistant asking before it loads a remote image, an approval prompt.
+       * Colours and type come from the look's palette; there is nothing to
+       * configure beyond the content.
+       */
+      type: "chat";
+      messages: ChatMessage[];
+      seconds?: number;
+    }
+  | {
+      /**
+       * A plain web page in a browser frame with text that is there but
+       * cannot be seen — until a scan sweeps down the page and reveals it.
+       * "An attacker hid a note in invisible text", shown literally. `lines`
+       * are the visible paragraphs; `hidden` is the concealed sentence, placed
+       * after line `hiddenAfter` (the last by default). The scan starts at `at`
+       * seconds and takes `sweep` seconds; what it has passed stays revealed.
+       */
+      type: "page";
+      url: string;
+      title?: string;
+      lines: string[];
+      hidden: string;
+      hiddenAfter?: number;
+      at?: number;
+      sweep?: number;
+      seconds?: number;
+    }
   | {
       type: "diagram";
       nodes: DiagramNode[];

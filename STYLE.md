@@ -22,7 +22,7 @@ this file is wrong. Offer the comparison; do not choose for them.
 | Loudness | What | Rule of thumb |
 |---|---|---|
 | **Quiet** — always fine | captions, cuts, matched-zoom punches, blends and pushes, audio crossfades, J/L-cuts, titles, badges, lower thirds | Use freely. This is the texture of the reel. |
-| **Medium** — earns its place | `marks`, `pointer` (rings, spotlight), click `zoom`, `card`, ribbon, diagram steps, code morphs, speed ramps, lottie icons | One at a time. Each should answer "where do I look?" |
+| **Medium** — earns its place | `marks`, `pointer` (rings, spotlight), click `zoom`, `card`, ribbon, diagram steps, travelling dots, code morphs, speed ramps, lottie icons, chat mockups, the hidden-text page reveal | One at a time. Each should answer "where do I look?" |
 | **Loud** — a beat that should hurt | `slams`, `impacts` (shake, flash, glitch), the orb | **Two or three in a 30-second reel.** Never two at once, unless they are one beat (see §2). |
 
 If you can't say what a moment would lose without the effect, it didn't need it.
