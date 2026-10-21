@@ -8,6 +8,7 @@
   "homepage": "https://github.com/927tanmay/reel-studio#readme",
   "engines": { "node": ">=22" },
   "scripts": {
+    "doctor": "node scripts/doctor.mjs",
     "studio": "remotion studio",
     "ingest": "node scripts/ingest.mjs",
     "grade": "node scripts/grade.mjs",

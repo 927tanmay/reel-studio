@@ -7,6 +7,12 @@ next without changing the tool.
 
 It runs locally. Nothing in it costs money, calls an API, or needs an account.
 
+![The engine's own smoke test: a floating card, a click ring, a terminal and a thinking orb, all generated](docs/demo.gif)
+
+*Rendered by `npm run render 000-smoke-test` — generated sources only, no
+footage. It is the engine's test fixture, deliberately packed with every kind of
+move; a real reel carries a handful, not all of them (see `STYLE.md`).*
+
 ## Requirements
 
 - macOS or Linux, Node 22 or newer
@@ -17,7 +23,7 @@ It runs locally. Nothing in it costs money, calls an API, or needs an account.
 
 ```bash
 npm install
-node scripts/make-sfx.mjs
+npm run doctor                 # checks Node, ffmpeg and uv, and says what to install
 npm run render 000-smoke-test
 ```
 

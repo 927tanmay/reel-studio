@@ -575,6 +575,7 @@ npm run studio               # live preview
 npm run render 001-my-reel   # render, normalise, verify — auto-saves a take
 npm run thumbnail 001-my-reel  # freeze a shot's own picture pipeline into a feed thumbnail
 npm run takes 001-my-reel    # list, restore, diff or forget past takes
+npm run doctor                # is this machine ready: Node, ffmpeg, uv
 npm run typecheck
 npm test                     # unit tests for the pure maths, no render
 node scripts/make-sfx.mjs    # regenerate the default sound effects
