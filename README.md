@@ -133,6 +133,14 @@ Seven files, each for a different reader:
 - **`HANDOFF.md`** and **`DIRECTION.md`** — for whoever writes briefs upstream,
   even if that's a different project entirely.
 
+## Contributing
+
+Issues and pull requests are welcome — `CONTRIBUTING.md` has the ground rules
+(the engine stays show-agnostic, nothing that costs money, every visual feature
+ships with a gate, a test and stills you've actually looked at). Security
+reports go through GitHub's private reporting; see `SECURITY.md`. Releases are
+listed in `CHANGELOG.md`.
+
 ## Licence
 
 MIT — see `LICENSE`. Things it doesn't cover:
