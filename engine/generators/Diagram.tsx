@@ -1,5 +1,6 @@
-import React from "react";
-import { AbsoluteFill, Img, Sequence, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
+import React, { useMemo } from "react";
+import { AbsoluteFill, Easing, Img, Sequence, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
+import { measureText } from "@remotion/layout-utils";
 import type { DiagramNode, Frame, GenSpec } from "../spec";
 import type { Tokens } from "../tokens";
 import { px } from "../scale";
@@ -9,6 +10,7 @@ import { evolvePath } from "@remotion/paths";
 import { ICONS, iconProgress, segmentProgress, type IconName } from "../icons";
 import { LottieIcon } from "./Lottie";
 import { packetAt } from "../packet";
+import { fitDiagram } from "../diagramFit";
 
 type DiagramSpec = Extract<GenSpec, { type: "diagram" }>;
 
@@ -193,9 +195,46 @@ export const Diagram: React.FC<GenProps<DiagramSpec>> = ({ spec, reel }) => {
   const column = spec.layout === "column";
   const windowSize = spec.window ?? (column ? 3 : 2);
 
-  const cardW = column ? reel.frame.w * 0.76 : reel.frame.w * (0.78 / windowSize) * 1.15;
-  const cardH = column ? reel.frame.h * (0.5 / windowSize) : reel.frame.h * 0.17 * g;
-  const gap = column ? cardH * 0.42 : cardW * 0.3;
+  const baseCardW = column ? reel.frame.w * 0.76 : reel.frame.w * (0.78 / windowSize) * 1.15;
+  const baseCardH = column ? reel.frame.h * (0.5 / windowSize) : reel.frame.h * 0.17 * g;
+
+  // `fit`: cards sized from what is written on them (see engine/diagramFit.ts).
+  // Off, the proportions above are used exactly as they always were.
+  const fitted = useMemo(() => {
+    if (!spec.fit) return null;
+    const labelAsked = px(tokens, reel.frame, 44 * g);
+    const subAsked = px(tokens, reel.frame, 26 * g);
+    return fitDiagram({
+      layout: spec.layout ?? "row",
+      window: windowSize,
+      count: spec.nodes.length,
+      frameW: reel.frame.w,
+      frameH: reel.frame.h,
+      labelSize: labelAsked,
+      subSize: subAsked,
+      iconSize: px(tokens, reel.frame, 52 * g),
+      padding: px(tokens, reel.frame, 20),
+      border: px(tokens, reel.frame, 3),
+      innerGap: px(tokens, reel.frame, 8),
+      minCardH: baseCardH,
+      nodes: spec.nodes.map((n) => ({ label: n.label, sub: n.sub, visual: Boolean(n.visual) })),
+      measure: (text, size, mono) =>
+        measureText({
+          text,
+          fontFamily: mono ? tokens.fonts.mono : tokens.fonts.display,
+          fontSize: size,
+          fontWeight: mono ? 400 : 700,
+        }).width,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [spec.fit, spec.nodes, spec.layout, windowSize, reel.frame.w, reel.frame.h, g]);
+
+  const cardW = fitted?.cardW ?? baseCardW;
+  const cardH = fitted?.cardH ?? baseCardH;
+  const gap = fitted?.gap ?? (column ? cardH * 0.42 : cardW * 0.3);
+  const labelPx = fitted?.labelSize ?? px(tokens, reel.frame, 44 * g);
+  const subPx = fitted?.subSize ?? px(tokens, reel.frame, 26 * g);
+  const edgeDraw = tokens.generators?.edgeDrawFrames;
 
   const position = (i: number) => i * ((column ? cardH : cardW) + gap);
   const stripLength = position(Math.max(0, spec.nodes.length - 1));
@@ -260,6 +299,35 @@ export const Diagram: React.FC<GenProps<DiagramSpec>> = ({ spec, reel }) => {
             const visible = shown.has(edge.from) && shown.has(edge.to);
             const a = position(from) + (column ? cardH : cardW);
             const len = position(to) - position(from) - (column ? cardH : cardW);
+            const lineAt = (length: number, opacity: number, key: string) => (
+              <div
+                key={key}
+                style={{
+                  position: "absolute",
+                  backgroundColor: P.chrome ?? "#555",
+                  opacity,
+                  ...(column
+                    ? { left: cardW / 2 - strokeW / 2, top: a, width: strokeW, height: length }
+                    : { top: cardH / 2 - strokeW / 2, left: a, height: strokeW, width: length }),
+                }}
+              />
+            );
+
+            // The arrow draws itself on, from the first node to the second,
+            // once both are up: the ghost line stays dim underneath.
+            if (edgeDraw) {
+              const born =
+                Math.max(
+                  steps.find((st) => st.show.includes(edge.from))?.at ?? 0,
+                  steps.find((st) => st.show.includes(edge.to))?.at ?? 0,
+                ) * fps;
+              const drawn = interpolate(frame - born - 4, [0, edgeDraw], [0, 1], {
+                extrapolateLeft: "clamp",
+                extrapolateRight: "clamp",
+                easing: Easing.out(Easing.cubic),
+              });
+              return [lineAt(len, 0.15, `e${i}g`), visible ? lineAt(len * drawn, 1, `e${i}`) : null];
+            }
 
             return (
               <div
@@ -312,20 +380,23 @@ export const Diagram: React.FC<GenProps<DiagramSpec>> = ({ spec, reel }) => {
                 }}
               >
                 {node.visual ? (
-                  <NodeVisual
-                    variant={node.visual}
-                    frame={frame}
-                    tokens={tokens}
-                    frameSize={reel.frame}
-                    scale={g}
-                    startFrame={Math.round(appearAt * fps)}
-                  />
+                  // A fitted card never squeezes its icon: the card was sized to hold it.
+                  <div style={fitted ? { flexShrink: 0, display: "flex" } : { display: "contents" }}>
+                    <NodeVisual
+                      variant={node.visual}
+                      frame={frame}
+                      tokens={tokens}
+                      frameSize={reel.frame}
+                      scale={g}
+                      startFrame={Math.round(appearAt * fps)}
+                    />
+                  </div>
                 ) : null}
                 <div
                   style={{
                     fontFamily: tokens.fonts.display,
                     fontWeight: 700,
-                    fontSize: px(tokens, reel.frame, 44 * g),
+                    fontSize: labelPx,
                     color: node.color ?? tokens.title.color,
                     lineHeight: 1.1,
                   }}
@@ -336,7 +407,7 @@ export const Diagram: React.FC<GenProps<DiagramSpec>> = ({ spec, reel }) => {
                   <div
                     style={{
                       fontFamily: tokens.fonts.mono,
-                      fontSize: px(tokens, reel.frame, 26 * g),
+                      fontSize: subPx,
                       color: P.muted ?? "#9aa",
                     }}
                   >

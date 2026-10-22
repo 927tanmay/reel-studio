@@ -425,6 +425,15 @@ export type GenSpec =
        * by side, which arrive without the picture moving.
        */
       pan?: boolean;
+      /**
+       * Size the cards from what is written on them, not from fixed fractions
+       * of the frame. A label that wraps makes its card taller instead of
+       * spilling out of it, an oversize word shrinks the type (never below 75%),
+       * the icon keeps its size, and a row's `window` cards fit inside the
+       * frame instead of running off both edges. Off by default, so a diagram
+       * cut before this renders exactly as it did.
+       */
+      fit?: boolean;
       seconds?: number;
     }
   | {
@@ -539,6 +548,21 @@ export type GenSpec =
       */
       type: "image";
       src: string;
+      /**
+       * A slow push across the whole shot: the picture scales from `from`
+       * (default 1) to `to`, eased in and out, about the point `x`, `y` (fractions
+       * of the picture, default the centre). It never starts or stops with a jolt.
+       * Keep `to` modest (1.05-1.12): the aim is life, not a zoom you notice.
+       */
+      push?: { to: number; from?: number; x?: number; y?: number };
+      /**
+       * Show the whole picture as a floating card (the look's `card`: rounded,
+       * shadowed, over a blurred copy of itself) at its own aspect, instead of
+       * cropping it to fill the frame. For a screenshot or a diagram whose edges
+       * matter. `true` uses the look's placement; give `width` or `top` (fractions
+       * of the frame) to override it. A `push` then happens inside the card.
+       */
+      card?: boolean | { width?: number; top?: number };
       seconds?: number;
     };
 

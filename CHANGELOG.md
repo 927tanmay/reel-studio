@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- A diagram can set `fit: true`: its cards are sized from what is written on them,
+  so a long label wraps inside a taller card instead of overflowing, the icon keeps
+  its size, and a row's `window` cards sit inside the frame instead of running off
+  both edges. Off by default; every existing diagram renders pixel-identically.
+- Arrows can draw themselves on between nodes (`Tokens.generators.edgeDrawFrames`).
+- An `image` clip can `push` slowly across its shot and be shown as a floating
+  `card` at its own aspect, over a blurred copy of itself.
 - A dot can travel along a diagram arrow (`edges[].travel`), with a trail and an
   optional label, to trace how data moves.
 - Two new generated clips: `chat` (a chat window with a click-to-load image slot

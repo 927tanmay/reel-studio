@@ -569,6 +569,25 @@ AGENTS.md rules 42–44, checked from stills on a scratch reel:
   while the layer position added another offset. Draw each shape around the
   origin and let the layer's position place it.
 
+### Fitted diagrams, drawn-on arrows, moving stills
+
+AGENTS.md rule 45, checked from stills on a scratch reel and from reel 010:
+
+- **Why `fit` exists.** In a 1080 x 1056 band a row's cards are 323 x 179. A
+  two-line label plus a two-line sub-label plus an icon is taller than that, so the
+  text overflowed and the flex layout squeezed the icon to a few pixels; and three
+  such cards are 1163 wide against a 1080 frame. `fit` measures the text
+  (`measureText`) and sizes the cards to it. Its wrap estimate is kept 5% short of
+  the real width, because a browser breaks a hair earlier than a measurement says.
+- **One type size per diagram.** The label size is shared by every card, so a row
+  reads as one system. A card with a long label drags all of them down, never below
+  75%; past that, shorten the label.
+- **Arrows draw on late, and quietly.** An arrow starts 4 frames after the second
+  node is up and takes `edgeDrawFrames` (10 reads as snappy), eased out; a dim
+  ghost of the full line sits underneath so the diagram's shape is never in doubt.
+- **A pushed still is for life, not for a zoom.** 5-10% over the whole shot,
+  eased in and out. Anything faster reads as a punch, which is a different move.
+
 ## 3. Generators — one clip, one job each
 
 `engine/generators/`: `diagram`, `code`, `terminal`, `compare`, `data`,

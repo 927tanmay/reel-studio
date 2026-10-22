@@ -542,6 +542,12 @@ export type Tokens = {
      * node arrives. Absent, they simply appear drawn, as they always did.
      */
     iconDrawFrames?: number;
+    /**
+     * Frames an arrow between two diagram nodes takes to draw itself on, from
+     * the first node to the second, once both are on screen. Absent, arrows
+     * simply appear, as they always did.
+     */
+    edgeDrawFrames?: number;
   };
   /** Named punch presets. Shotlists may use these or pass their own numbers. */
   punches?: Record<string, { to: number; frames: number; hit?: string }>;

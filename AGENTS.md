@@ -536,6 +536,23 @@ by hand, and resuming is expected and supported.
    copy beneath it. `verify.ts` fails a page with no visible lines or no hidden
    text and warns if the scan outlasts the shot.
 
+45. **A diagram's cards can be sized from their text, and a still can move.**
+   `fit: true` on a `diagram` sizes the cards from what is on them
+   (`engine/diagramFit.ts`): the type shrinks, never below 75%, until no label
+   or sub-label takes more than two lines, a card grows tall enough for what
+   wraps, the icon keeps its size, and a row's `window` cards fit inside the
+   frame (without it a row's cards are wider than the frame at `window: 3` and
+   the outer two run off both edges). Reach for it on any row, and on any
+   diagram whose labels the brief supplies and you cannot shorten. Off by
+   default, so older reels render exactly as they did. `Tokens.generators.
+   edgeDrawFrames` makes each arrow draw itself on, first node to second, once
+   both are up. An `image` clip takes `push: { to, from?, x?, y? }`, a slow
+   eased scale across the whole shot (keep `to` between 1.05 and 1.12), and
+   `card: true`, the whole picture at its own aspect as the look's floating
+   card over a blurred copy of itself, with the push happening inside it. Use
+   `card` for a screenshot whose edges matter; leave it off for a photograph
+   that should fill the frame.
+
 ## What stays human
 
 Take selection, where a cut lands emotionally, whether a crop reads at phone
