@@ -644,6 +644,19 @@ by hand, and resuming is expected and supported.
    (`voice: { key, words }`) where you can, and it starts at that take's zero.
    Headline captions and a header's title or subtitle share the top of the frame:
    with `captionStyle: "headline"` keep the header to its kicker.
+49b. **Two more formats, both over `sections()` and the row list.** `versus()`: two
+   sides (`name`, a plain `icon`, a `tone`), then a round per thing compared — a
+   `topic` (the header's title, and the phrase the round begins on), what is true of
+   each side (`text`, optionally `at`: the word it lands on), and a `winner` who
+   gets the tick (leave it out for a draw); an optional `intro` (with no `clips`,
+   the two sides appear as two rows) and `verdict` (with a `winner`, it shows that
+   one). `mythFact()`: a `claim` each with a `myth` and a `fact`; the myth row is
+   crossed (`cross` icon, `error` status, tone `warn`), the fact ticked (`ok`),
+   and the fact should name `at` the word where the correction starts. Labels
+   (`MYTH`/`FACT`, `ROUND`) and tone *names* are options, never colours. Both
+   take `clips` per round or claim to replace the rows with anything else. Phrases
+   match a number written either way ("eight" finds the "8" Whisper wrote, and the
+   reverse, up to twenty and the tens).
 50. **The shotlist is checked before it renders.** `npm run check <post>` runs
    `engine/verify.ts` and the timeline's own warnings against the real shotlist
    and prints every one; a `fail` exits 1, and `npm run render` runs it first and

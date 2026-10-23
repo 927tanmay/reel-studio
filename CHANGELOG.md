@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Two more formats: `versus()` (two sides, a round per topic with a winner ticked, an
+  optional intro and verdict) and `mythFact()` (a crossed myth and a ticked fact per
+  claim), both over `sections()` and the row list. Phrases now match a number either
+  way: "eight" finds the "8" a transcript wrote, and the reverse.
 - Screenshots: `npm run snap <post> <url>` captures a web page into the post's `raw/`
   at twice its density (whole page, one element, phone view, dark mode, hide a
   banner) using the headless Chrome Remotion already downloads, over the DevTools

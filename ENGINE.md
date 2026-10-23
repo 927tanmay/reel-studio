@@ -131,6 +131,11 @@ Grouped by how loud they are (see §4). Each line is a thing a brief can say.
   eavesdroppers, request journeys.
 - **A row list.** Icon, title, a second line and a status mark, landing one by
   one under an optional browser bar — "what you get".
+- **Versus and myth-or-fact, as content too.** *Versus*: the two sides (a name, an
+  icon, a colour), then a round per thing compared — "Speed: A is instant, B takes a
+  minute, A wins" — each with the word it lands on, ending on a verdict. *Myth or
+  fact*: for each claim, the myth (shown crossed out) and the fact (ticked), the fact
+  landing on the word where you correct it. Both are the same look as a roundup.
 - **Formats — hand over content, get the whole edit.** For a voice-only reel you
   can write the brief as *content* instead of shots: a **listicle** ("5 tools":
   a `TOOL 01` pill that fills as it goes, the name, a subtitle that can change on

@@ -103,7 +103,25 @@ export type SectionPlan = {
 // ---------------------------------------------------------------------------
 // Finding phrases in a transcript
 
-const tokens = (s: string) => s.split(/\s+/).map(normalise).filter(Boolean);
+/**
+ * Whisper writes "8 glasses" where a script says "eight glasses", and a phrase
+ * should find either. Number words up to twenty, and the tens, match their
+ * digits; everything else is compared as `normalise` does.
+ */
+const NUMBER_WORDS: Record<string, string> = Object.fromEntries(
+  [
+    "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
+    "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen", "twenty",
+  ]
+    .map((w, i) => [w, String(i)])
+    .concat([["thirty", "30"], ["forty", "40"], ["fifty", "50"], ["sixty", "60"], ["seventy", "70"], ["eighty", "80"], ["ninety", "90"]]),
+);
+const canon = (s: string) => {
+  const n = normalise(s);
+  return NUMBER_WORDS[n] ?? n;
+};
+
+const tokens = (s: string) => s.split(/\s+/).map(canon).filter(Boolean);
 
 /** Splits `"server#2+0.2s"` into the phrase, which occurrence, and an offset. */
 export const parseWhen = (s: string): { phrase: string; nth: number; offset: number } => {
@@ -126,7 +144,7 @@ const heard = (words: Word[], from: number, to: number, limit = 24): string => {
 export const findPhrase = (words: Word[], phrase: string, from: number, to: number, nth = 0): number | undefined => {
   const want = tokens(phrase);
   if (want.length === 0) return undefined;
-  const heardWords = words.map((w) => ({ w, n: normalise(w.text) })).filter((x) => x.n);
+  const heardWords = words.map((w) => ({ w, n: canon(w.text) })).filter((x) => x.n);
   let seen = 0;
   for (let i = 0; i + want.length <= heardWords.length; i++) {
     const start = heardWords[i].w.startMs / 1000;
@@ -491,3 +509,173 @@ export const howItWorksSections = (opts: HowItWorksOptions): SectionsOptions => 
 
 export const howItWorks = (opts: HowItWorksOptions): Shot[] => buildSections(howItWorksSections(opts)).shots;
 export const planHowItWorks = (opts: HowItWorksOptions) => buildSections(howItWorksSections(opts));
+
+// ---------------------------------------------------------------------------
+// Versus: "A or B", one round per thing worth comparing
+
+export type VersusSide = {
+  /** Shown on each row's second line, and in the intro and verdict. */
+  name: string;
+  /** A plain icon for this side's rows. */
+  icon: NonNullable<Row["icon"]>;
+  /** A name from the look's `scene.tones`, a palette name or a CSS colour. Tells the sides apart. */
+  tone?: string;
+};
+
+export type VersusPoint = {
+  /** What is true of this side on this point: "ships in a day", "needs a server". */
+  text: string;
+  /** A second line instead of the side's name. */
+  sub?: string;
+  /** The word it lands on. Leave out and the second one follows the first. */
+  at?: string | number;
+};
+
+export type Round = {
+  /** The phrase the round begins on. */
+  starts?: string;
+  /** What is being compared: "Speed", "Price". It is the header's title. */
+  topic: string;
+  a: VersusPoint;
+  b: VersusPoint;
+  /** Gets the tick. Leave out for a draw. */
+  winner?: "a" | "b";
+  subtitle?: ListItem["subtitle"];
+  accent?: string;
+  /** Replace the two rows with your own clips. */
+  clips?: Clip[];
+  shot?: Clip["shot"];
+};
+
+export type VersusOptions = Omit<SectionsOptions, "sections"> & {
+  a: VersusSide;
+  b: VersusSide;
+  /** "ROUND" gives "ROUND 01". */
+  label?: string;
+  pad?: number;
+  accents?: string[];
+  /** The hook. With no `clips`, the two sides appear as two rows. */
+  intro?: Omit<ListBookend, "clips"> & { clips?: Clip[] };
+  rounds: Round[];
+  /** The close. With no `clips`, the winner appears as one row. */
+  verdict?: Omit<ListBookend, "clips"> & { clips?: Clip[]; winner?: "a" | "b"; text?: string };
+};
+
+export const versusSections = (opts: VersusOptions): SectionsOptions => {
+  const { a, b, label = "ROUND", pad = 2, accents, intro, rounds, verdict, ...rest } = opts;
+  if (rounds.length === 0) throw new Error("A versus reel needs at least one round.");
+  const out: SectionInput[] = [];
+  const side = (s: VersusSide, p: VersusPoint, wins: boolean): Loose<Row> => ({
+    icon: s.icon,
+    title: p.text,
+    sub: p.sub ?? s.name,
+    ...(wins ? { status: "check" as const } : {}),
+    ...(s.tone ? { tone: s.tone } : {}),
+    ...(p.at !== undefined ? { at: p.at } : {}),
+  });
+  const rowsClip = (rows: Loose<Row>[]): Clip => ({ src: { type: "rows", rows } as Loose<GenSpec> });
+
+  if (intro) {
+    out.push({
+      accent: intro.accent,
+      header: intro.kicker || intro.title || intro.subtitle ? { kicker: intro.kicker, title: intro.title, subtitle: intro.subtitle as Header["subtitle"] } : undefined,
+      clips: intro.clips ?? [rowsClip([{ icon: a.icon, title: a.name, ...(a.tone ? { tone: a.tone } : {}) }, { icon: b.icon, title: b.name, ...(b.tone ? { tone: b.tone } : {}) }])],
+    });
+  }
+
+  rounds.forEach((r, i) => {
+    out.push({
+      // With no intro the first round opens the take; otherwise it begins on its topic.
+      starts: r.starts ?? (i === 0 && !intro ? undefined : r.topic),
+      accent: r.accent ?? accents?.[i % (accents.length || 1)],
+      header: {
+        kicker: `${label} ${String(i + 1).padStart(pad, "0")}`.trim(),
+        step: [i + 1, rounds.length],
+        title: r.topic,
+        subtitle: (r.subtitle ?? `${a.name} vs ${b.name}`) as Header["subtitle"],
+      },
+      clips: r.clips ?? [{ ...rowsClip([side(a, r.a, r.winner === "a"), side(b, r.b, r.winner === "b")]), shot: r.shot }],
+    });
+  });
+
+  if (verdict) {
+    const winner = verdict.winner === "a" ? a : verdict.winner === "b" ? b : undefined;
+    if (!verdict.clips && !winner) throw new Error("The verdict needs `clips`, or a `winner` so it can show one.");
+    out.push({
+      starts: verdict.starts,
+      accent: verdict.accent,
+      header: verdict.kicker || verdict.title || verdict.subtitle ? { kicker: verdict.kicker, title: verdict.title, subtitle: verdict.subtitle as Header["subtitle"] } : undefined,
+      clips:
+        verdict.clips ??
+        [rowsClip([{ icon: winner!.icon, title: verdict.text ?? winner!.name, sub: winner!.name, status: "check", ...(winner!.tone ? { tone: winner!.tone } : {}) }])],
+    });
+  }
+  return { ...rest, sections: out };
+};
+
+export const versus = (opts: VersusOptions): Shot[] => buildSections(versusSections(opts)).shots;
+export const planVersus = (opts: VersusOptions) => buildSections(versusSections(opts));
+
+// ---------------------------------------------------------------------------
+// Myth or fact: a claim everyone repeats, then what is true
+
+export type Claim = {
+  starts?: string;
+  /** A short title for the header; optional. */
+  title?: string;
+  myth: { text: string; at?: string | number };
+  fact: { text: string; at?: string | number };
+  subtitle?: ListItem["subtitle"];
+  accent?: string;
+  clips?: Clip[];
+  shot?: Clip["shot"];
+};
+
+export type MythFactOptions = Omit<SectionsOptions, "sections"> & {
+  /** The words on the two rows' second lines, and the pill: "MYTH 01". Default MYTH and FACT. */
+  labels?: { myth: string; fact: string };
+  /** Tone *names* from the look (`scene.tones`) or any palette name or CSS colour. Default `warn` and `ok`. */
+  tones?: { myth: string; fact: string };
+  pad?: number;
+  accents?: string[];
+  intro?: ListBookend;
+  claims: Claim[];
+  outro?: ListBookend;
+};
+
+export const mythFactSections = (opts: MythFactOptions): SectionsOptions => {
+  const { labels = { myth: "MYTH", fact: "FACT" }, tones = { myth: "warn", fact: "ok" }, pad = 2, accents, intro, claims, outro, ...rest } = opts;
+  if (claims.length === 0) throw new Error("A myth-or-fact reel needs at least one claim.");
+  const bookend = (b: ListBookend): SectionInput => ({
+    starts: b.starts,
+    accent: b.accent,
+    header: b.kicker || b.title || b.subtitle ? { kicker: b.kicker, title: b.title, subtitle: b.subtitle as Header["subtitle"] } : undefined,
+    clips: b.clips,
+  });
+  const out: SectionInput[] = [];
+  if (intro) out.push({ ...bookend(intro), starts: undefined });
+
+  claims.forEach((c, i) => {
+    const rows: Loose<Row>[] = [
+      { icon: "cross", title: c.myth.text, sub: labels.myth, status: "error", tone: tones.myth, ...(c.myth.at !== undefined ? { at: c.myth.at } : {}) },
+      { icon: "check", title: c.fact.text, sub: labels.fact, status: "check", tone: tones.fact, ...(c.fact.at !== undefined ? { at: c.fact.at } : {}) },
+    ];
+    out.push({
+      starts: c.starts ?? (i === 0 && !intro ? undefined : c.myth.text.split(/\s+/).slice(0, 3).join(" ")),
+      accent: c.accent ?? accents?.[i % (accents.length || 1)],
+      header: {
+        kicker: `${labels.myth} ${String(i + 1).padStart(pad, "0")}`.trim(),
+        step: [i + 1, claims.length],
+        title: c.title,
+        subtitle: c.subtitle as Header["subtitle"],
+      },
+      clips: c.clips ?? [{ src: { type: "rows", rows } as Loose<GenSpec>, shot: c.shot }],
+    });
+  });
+
+  if (outro) out.push(bookend(outro));
+  return { ...rest, sections: out };
+};
+
+export const mythFact = (opts: MythFactOptions): Shot[] => buildSections(mythFactSections(opts)).shots;
+export const planMythFact = (opts: MythFactOptions) => buildSections(mythFactSections(opts));

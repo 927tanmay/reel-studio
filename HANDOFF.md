@@ -439,7 +439,15 @@ in, each with the word it appears on), or any other clip. For "a list of N
 things" say so: it numbers them and fills a progress pill. For "how X works"
 give the topic and the steps. Name a word wherever something should appear *on*
 it; the editor never needs seconds, and the same word said twice is "server#2"
-for the second time. Don't ask for headline-style captions together with a
+for the second time. For **"A versus B"** give: the two names and a picture for each (cloud, phone,
+database, server, key…), then for each round the thing being compared, what is
+true of each side in a few words, who wins (or that it is a draw), and the word
+each lands on; and the verdict. For **myth or fact** give, per claim, the myth
+and the fact in a few words each, the phrase the claim starts on, and the word
+where you turn to the correction. Keep each line short: it sits on a row, not a
+paragraph.
+
+Don't ask for headline-style captions together with a
 title and subtitle in the header: they sit in the same place.
 
 ---
