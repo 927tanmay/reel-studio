@@ -96,6 +96,7 @@ const SourceView: React.FC<{
             spec={source}
             reel={spec}
             durationInFrames={resolved.durationInFrames}
+            accent={resolved.shot.accent}
             words={(() => {
               // Only a generator that follows the voice reads these, so only
               // an orb that asked pays for working them out.

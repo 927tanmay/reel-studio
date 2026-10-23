@@ -9,6 +9,8 @@ import { Callout } from "./Callout";
 import { ImageGen } from "./Image";
 import { Orb } from "./Orb";
 import { Chat } from "./Chat";
+import { Scene } from "./Scene";
+import { Rows } from "./Rows";
 import { Page } from "./Page";
 import { LottieGen } from "./Lottie";
 import type { WordTiming } from "../spec";
@@ -48,9 +50,11 @@ export type GenProps<T extends GenSpec = GenSpec> = {
    * generator that moves with the voice. Absent when no transcript is under it.
    */
   words?: WordTiming[];
+  /** The shot's own accent colour, for a generator whose default tone should follow its section. */
+  accent?: string;
 };
 
-export const Generated: React.FC<GenProps> = ({ spec, reel, durationInFrames, words }) => {
+export const Generated: React.FC<GenProps> = ({ spec, reel, durationInFrames, words, accent }) => {
   switch (spec.type) {
     case "diagram":
       return <Diagram spec={spec} reel={reel} durationInFrames={durationInFrames} />;
@@ -66,6 +70,10 @@ export const Generated: React.FC<GenProps> = ({ spec, reel, durationInFrames, wo
       return <Callout spec={spec} reel={reel} durationInFrames={durationInFrames} />;
     case "image":
       return <ImageGen spec={spec} reel={reel} durationInFrames={durationInFrames} />;
+    case "rows":
+      return <Rows spec={spec} reel={reel} durationInFrames={durationInFrames} accent={accent} />;
+    case "scene":
+      return <Scene spec={spec} reel={reel} durationInFrames={durationInFrames} accent={accent} />;
     case "chat":
       return <Chat spec={spec} reel={reel} durationInFrames={durationInFrames} />;
     case "page":

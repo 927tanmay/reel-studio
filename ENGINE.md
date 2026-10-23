@@ -117,6 +117,13 @@ Grouped by how loud they are (see §4). Each line is a thing a brief can say.
   usual lines with the spoken word in a coloured box, or "headline" captions
   that write the words big across the top as they are spoken, one sentence at a
   time, with chosen words in named colours.
+- **A scene for "how it works".** Glowing wireframe things (laptop, server rack,
+  hooded observer, phone, database…) placed in the frame, dotted wires between
+  them, dots carrying a tag along the wires, and monospace notes that appear and
+  change — each drawing itself on at the word that names it. For client/server,
+  eavesdroppers, request journeys.
+- **A row list.** Icon, title, a second line and a status mark, landing one by
+  one under an optional browser bar — "what you get".
 
 ### Loud — a beat that should hurt. Two or three in a 30-second reel
 - **Key-word slam** — one to three words land huge in the middle of the frame on

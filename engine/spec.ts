@@ -339,7 +339,10 @@ export type DiagramVisual =
   | "database"
   | "play"
   | "terminal"
-  | "network";
+  | "network"
+  | "laptop"
+  | "rack"
+  | "hacker";
 
 export type DiagramNode = {
   id: string;
@@ -378,6 +381,69 @@ export type DiagramEdge = { from: string; to: string; label?: string; travel?: T
 /** A step the generator advances to, optionally pinned to a spoken word. */
 export type Step = { at?: number; show: string[] };
 
+/** One line of a `rows` clip. */
+export type Row = {
+  icon?: SceneKind;
+  title: string;
+  /** A second line in monospace: a duration, an error, a value. */
+  sub?: string;
+  /** Drawn at the right: a tick, a warning, a cross, or a clock for "working". */
+  status?: "check" | "warn" | "error" | "pending";
+  /** A name from the look's `scene.tones`, a palette name, or a CSS colour. */
+  tone?: string;
+  /** Seconds the row arrives. Defaults to a stagger after the one before. */
+  at?: number;
+};
+
+/** A plain icon (not a UI mockup) — the glyphs a `scene` can place. */
+export type SceneKind = Exclude<DiagramVisual, "button" | "spinner" | "debounce" | "checkout" | "receipt" | "booking">;
+
+/** One thing standing in a `scene`: a glowing wireframe glyph at a place in the frame. */
+export type SceneItem = {
+  id: string;
+  kind: SceneKind;
+  /** The small monospace caption under it: "CLIENT", "SERVER", "OBSERVER". */
+  label?: string;
+  /** Centre, as fractions of the frame. */
+  x: number;
+  y: number;
+  /** Width as a fraction of frame width. Defaults to the look's. */
+  size?: number;
+  /** A name from the look's `scene.tones` ("client", "server", "threat"), a palette name, or a CSS colour. */
+  tone?: string;
+  /** Seconds into the shot it appears, drawing itself on. Defaults to the start. */
+  at?: number;
+  /** Seconds it leaves. Omit and it stays. */
+  until?: number;
+};
+
+/** A line between two items, optionally carrying dots. */
+export type SceneLink = {
+  from: string;
+  to: string;
+  style?: "dotted" | "solid";
+  /** Seconds it appears. Defaults to when both ends have. */
+  at?: number;
+  until?: number;
+  tone?: string;
+  /** Dots riding it, from `from` to `to` — the same trips as on a diagram arrow. */
+  travel?: Travel[];
+};
+
+/** A line of monospace text in a `scene`: a value caught on the wire, a thought. */
+export type SceneNote = {
+  text: string;
+  /** Sits above this item. Or give `x`/`y` (fractions of the frame) instead. */
+  near?: string;
+  x?: number;
+  y?: number;
+  at: number;
+  until?: number;
+  tone?: string;
+  /** Characters per second to type it in. 0 or absent fades it in whole. */
+  typeSpeed?: number;
+};
+
 /** One message in a `chat` clip. */
 export type ChatMessage = {
   from: "user" | "ai";
@@ -408,6 +474,37 @@ export type ChatMessage = {
 };
 
 export type GenSpec =
+  | {
+      /**
+       * A list of rows landing one by one — an icon tile, a title, a monospace
+       * second line and a status mark — for "what you get": a tool's features,
+       * the contents of a bug report, the steps of a process. Rows arrive on
+       * their `at` (pin each to the word that names it), or a stagger apart when
+       * `at` is left out. An optional `frame` puts a browser bar above them,
+       * with an address and a small badge (an extension's icon, say).
+       */
+      type: "rows";
+      rows: Row[];
+      frame?: { url: string; badge?: string };
+      seconds?: number;
+    }
+  | {
+      /**
+       * A stage for "how it works" explainers: glowing wireframe things placed
+       * in the frame (a laptop, a server rack, a hooded observer), dotted links
+       * between them, dots riding the links, and monospace notes that appear and
+       * change — the client sends a password, an observer reads it, TLS turns it
+       * into `9c1f 7a0e…`. Things draw themselves on when they arrive (`at`), so
+       * the scene builds as the voice explains it, and leave (`until`) when the
+       * story moves on. Positions are fractions of the frame; colours come from
+       * the look's `scene.tones`.
+       */
+      type: "scene";
+      items: SceneItem[];
+      links?: SceneLink[];
+      notes?: SceneNote[];
+      seconds?: number;
+    }
   | {
       /**
        * A chat window: user and AI bubbles arriving in order, with an optional

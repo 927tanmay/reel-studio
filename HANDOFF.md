@@ -240,7 +240,7 @@ graphic should get; the rest works the same as any other generated clip
 
 ## 5. Write generated clips out in full
 
-Eleven kinds of clip can be generated. If you ask for one, supply all of its
+Thirteen kinds of clip can be generated. If you ask for one, supply all of its
 content. Half a diagram is a question, not a brief.
 
 **diagram** — nodes that assemble and pan. The one worth reaching for
@@ -309,6 +309,23 @@ dimmed
 > cyan: a radar pulse (for "your lost phone"), a padlock snapping shut, a
 > key swap (for key rotation), a shield closing (for "fixed" or "blocked"), a
 > check that ticks itself (for an answer reveal) and a single expanding ring.
+
+**scene** — a stage for "how it works": glowing things, wires, and data moving
+> Say what is in it (a laptop as the client, a server rack, a hooded observer,
+> a phone, a database, a lock…), roughly where each stands, and the word each
+> *appears* on. Say which are joined by a wire, and what travels along it and on
+> which word ("on 'sends', `password: hunter2` travels from the client to the
+> server"). Add short notes that appear beside things and change ("observer
+> reads: hunter2", then "observer sees: 9c1f 7a0e…"). Use it for client and
+> server, an eavesdropper, a request's journey, a queue or cache. Keep it to
+> three or four things; more is a diagram.
+
+**rows** — a list of lines landing one by one
+> Each row: a small icon, a title, an optional second line (a duration, an
+> error, a value) and a status (done, warning, error, working), and the word it
+> lands on. For "what you get": a tool's features, what a bug report contains,
+> the steps of a process. Optionally a browser bar above it with an address.
+> Four to five rows is plenty.
 
 **chat** — a chat window, for showing a safeguard as the real interface
 > The messages in order (user or AI), the word each lands on, and what the

@@ -49,7 +49,10 @@ export type IconName =
   | "database"
   | "play"
   | "terminal"
-  | "network";
+  | "network"
+  | "laptop"
+  | "rack"
+  | "hacker";
 
 export const ICONS: Record<IconName, IconSegment[]> = {
   check: [{ d: "M10 25 L19 34 L38 13", from: 0, to: 1 }],
@@ -168,6 +171,27 @@ export const ICONS: Record<IconName, IconSegment[]> = {
     { d: "M24 6 a4 4 0 1 1 0 8 a4 4 0 1 1 0 -8", from: 0.7, to: 0.85 },
     { d: "M10 33 a4 4 0 1 1 0 8 a4 4 0 1 1 0 -8", from: 0.8, to: 0.93 },
     { d: "M38 33 a4 4 0 1 1 0 8 a4 4 0 1 1 0 -8", from: 0.88, to: 1 },
+  ],
+  laptop: [
+    { d: "M10 9 H38 V30 H10 Z", from: 0, to: 0.4 },
+    { d: "M5 34 H43 L39 39 H9 Z", from: 0.35, to: 0.7 },
+    { d: "M10 30 L5 34", from: 0.65, to: 0.72 },
+    { d: "M38 30 L43 34", from: 0.65, to: 0.72 },
+    { d: "M14 15 H28", from: 0.7, to: 0.82 },
+    { d: "M14 20 H33", from: 0.8, to: 0.92 },
+    { d: "M14 25 H24", from: 0.9, to: 1 },
+  ],
+  rack: [
+    { d: "M10 12 H30 V41 H10 Z", from: 0, to: 0.35 },
+    { d: "M10 12 L18 6 H38 L30 12", from: 0.3, to: 0.55 },
+    { d: "M30 12 L38 6 V35 L30 41", from: 0.5, to: 0.75 },
+    { d: "M14 19 H26", from: 0.72, to: 0.82 },
+    { d: "M14 25 H26", from: 0.8, to: 0.9 },
+    { d: "M14 31 H26", from: 0.88, to: 1 },
+  ],
+  hacker: [
+    { d: "M24 5 C15 5 11 13 11 20 C11 24 13 27 15 29 L8 43 H40 L33 29 C35 27 37 24 37 20 C37 13 33 5 24 5 Z", from: 0, to: 0.7 },
+    { d: "M17 21 C17 17 20 14 24 14 C28 14 31 17 31 21 C31 26 28 29 24 29 C20 29 17 26 17 21 Z", from: 0.6, to: 1 },
   ],
   "trend-up": [
     { d: "M6 34 L18 22 L26 28 L42 10", from: 0, to: 0.75 },

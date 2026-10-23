@@ -588,6 +588,35 @@ by hand, and resuming is expected and supported.
    `src.seconds`: `in` there is where a borrowed voice starts reading, not a
    point to trim from (an early version subtracted it and collapsed the shot).
 
+47. **A scene explains how a thing works, and builds as the voice explains
+   it.** `src: { type: "scene", items, links?, notes? }` is a stage of glowing
+   wireframes: `items` are plain icons (`laptop`, `rack`, `hacker`, `phone`,
+   `database`, `lock`, `key`…) at fractions of the frame, each with a `tone`
+   from `Tokens.scene.tones` (`client`, `server`, `threat`, `ok`…), a mono
+   `label` ("CLIENT"), and an `at` when it draws itself on and an optional
+   `until` when it leaves; `links` join two items (dotted by default, solid on
+   request) and carry `travel` trips — the same eased, trailing dots as a diagram
+   arrow, with a tag riding along (`password: hunter2`); `notes` are monospace
+   lines that appear, type in (`typeSpeed`) and change — two notes in one place
+   one after the other is a value being transformed. Use it for client/server,
+   request lifecycles, an eavesdropper, a cache, a queue: anything with a few
+   things, the wires between them, and something travelling. Pin every `at` to
+   the word that names it so the scene builds on the voice. `verify.ts` fails an
+   item id used twice, a link or note pointing at a missing item, and a dot with
+   no `Tokens.packet`; it warns on anything after the shot ends. Look:
+   `Tokens.scene`. The glyphs are the same path data the diagram icons use, so
+   any new plain icon is available to a scene for free.
+48. **A row list shows what you get, one line at a time.** `src: { type: "rows",
+   rows, frame? }`: each row is an icon tile, a title, an optional monospace
+   second line (red when its status is an error or warning) and a status mark
+   (`check`, `warn`, `error`, `pending`), landing on its `at` — pin it to the
+   word that names it — or a stagger after the row above when `at` is left out
+   (a row can never arrive before the one above it by accident). `frame`
+   adds a browser bar with an address and a small badge. A row's default tone
+   follows the shot's `accent`, so a section's rows match its glow. Use it for a
+   tool's features, the contents of a report, the steps of a process. Look:
+   `Tokens.rows`.
+
 ## What stays human
 
 Take selection, where a cut lands emotionally, whether a crop reads at phone
@@ -627,14 +656,14 @@ engine/          the moves and the contract — general, never show-specific
   spec.ts        the shotlist contract and timeline resolution
   icons.ts       the built-in icons as drawable path segments
   codeMorph.ts   code as positioned tokens, and how one version becomes the next
-  header.ts · backdrop.ts · emphasis.ts · card.ts · zoom.ts · ramp.ts · impact.ts · packet.ts   pure geometry for cards, click zooms, speed ramps and impacts,
+  scene.ts · rows.ts · header.ts · backdrop.ts · emphasis.ts · card.ts · zoom.ts · ramp.ts · impact.ts · packet.ts   pure geometry for cards, click zooms, speed ramps and impacts,
                  shared by the renderer, the timeline and verify.ts
   scale.ts       crop-then-scale, and size tokens that survive a frame change
   words.ts       word anchoring, and the pauses/fillers a cut removes
   colour.ts      matching one clip's colour to another's
   verify.ts      gates that need no render
   moves/         punch · blend · push · captions · title · badge · marks · pointer · bed · hits
-  generators/    diagram · code · terminal · compare · data · callout · chat · page · lottie · orb
+  generators/    diagram · code · terminal · compare · data · callout · chat · page · rows · scene · lottie · orb
 projects/        one look per channel; copy default/ and change everything
                  (explainer/ is the default plus a glow-and-header, box-caption style)
 public/posts/    one folder per reel, self-contained

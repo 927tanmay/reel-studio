@@ -3,26 +3,11 @@ import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
 import type { ChatMessage, GenSpec } from "../spec";
 import { px } from "../scale";
 import { ease } from "../moves/punch";
-import { ICONS, type IconName } from "../icons";
+import { StaticIcon } from "./StaticIcon";
 import type { GenProps } from "./index";
 import { useGeneratorBg } from "./index";
 
 type ChatSpec = Extract<GenSpec, { type: "chat" }>;
-
-/** An icon from the plain set, fully drawn, in a colour. */
-const Icon: React.FC<{ name: IconName; size: number; colour: string }> = ({ name, size, colour }) => (
-  <svg width={size} height={size} viewBox="0 0 48 48">
-    <g fill="none" stroke={colour} strokeWidth={3.6} strokeLinecap="round" strokeLinejoin="round">
-      {ICONS[name].map((seg, i) =>
-        seg.dot ? (
-          <circle key={i} cx={seg.dot.cx} cy={seg.dot.cy} r={seg.dot.r} fill={colour} />
-        ) : (
-          <path key={i} d={seg.d} />
-        ),
-      )}
-    </g>
-  </svg>
-);
 
 /** A hex colour with an alpha, falling back to the palette's own tint for anything else. */
 const tint = (colour: string, alpha: number, fallback: string) =>
@@ -184,18 +169,18 @@ const ImageSlot: React.FC<{
     >
       {done && outcome === "loaded" ? (
         <>
-          <Icon name="image" size={u(96)} colour={tokens.bg} />
+          <StaticIcon name="image" size={u(96)} colour={tokens.bg} />
           <div style={{ fontFamily: tokens.fonts.mono, fontSize: u(26), color: tokens.bg, fontWeight: 600 }}>{image.host}</div>
         </>
       ) : done ? (
         <>
-          <Icon name="shield" size={u(84)} colour={warn} />
+          <StaticIcon name="shield" size={u(84)} colour={warn} />
           <div style={{ fontFamily: tokens.fonts.display, fontSize: u(34), color: warn, fontWeight: 700 }}>Blocked</div>
           <div style={{ fontFamily: tokens.fonts.mono, fontSize: u(24), color: P.muted ?? "#8A959F" }}>{image.host}</div>
         </>
       ) : (
         <>
-          <Icon name="image" size={u(72)} colour={P.muted ?? "#8A959F"} />
+          <StaticIcon name="image" size={u(72)} colour={P.muted ?? "#8A959F"} />
           <div style={{ fontFamily: tokens.fonts.display, fontSize: u(32), color: ink, fontWeight: 600, lineHeight: 1.25 }}>
             {image.prompt ?? (
               <>

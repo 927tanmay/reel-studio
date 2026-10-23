@@ -1,4 +1,5 @@
 import { dominantSound, shotLabel, wordsInShot, type ReelSpec, type Timeline } from "./spec";
+import { rowStarts } from "./rows";
 
 /**
  * Pacing, measured from the resolved timeline — the same frames the renderer
@@ -98,6 +99,16 @@ export const critiqueTimeline = (
       if (src.type === "diagram") for (const s of src.steps ?? []) push(at(s.at), "step", r.index, "diagram step");
       if (src.type === "diagram") {
         for (const e of src.edges ?? []) for (const trip of e.travel ?? []) push(at(trip.at), "step", r.index, "dot sets off");
+      }
+      if (src.type === "rows") {
+        rowStarts(src.rows, spec.style.rows?.stagger ?? 0).forEach((t0, i) => {
+          if (i > 0 || t0 > 0) push(at(t0), "step", r.index, "row");
+        });
+      }
+      if (src.type === "scene") {
+        for (const i of src.items) if ((i.at ?? 0) > 0) push(at(i.at), "step", r.index, "scene item");
+        for (const n of src.notes ?? []) push(at(n.at), "step", r.index, "scene note");
+        for (const l of src.links ?? []) for (const trip of l.travel ?? []) push(at(trip.at), "step", r.index, "dot sets off");
       }
       if (src.type === "chat") for (const m of src.messages) if ((m.at ?? 0) > 0) push(at(m.at), "step", r.index, "chat message");
       if (src.type === "page") push(at(src.at ?? 0.5), "step", r.index, "page scan");

@@ -306,6 +306,47 @@ export type PacketStyle = {
 };
 
 /**
+ * The look of the `rows` generator. Optional — a look without one cannot show
+ * a row list, and `verify.ts` says so.
+ */
+export type RowsStyle = {
+  /** Top of the list, as a fraction of frame height (clear of a header). */
+  top: number;
+  /** Width of the list, as a fraction of frame width. */
+  width: number;
+  gap: number;
+  radius: number;
+  /** The icon tile's side, in design pixels. */
+  tile: number;
+  titleSize: number;
+  subSize: number;
+  enterFrames: number;
+  /** Seconds between rows that don't name their own `at`. */
+  stagger: number;
+};
+
+/**
+ * The look of the `scene` generator: glowing wireframe glyphs. Optional — a
+ * look without one cannot show a scene, and `verify.ts` says so.
+ */
+export type SceneStyle = {
+  /** Default glyph width as a fraction of frame width. */
+  glyphSize: number;
+  /** Stroke weight in the glyph's own 48-unit box. */
+  stroke: number;
+  /** Glow radius in design pixels. */
+  glow: number;
+  labelSize: number;
+  noteSize: number;
+  /** Frames a glyph takes to draw itself on. */
+  drawFrames: number;
+  /** Named colours for items, links and notes: `client`, `server`, `threat`… */
+  tones: Record<string, string>;
+  /** The colour of a link with no tone of its own. */
+  link: string;
+};
+
+/**
  * The look of a section backdrop (`Shot.backdrop`): soft glows drifting behind
  * a generated clip. Optional — a look without one cannot show a backdrop, and
  * `verify.ts` says so. A blob's `color` may be `"accent"`, which takes the
@@ -585,6 +626,10 @@ export type Tokens = {
   slam?: SlamStyle;
   /** The look of a dot travelling along a diagram arrow. Omit and `travel` cannot be used. */
   packet?: PacketStyle;
+  /** The look of the rows generator. Omit and `rows` clips cannot be used. */
+  rows?: RowsStyle;
+  /** The look of the scene generator. Omit and `scene` clips cannot be used. */
+  scene?: SceneStyle;
   /** The look of the glow behind a generated clip. Omit and `backdrop` cannot be used. */
   backdrop?: BackdropStyle;
   /** The look of a section header. Omit and `header` cannot be used. */

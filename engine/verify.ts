@@ -4,6 +4,8 @@ import type { TextStyle, Tokens } from "./tokens";
 import { primaryMediaKey } from "./moves/Captions";
 import { normalise } from "./words";
 import { emphasisWords } from "./emphasis";
+import { missingRefs } from "./scene";
+import { rowStarts } from "./rows";
 import { cardBox, cardTilt } from "./card";
 import { coverRegion } from "./scale";
 
@@ -153,6 +155,57 @@ export const verifySpec = (spec: ReelSpec, timeline: Timeline): Finding[] => {
           `Every keyframe needs \`speed\` above 0 and \`at\` from 0.`,
       });
     }
+  }
+
+  // A scene needs its look, items that exist for every link and note to point
+  // at, and moments inside the shot.
+  for (const resolved of timeline.shots) {
+    const { shot, index, durationInFrames } = resolved;
+    const src = shot.src;
+    if (!src || typeof src !== "object" || src.type !== "scene") continue;
+    if (!t.scene) {
+      findings.push({ level: "fail", message: `Shot ${index} is a scene, but the look defines no \`scene\` style. Add one to the look's tokens.` });
+      continue;
+    }
+    if (src.items.length === 0) findings.push({ level: "fail", message: `Shot ${index} is a scene with no items.` });
+    const ids = src.items.map((i) => i.id);
+    if (new Set(ids).size !== ids.length) {
+      findings.push({ level: "fail", message: `Shot ${index}'s scene has two items with the same id.` });
+    }
+    for (const id of missingRefs(src.items, src.links ?? [], src.notes ?? [])) {
+      findings.push({ level: "fail", message: `Shot ${index}'s scene refers to "${id}", which is not one of its items.` });
+    }
+    if ((src.links ?? []).some((l) => l.travel?.length) && !t.packet) {
+      findings.push({ level: "fail", message: `Shot ${index}'s scene has a dot on a link, but the look defines no \`packet\` style.` });
+    }
+    const fps = spec.frame.fps;
+    const late = (seconds: number | undefined, what: string) => {
+      if (seconds !== undefined && Math.round(seconds * fps) >= durationInFrames) {
+        findings.push({ level: "warn", message: `Shot ${index}'s scene ${what} at ${seconds}s, after the shot has ended — it will never show.` });
+      }
+    };
+    src.items.forEach((i) => late(i.at, `item "${i.id}" appears`));
+    (src.notes ?? []).forEach((n, k) => late(n.at, `note ${k} appears`));
+    for (const l of src.links ?? []) for (const trip of l.travel ?? []) late(trip.at, `dot on ${l.from} → ${l.to} sets off`);
+  }
+
+  // Rows need their look and times inside the shot.
+  for (const resolved of timeline.shots) {
+    const { shot, index, durationInFrames } = resolved;
+    const src = shot.src;
+    if (!src || typeof src !== "object" || src.type !== "rows") continue;
+    if (!t.rows) {
+      findings.push({ level: "fail", message: `Shot ${index} is a row list, but the look defines no \`rows\` style. Add one to the look's tokens.` });
+      continue;
+    }
+    if (src.rows.length === 0) findings.push({ level: "fail", message: `Shot ${index} is a row list with no rows.` });
+    const starts = rowStarts(src.rows, t.rows.stagger);
+    src.rows.forEach((row, i) => {
+      const start = starts[i];
+      if (Math.round(start * spec.frame.fps) >= durationInFrames) {
+        findings.push({ level: "warn", message: `Shot ${index}'s row ${i} ("${row.title}") arrives at ${start.toFixed(1)}s, after the shot has ended — it will never show.` });
+      }
+    });
   }
 
   // Header, backdrop and headline captions each need the look that styles

@@ -6,6 +6,10 @@
   header (pill with progress dashes, or a typed comment with a caret; a title; a
   subtitle that swaps), highlight-box captions, and word-by-word "headline"
   captions with named colour groups. A new `explainer` look puts these together.
+- Two new generated clips: `scene` (glowing wireframe things, dotted links, dots
+  and typed notes — "how it works" explainers) and `rows` (icon, title and status
+  rows landing one by one, with an optional browser bar). Icons: laptop, rack,
+  hacker.
 - Fix: a generated clip with `in` (a borrowed voice's offset) no longer has its
   length reduced by it.
 - Three more icons: play, terminal, network.

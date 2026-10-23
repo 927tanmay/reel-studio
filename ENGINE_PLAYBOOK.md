@@ -622,6 +622,37 @@ fake word timings:
   (a 5s diagram over seconds 6–11 of a recording) collapsed to one frame because
   the duration subtracted `in` from the clip's own length. A test now holds it.
 
+### Scenes and row lists
+
+AGENTS.md rules 47–48, from the "how TLS works" and tools-roundup samples:
+
+- **The glyphs are the icons.** A scene item is just a plain icon drawn thin with
+  a glow, so one path set serves diagrams, scenes and rows, and a new icon is
+  available everywhere at once. The three wireframes made for it (`laptop`,
+  `rack` as an isometric box, `hacker` as a hooded figure) read at a glance
+  because each is a few strokes; a detailed glyph turns to mush at glow.
+- **Draw the link under the glyphs and trim it to their edges.** A link runs
+  centre to centre and is shortened by most of a glyph's width, so it never
+  appears to pass behind a laptop. Dotted needs a *round* cap and a tiny dash
+  length: with a normal cap the dots fuse into a dashed line. At first the link
+  was so faint it vanished at phone size; opacity and stroke went up.
+- **Let notes type, and put two in one place.** A value transforming (`password:
+  hunter2` → `9c1f 7a0e…`) reads better as one note ending and the next starting
+  than as text swapping. Notes sit above an item by default; give `x`/`y` to
+  place one anywhere.
+- **Stagger from the row above, not from the index.** An early version timed a
+  row with no `at` as `index × stagger`, so an unpinned fourth row arrived before
+  a pinned third. Counting on from the previous row's start fixes that and keeps
+  rows in order however many are pinned.
+- **The section accent has to reach the clip.** Rows, and a scene's default
+  tone, follow the shot's `accent`, but generators only receive what
+  `Generated` passes, so `accent` is a prop alongside `words`. A badge that stayed
+  cyan inside a green section looked like a mistake.
+- **Sample reels are references, not templates.** Both samples were studied for
+  structure (a glow, a header, a staged illustration, captions that build on the
+  voice) and rebuilt from the engine's own parts; no artwork was copied, and the
+  looks and glyphs here are original.
+
 ## 3. Generators — one clip, one job each
 
 `engine/generators/`: `diagram`, `code`, `terminal`, `compare`, `data`,

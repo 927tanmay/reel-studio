@@ -322,6 +322,23 @@ export const tokens: Tokens = {
     scrim: { color: "#000000", opacity: 0.45 },
   },
 
+  // A list of rows landing one by one: an icon tile, a title, a mono second line
+  // and a status mark. Starts below a header and stops well short of the captions.
+  rows: { top: 0.3, width: 0.86, gap: 18, radius: 22, tile: 76, titleSize: 38, subSize: 25, enterFrames: 10, stagger: 0.45 },
+
+  // The "how it works" stage: thin glowing wireframes, a cool client, a violet
+  // server and a warm threat, so who is who reads before a word is said.
+  scene: {
+    glyphSize: 0.21,
+    stroke: 1.5,
+    glow: 9,
+    labelSize: 21,
+    noteSize: 24,
+    drawFrames: 18,
+    tones: { client: "#35A7FF", server: "#8B6CFF", threat: "#FF7A45", ok: "#4ADE80", warn: "#F97583" },
+    link: "#7C93C4",
+  },
+
   // A section's glow: an accent-coloured blob up left (each shot's own `accent`
   // tints it) and a violet one low right, both drifting slowly. Only shows
   // behind generated clips that ask for a `backdrop`.

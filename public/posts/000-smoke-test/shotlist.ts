@@ -222,5 +222,40 @@ export default reel({
         ],
       },
     },
+
+    {
+      // Proves the scene stage: glowing wireframe things that draw themselves on,
+      // a dotted link, a dot riding it, and notes that type in.
+      src: {
+        type: "scene",
+        seconds: 3.5,
+        items: [
+          { id: "client", kind: "laptop", label: "Client", x: 0.2, y: 0.5, tone: "client" },
+          { id: "server", kind: "rack", label: "Server", x: 0.8, y: 0.48, tone: "server", at: 0.2 },
+          { id: "watcher", kind: "hacker", label: "Observer", x: 0.5, y: 0.7, tone: "threat", at: 1.2 },
+        ],
+        links: [{ from: "client", to: "server", at: 0.5, travel: [{ at: 1.6, seconds: 1.2, label: "password: hunter2" }] }],
+        notes: [{ text: "observer reads: hunter2", near: "watcher", at: 2.0, tone: "threat", typeSpeed: 40 }],
+      },
+      header: { kicker: "// how TLS works", kickerStyle: "comment", title: "Data over the network…" },
+    },
+
+    {
+      // Proves the row list: an icon tile, a title and a status mark, arriving
+      // one by one under a browser bar.
+      src: {
+        type: "rows",
+        seconds: 3,
+        frame: { url: "myapp.com/checkout", badge: "J" },
+        rows: [
+          { icon: "play", title: "Screen recording", sub: "00:14 · cursor + clicks", status: "check", tone: "ok", at: 0.3 },
+          { icon: "terminal", title: "Console logs", sub: "TypeError: total is NaN", status: "check", tone: "ok" },
+          { icon: "network", title: "Network requests", sub: "POST /pay 500", status: "pending", tone: "ok" },
+        ],
+      },
+      backdrop: true,
+      accent: "#4ADE80",
+      header: { kicker: "TOOL 03", step: [3, 3], title: "Jam", subtitle: "1 click = full bug context" },
+    },
   ],
 });
