@@ -420,6 +420,19 @@ choose one per reel. Each section can have its own accent colour and a soft
 glow behind its clips. Record the voice in clean, separate takes per section
 if you can; sections then start exactly on their first word.
 
+*Write it as content, not as shots.* The editor builds the whole edit from a
+list, so for each section give: **the phrase it starts on** (the words you say
+as it begins: "number two", "so how does it work"), the name or title, the
+subtitle (and, if it changes, the word it changes on), and what is on screen —
+a row list (each row: icon, title, a second line, a status, and the word it
+lands on), or a scene (things, wires, what travels along them, notes that type
+in, each with the word it appears on), or any other clip. For "a list of N
+things" say so: it numbers them and fills a progress pill. For "how X works"
+give the topic and the steps. Name a word wherever something should appear *on*
+it; the editor never needs seconds, and the same word said twice is "server#2"
+for the second time. Don't ask for headline-style captions together with a
+title and subtitle in the header: they sit in the same place.
+
 ---
 
 ## 7. The checklist

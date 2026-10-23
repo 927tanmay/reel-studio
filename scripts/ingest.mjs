@@ -114,6 +114,27 @@ for (const file of videos) {
   fmt.ok(`${key}  ${final.width}x${final.height} ${orientation}  ${final.seconds.toFixed(2)}s  ${final.hasAudio ? "audio" : "silent"}`);
 }
 
+// A voice recorded on its own (a voice memo, a studio take) is a media key like
+// any other: the faceless formats read its words and play it under generated
+// clips. No picture, so no size.
+for (const file of audios) {
+  const key = keyFor(file);
+  if (manifest[key] && videos.some((v) => keyFor(v) === key)) continue; // the video of that name wins
+  const info = await probe(file);
+  manifest[key] = {
+    key,
+    file: relToPublic(file),
+    seconds: Number(info.seconds.toFixed(3)),
+    width: 0,
+    height: 0,
+    fps: 0,
+    hasAudio: true,
+    ...(manifest[key]?.cleanAudio ? { cleanAudio: manifest[key].cleanAudio } : {}),
+    ...(manifest[key]?.audioOffset !== undefined ? { audioOffset: manifest[key].audioOffset } : {}),
+  };
+  fmt.ok(`${key}  audio only  ${info.seconds.toFixed(2)}s`);
+}
+
 for (const file of images) {
   const key = keyFor(file);
   manifest[key] = { key, file: relToPublic(file), seconds: 0, width: 0, height: 0, fps: 0, hasAudio: false };

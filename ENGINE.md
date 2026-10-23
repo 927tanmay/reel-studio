@@ -124,6 +124,15 @@ Grouped by how loud they are (see §4). Each line is a thing a brief can say.
   eavesdroppers, request journeys.
 - **A row list.** Icon, title, a second line and a status mark, landing one by
   one under an optional browser bar — "what you get".
+- **Formats — hand over content, get the whole edit.** For a voice-only reel you
+  can write the brief as *content* instead of shots: a **listicle** ("5 tools":
+  a `TOOL 01` pill that fills as it goes, the name, a subtitle that can change on
+  a word, and what is on screen for each) or a **how-it-works** (a typed
+  `// how TLS works` comment, one title across a few scenes). Each section names
+  *the phrase it starts on* ("number two"), and anything inside it that should
+  appear on a word names that word ("the server", or "server#2" for the second time
+  it is said). Nothing is timed by seconds, so re-recording the voice moves
+  everything. Record the voice as one take per section if you can.
 
 ### Loud — a beat that should hurt. Two or three in a 30-second reel
 - **Key-word slam** — one to three words land huge in the middle of the frame on

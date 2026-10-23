@@ -42,6 +42,7 @@ Never put a colour, a size, a duration or a structural assumption into
 | 06 | Shotlist | you, with the user | `shotlist.ts` |
 | 06b | Beat check (optional) | `npm run beatcheck <post>` | — |
 | 06c | Pacing check (optional) | `npm run critique <post>` | — |
+| 06d | Shotlist check (every render runs it first) | `npm run check <post>` | — |
 | 07 | Compose | `npm run studio` | — |
 | 08 | Render and verify | `npm run render <post>` | `out/<post>/reel.mp4`, a take |
 | 08b | Thumbnail (optional) | `npm run thumbnail <post>` | `out/<post>/thumbnail.jpg` |
@@ -617,6 +618,39 @@ by hand, and resuming is expected and supported.
    tool's features, the contents of a report, the steps of a process. Look:
    `Tokens.rows`.
 
+49. **A reel with nobody on screen is built from its content, not cut by
+   hand.** `engine/formats.ts` turns structured content and a voice's words
+   into the whole shotlist: `sections()` is the core, `listicle()` ("five
+   tools": a `TOOL 01` pill filling as it goes, the name, a subtitle, a row
+   list or any clip) and `howItWorks()` (a typed `// how TLS works` comment and
+   one title carried across a few scenes) are presets over it. Each section
+   says *which phrase it starts on* (`starts: "number two"`), and inside a clip
+   every `at` / `until` / `pressAt` may be a phrase instead of seconds:
+   `"server"`, `"the server"`, `"server#2"` (second time it is said),
+   `"server+0.2s"` (a little after). A phrase is searched for inside the clip it
+   sits in, so a word said in an earlier section never captures it, and one that
+   is not spoken throws, naming what *was* heard there. Sections abut on whole
+   frames, every shot borrows the voice (`audio: { from }`, `in` = its offset)
+   and states its own length, so the voice plays unbroken and captions follow it.
+   Rules: the first section of a take opens it at 0 (its `starts` is checked,
+   never used to trim); `lead` (default 0.12 s) opens a section a breath before
+   its word; headers on consecutive shots with the same kicker, title and step
+   are marked `continued`; a subtitle swap list is re-based onto each shot.
+   Colours are never built in: pass `accents`. `buildSections` also returns a
+   `plan` and `describePlan` prints where each section landed — read it before
+   rendering. A voice recorded on its own (`raw/voice.wav`, `.m4a`) is
+   ingested as an audio-only media key; give each section its own take
+   (`voice: { key, words }`) where you can, and it starts at that take's zero.
+   Headline captions and a header's title or subtitle share the top of the frame:
+   with `captionStyle: "headline"` keep the header to its kicker.
+50. **The shotlist is checked before it renders.** `npm run check <post>` runs
+   `engine/verify.ts` and the timeline's own warnings against the real shotlist
+   and prints every one; a `fail` exits 1, and `npm run render` runs it first and
+   stops before spending the render (`--no-check` renders anyway). Until this,
+   those findings only appeared in the studio console. Warnings print and do not
+   stop it. It bundles the shotlist with esbuild into `out/.check/`, so a
+   shotlist that cannot load is reported there too, in plain words.
+
 ## What stays human
 
 Take selection, where a cut lands emotionally, whether a crop reads at phone
@@ -656,6 +690,7 @@ engine/          the moves and the contract — general, never show-specific
   spec.ts        the shotlist contract and timeline resolution
   icons.ts       the built-in icons as drawable path segments
   codeMorph.ts   code as positioned tokens, and how one version becomes the next
+  formats.ts     sections, listicle, how-it-works: structured content + a voice → a shotlist
   scene.ts · rows.ts · header.ts · backdrop.ts · emphasis.ts · card.ts · zoom.ts · ramp.ts · impact.ts · packet.ts   pure geometry for cards, click zooms, speed ramps and impacts,
                  shared by the renderer, the timeline and verify.ts
   scale.ts       crop-then-scale, and size tokens that survive a frame change
@@ -679,6 +714,7 @@ scripts/         ingest · transcribe · align · render · thumbnail · verify 
                  the resolved timeline; engine/critique.ts is the analysis,
                  dump-critique.ts its internal) · tighten (reports what a
                  tightening pass would remove) ·
+                 check (shotlist gates before a render; render runs it) ·
                  export-timeline (writes an EDL; dump-timeline.ts and
                  ts-resolve-hook.mjs are shared internals, not run directly)
 posts.ts         the register; every reel needs a line here
@@ -707,6 +743,7 @@ node scripts/make-music.mjs  # write the default music bed (not committed)
 npm run beats <track>        # tempo, confidence, real start points for a music file
 npm run beatcheck 001-my-reel  # how far every cut, hit and dip sits from the beat grid
 npm run critique 001-my-reel   # pacing: first change, longest gap, speech coverage, dead air
+npm run check 001-my-reel      # the shotlist's own gates, before any render (render runs it too)
 ```
 
 ## Adding to the engine

@@ -56,6 +56,9 @@ visibly weaker*, not merely plainer.
   the flat frame; wait for the card to settle (`verify.ts` warns).
 - **Drawn pointer arrow over a recording that already shows a cursor.** Two
   cursors.
+- **Headline captions with a header's title or subtitle.** Both sit under the
+  top of the frame and print over each other (`npm run check` fails it). Keep the
+  header to its kicker pill, or use the box caption style.
 
 ## 3. Where in the reel
 

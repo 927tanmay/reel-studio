@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- Formats (`engine/formats.ts`): structured content and a voice's words in, a whole
+  shotlist out. `sections()` is the core; `listicle()` and `howItWorks()` are
+  presets. A section starts on a spoken phrase, and any `at`/`until`/`pressAt` inside
+  a clip can be a phrase (`"server"`, `"server#2"`, `"server+0.2s"`) instead of
+  seconds, searched for inside that clip. Missing phrases throw, naming what was heard.
+- `npm run check <post>` runs the shotlist's own gates before any render, and
+  `npm run render` runs it first (`--no-check` skips). New gate: headline captions
+  over a header's title or subtitle.
+- `npm run ingest` now ingests audio-only files in `raw/` (a voice recorded on its
+  own); before, they were silently ignored.
+- `esbuild` is now a declared dev dependency (the check script uses it).
 - Faceless-reel toolkit: a per-section glow (`backdrop`, `accent`), a section
   header (pill with progress dashes, or a typed comment with a caret; a title; a
   subtitle that swaps), highlight-box captions, and word-by-word "headline"

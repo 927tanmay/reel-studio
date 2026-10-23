@@ -13,6 +13,7 @@ import { existsSync } from "node:fs";
 import { copyFile, mkdir, readdir, rename, rm, stat } from "node:fs/promises";
 import { spawn } from "node:child_process";
 import { ROOT, fmt, postDir, probe, readJson, requireFfmpeg, requirePost, run, writeJson } from "./lib.mjs";
+import { check, report } from "./check.mjs";
 
 const id = requirePost(process.argv[2]);
 const args = process.argv.slice(3);
@@ -21,9 +22,10 @@ const stillAt = args.includes("--still") ? Number(args[args.indexOf("--still") +
 // Consumed here, not forwarded to `remotion render` — a label for this take,
 // for when `npm run takes` lists ten of them and "3" alone doesn't say which
 // one mattered.
+const skipCheck = args.includes("--no-check");
 const noteIndex = args.indexOf("--note");
 const note = noteIndex > -1 ? (args[noteIndex + 1] ?? null) : null;
-const forwardArgs = args.filter((_, i) => i !== noteIndex && i !== noteIndex + 1);
+const forwardArgs = args.filter((a, i) => a !== "--no-check" && i !== noteIndex && i !== noteIndex + 1);
 
 await requireFfmpeg();
 
@@ -47,6 +49,22 @@ if (stillAt !== null) {
   await shell("npx", ["remotion", "still", id, out, "--frame", String(Math.round(stillAt * 30))]);
   fmt.ok(out);
   process.exit(0);
+}
+
+// The shotlist's own gates, before the minutes a render costs: two things
+// printed over each other, a phrase that is not spoken, a look missing a style.
+// Warnings print and carry on; a failure stops here. `--no-check` skips it.
+if (!skipCheck) {
+  fmt.head(`Checking ${id}`);
+  const result = await check(id).catch((e) => {
+    fmt.fail(`Could not load the shotlist: ${e.message}`);
+    process.exit(1);
+  });
+  const failures = report(result);
+  if (failures > 0) {
+    console.error(`\n${failures} failure${failures === 1 ? "" : "s"} in the shotlist, so nothing was rendered. Fix it, or pass --no-check to render anyway.`);
+    process.exit(1);
+  }
 }
 
 const raw = path.join(outDir, "reel.raw.mp4");

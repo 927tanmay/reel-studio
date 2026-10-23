@@ -18,6 +18,7 @@
     "align": "node scripts/align.mjs",
     "beatcheck": "node scripts/beatcheck.mjs",
     "critique": "node scripts/critique.mjs",
+    "check": "node scripts/check.mjs",
     "render": "node scripts/render.mjs",
     "thumbnail": "node scripts/thumbnail.mjs",
     "verify": "node scripts/verify.mjs",
@@ -44,6 +45,7 @@
   },
   "devDependencies": {
     "@types/react": "^19.0.0",
+    "esbuild": "^0.28.1",
     "typescript": "^5.7.0"
   }
 }

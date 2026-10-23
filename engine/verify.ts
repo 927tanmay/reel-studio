@@ -251,6 +251,27 @@ export const verifySpec = (spec: ReelSpec, timeline: Timeline): Finding[] => {
     if (shot.captionStyle === "headline" && !t.headline) {
       findings.push({ level: "fail", message: `Shot ${index} asks for headline captions, but the look defines no \`headline\` style. Add one to the look's tokens.` });
     }
+    // Headline captions and a header's title or subtitle both sit under the
+    // top of the frame and print over each other. Measured from the look's own
+    // numbers (type at a line height of 1), so a look that gives the two room
+    // passes; a kicker alone always does, it sits above.
+    if (shot.header && t.header && t.headline && shot.captionStyle === "headline" && willShowCaptions(spec, resolved)) {
+      const h = t.header;
+      const kicker = shot.header.kicker || shot.header.step ? h.kickerSize + 16 + h.gap : 0;
+      const title = shot.header.title ? h.titleSize : 0;
+      const subtitle = shot.header.subtitle ? h.gap + h.subtitleSize : 0;
+      const bottom = h.top * spec.frame.h + kicker + title + subtitle;
+      const headlineTop = extent(t.headline).top * spec.frame.h;
+      if ((title || subtitle) && bottom > headlineTop) {
+        findings.push({
+          level: "fail",
+          message:
+            `Shot ${index} has headline captions and a header whose ${shot.header.subtitle ? "subtitle" : "title"} ends about ${Math.round(bottom)}px down, ` +
+            `past where the headline starts (${Math.round(headlineTop)}px). The two print over each other. ` +
+            `Keep the header to its kicker, or use the box caption style, or lower Tokens.headline.top.`,
+        });
+      }
+    }
   }
   if (t.headline && timeline.shots.some((r) => r.shot.captionStyle === "headline" && willShowCaptions(spec, r))) {
     findings.push(...checkSafe("Headline captions", t.headline, t));
