@@ -63,6 +63,12 @@ if (await has("uv")) {
 } else {
   fmt.warn("uv not found — only needed for `npm run transcribe`. Install it: brew install uv");
 }
+if (process.platform !== "darwin" || process.arch !== "arm64") {
+  fmt.warn(
+    `Transcription needs an Apple Silicon Mac (this is ${process.platform}/${process.arch}); everything else works here. ` +
+      "Supply words.json yourself — the README has the shape.",
+  );
+}
 
 // Sound effects are committed; a missing one means an incomplete checkout.
 const sfx = ["snap", "whoosh", "tick", "tap", "switch"];

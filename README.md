@@ -18,6 +18,25 @@ move; a real reel carries a handful, not all of them (see `STYLE.md`).*
 - macOS or Linux, Node 22 or newer
 - `ffmpeg` — `brew install ffmpeg`
 - `uv`, only for transcription — `brew install uv`
+- **Transcription needs an Apple Silicon Mac.** `npm run transcribe` runs
+  `mlx-whisper`, which is built on Apple's MLX. Everything else (render, check,
+  screenshots, formats, the studio) runs on Linux and Intel Macs too; there, supply
+  the word timings yourself (below).
+
+### Word timings without the built-in transcription
+
+Anywhere `npm run transcribe` cannot run, produce `words.json` with any Whisper tool
+(whisper.cpp, faster-whisper, a hosted service) and put it in the post's folder. It is
+one list of words per media key, times in milliseconds:
+
+```json
+{ "voice": [ { "text": "Hello", "startMs": 0, "endMs": 320, "timestampMs": 160, "confidence": 0.9 } ] }
+```
+
+`timestampMs` and `confidence` may be `null`. Also write `transcript.md` (plain text, a
+`[seconds]` marker at the start of each line) if you want a coding agent to read the
+words cheaply instead of the JSON. Pass `--force` to `npm run transcribe` to try
+`mlx-whisper` on another chip anyway.
 
 ## Setup
 

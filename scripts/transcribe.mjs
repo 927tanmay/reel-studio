@@ -20,6 +20,19 @@ const MODEL = modelFlag > -1 ? process.argv[modelFlag + 1] : "mlx-community/whis
 
 await requireFfmpeg();
 
+// The model runs through mlx-whisper, which is built on Apple's MLX and needs an
+// Apple Silicon Mac. Say so up front rather than letting uv fail somewhere inside.
+// Everything else in the engine runs anywhere; only this stage is tied to the chip.
+if ((process.platform !== "darwin" || process.arch !== "arm64") && !process.argv.includes("--force")) {
+  console.error(
+    `Transcription uses mlx-whisper, which needs an Apple Silicon Mac (this is ${process.platform}/${process.arch}).\n` +
+      "Everything else works here. To get word timings, make words.json with any Whisper tool and put it in\n" +
+      "the post's folder as { \"<media key>\": [{ text, startMs, endMs, timestampMs, confidence }] }; the README\n" +
+      "has the shape. Pass --force to try mlx-whisper anyway.",
+  );
+  process.exit(1);
+}
+
 if (!(await has("uv"))) {
   console.error(
     "uv is required to run Whisper locally.\n" +

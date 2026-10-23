@@ -7,7 +7,7 @@ the ground rules below will save us both a round trip.
 
 ```bash
 npm install
-npm run doctor                 # Node, ffmpeg, uv — says what to install
+npm run doctor                 # Node, ffmpeg, uv — says what to install (transcription also needs Apple Silicon; nothing else here does)
 npm test                       # the pure maths, no render, under a second
 npm run render 000-smoke-test  # the whole chain, no footage needed
 ```

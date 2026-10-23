@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- README and CONTRIBUTING now say that transcription needs an Apple Silicon Mac (it runs
+  `mlx-whisper`) while everything else runs on Linux and Intel Macs, and show the
+  `words.json` shape for supplying timings from any other Whisper tool. `npm run
+  transcribe` and `npm run doctor` say so plainly on another chip instead of failing
+  inside `uv`; `--force` tries anyway.
 - Two more formats: `versus()` (two sides, a round per topic with a winner ticked, an
   optional intro and verdict) and `mythFact()` (a crossed myth and a ticked fact per
   claim), both over `sections()` and the row list. Phrases now match a number either
