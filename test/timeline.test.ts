@@ -71,3 +71,19 @@ test("critique counts a slam and a shake on one word as a single loud beat", () 
   assert.deepEqual(c.emphasis.loud[0].kinds.sort(), ["shake", "slam"]);
   assert.ok(c.emphasis.closestLoudGap! > 2.9);
 });
+
+test("a generated clip keeps its own length when `in` offsets the voice under it", () => {
+  // The voice-first pattern: a 5s diagram over seconds 6-11 of a recording.
+  const spec = reel({
+    ...base,
+    media: { ...media, voice: { key: "voice", file: "raw/voice.mp4", seconds: 20, width: 540, height: 960, fps: 30, hasAudio: true } },
+    shots: [
+      { src: { type: "diagram", nodes: [{ id: "a", label: "A" }], seconds: 5 }, in: 6, audio: { from: "voice" } },
+    ],
+  });
+  const t = resolveTimeline(spec);
+  assert.equal(t.shots[0].durationInFrames, 150);
+  assert.deepEqual(t.warnings, []);
+  // and the borrowed voice starts where `in` says, not at the top
+  assert.equal(t.shots[0].sounds[0].segments[0].sourceStart, 6);
+});

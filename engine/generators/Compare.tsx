@@ -3,6 +3,7 @@ import { AbsoluteFill, interpolate, useCurrentFrame, useVideoConfig } from "remo
 import type { GenSpec } from "../spec";
 import { px } from "../scale";
 import type { GenProps } from "./index";
+import { useGeneratorBg } from "./index";
 
 type CompareSpec = Extract<GenSpec, { type: "compare" }>;
 
@@ -11,6 +12,7 @@ export const Compare: React.FC<GenProps<CompareSpec>> = ({ spec, reel, durationI
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const tokens = reel.style;
+  const bg = useGeneratorBg(tokens.bg);
   const P = tokens.palette;
   const g = tokens.generators?.textScale ?? 1;
 
@@ -64,7 +66,7 @@ export const Compare: React.FC<GenProps<CompareSpec>> = ({ spec, reel, durationI
   return (
     <AbsoluteFill
       style={{
-        backgroundColor: tokens.bg,
+        backgroundColor: bg,
         flexDirection: "column",
         justifyContent: "center",
         alignItems: "stretch",

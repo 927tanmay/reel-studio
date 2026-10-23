@@ -588,6 +588,40 @@ AGENTS.md rule 45, checked from stills on a scratch reel and from reel 010:
 - **A pushed still is for life, not for a zoom.** 5-10% over the whole shot,
   eased in and out. Anything faster reads as a punch, which is a different move.
 
+### Sections, glows, headers and headline captions
+
+AGENTS.md rules 45–46, built from two sample reels (a tools roundup and a "how
+TLS works" explainer) and checked on a scratch reel with a synthetic voice and
+fake word timings:
+
+- **A glow behind a generated clip needs the clip to be transparent.** Every
+  generator used to paint `tokens.bg` over the whole frame, which would have
+  buried any backdrop. They now read a context (`useGeneratorBg`) that says
+  "paint nothing" when a backdrop is present. A new generator must use it, or
+  its shots will silently hide the glow.
+- **Run the drift on reel time.** A glow driven by shot-local frames restarts at
+  every cut, so the blobs visibly jump whenever a section's picture changes.
+  Adding the shot's start frame keeps one glow flowing across a whole section.
+- **Swap a subtitle in one grid cell.** The old line and the new one are
+  stacked in the same cell and cross-faded, so the line's height never changes
+  and nothing below the header moves while it swaps.
+- **Cards are built from time, not sentences.** `createTikTokStyleCaptions`
+  gathers words inside a window and doesn't know where a sentence ends, so a
+  headline ran "broke. How TLS actually works. Data over" together. Splitting
+  the words at `. ? !` and paging each run separately gives one thought per
+  card. It is opt-in (`breakOnSentence`) so older reels keep their cards.
+- **Hidden words must keep their space.** In reveal mode unspoken words are
+  invisible but laid out, so the line is already wrapped as it will end up and
+  nothing jumps when the last word lands.
+- **Box padding goes on every word.** The highlight box's padding is applied to
+  all tokens and only the background changes, so the line doesn't breathe as the
+  box moves from word to word. The leading space belongs outside the box.
+- **Look at sentence boundaries.** The bug above only showed at a page break;
+  a single sentence rendered fine. Render a frame just after a sentence ends.
+- **`in` on a generated clip is the voice's offset.** The voice-first pattern
+  (a 5s diagram over seconds 6–11 of a recording) collapsed to one frame because
+  the duration subtracted `in` from the clip's own length. A test now holds it.
+
 ## 3. Generators — one clip, one job each
 
 `engine/generators/`: `diagram`, `code`, `terminal`, `compare`, `data`,

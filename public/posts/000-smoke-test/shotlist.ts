@@ -204,5 +204,23 @@ export default reel({
         sweep: 1.4,
       },
     },
+
+    {
+      // Proves the section look: a glow behind a generated clip, tinted by the
+      // shot's accent, under a header with a progress pill and a subtitle that
+      // swaps. Add `continued: true` on the next shot of the same section.
+      src: { type: "data", style: "counter", items: [{ label: "bugs reproduced by hand", value: 0, suffix: "" }], seconds: 3 },
+      backdrop: true,
+      accent: "#FF4D6D",
+      header: {
+        kicker: "TOOL 02",
+        step: [2, 3],
+        title: "Replay",
+        subtitle: [
+          { at: 0, text: "Record once, go back anytime" },
+          { at: 1.6, text: "Inspect the exact state" },
+        ],
+      },
+    },
   ],
 });

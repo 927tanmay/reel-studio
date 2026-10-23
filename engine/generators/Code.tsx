@@ -3,7 +3,7 @@ import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
 import type { GenSpec } from "../spec";
 import { px } from "../scale";
 import type { GenProps } from "./index";
-import { currentStep } from "./index";
+import { currentStep, useGeneratorBg } from "./index";
 import { matchTokens, type CodeToken } from "../codeMorph";
 import { useTokens } from "./shiki";
 import { ease } from "../moves/punch";
@@ -47,6 +47,7 @@ const SimpleCode: React.FC<GenProps<CodeSpec>> = ({ spec, reel }) => {
   const { fps } = useVideoConfig();
   const seconds = frame / fps;
   const tokens = reel.style;
+  const bg = useGeneratorBg(tokens.bg);
   const P = tokens.palette;
 
   const lines = spec.code.replace(/\t/g, "  ").split("\n");
@@ -66,7 +67,7 @@ const SimpleCode: React.FC<GenProps<CodeSpec>> = ({ spec, reel }) => {
   return (
     <AbsoluteFill
       style={{
-        backgroundColor: tokens.bg,
+        backgroundColor: bg,
         padding: pad,
         justifyContent: "center",
       }}
@@ -140,6 +141,7 @@ const ShikiCode: React.FC<GenProps<CodeSpec>> = ({ spec, reel }) => {
   const { fps } = useVideoConfig();
   const seconds = frame / fps;
   const tokens = reel.style;
+  const bg = useGeneratorBg(tokens.bg);
   const P = tokens.palette;
   const style = tokens.code;
 
@@ -152,7 +154,7 @@ const ShikiCode: React.FC<GenProps<CodeSpec>> = ({ spec, reel }) => {
     spec.language ?? "typescript",
     P,
   );
-  if (!tokenSets) return <AbsoluteFill style={{ backgroundColor: tokens.bg }} />;
+  if (!tokenSets) return <AbsoluteFill style={{ backgroundColor: bg }} />;
 
   const morphFrames = style?.morphFrames ?? 1;
   const dim = style?.dim ?? 0.32;
@@ -213,7 +215,7 @@ const ShikiCode: React.FC<GenProps<CodeSpec>> = ({ spec, reel }) => {
   }
 
   return (
-    <AbsoluteFill style={{ backgroundColor: tokens.bg, padding: pad, justifyContent: "center" }}>
+    <AbsoluteFill style={{ backgroundColor: bg, padding: pad, justifyContent: "center" }}>
       {spec.title ? (
         <div
           style={{

@@ -109,6 +109,14 @@ Grouped by how loud they are (see §4). Each line is a thing a brief can say.
     across and reveals — "an attacker hid a note", shown literally).
 - **Split frame** — you visible in a band while a generated graphic advances in
   another, for when the viewer must see your face *and* the graphic.
+- **Faceless reels (voice only).** Everything on screen is generated under your
+  recorded voice. Each *section* can have a header (a pill like "TOOL 02" with
+  progress dashes, or a typed `// how TLS works` comment with a blinking
+  caret; a big title; a subtitle that changes on a word), its own accent colour,
+  and a soft drifting glow behind its clips. Captions come in two looks: the
+  usual lines with the spoken word in a coloured box, or "headline" captions
+  that write the words big across the top as they are spoken, one sentence at a
+  time, with chosen words in named colours.
 
 ### Loud — a beat that should hurt. Two or three in a 30-second reel
 - **Key-word slam** — one to three words land huge in the middle of the frame on

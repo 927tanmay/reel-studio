@@ -5,6 +5,7 @@ import { px } from "../scale";
 import { ease } from "../moves/punch";
 import { ICONS, type IconName } from "../icons";
 import type { GenProps } from "./index";
+import { useGeneratorBg } from "./index";
 
 type ChatSpec = Extract<GenSpec, { type: "chat" }>;
 
@@ -39,6 +40,7 @@ export const Chat: React.FC<GenProps<ChatSpec>> = ({ spec, reel }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const tokens = reel.style;
+  const bg = useGeneratorBg(tokens.bg);
   const P = tokens.palette;
   const g = tokens.generators?.textScale ?? 1;
   const u = (n: number) => px(tokens, reel.frame, n * g);
@@ -47,7 +49,7 @@ export const Chat: React.FC<GenProps<ChatSpec>> = ({ spec, reel }) => {
   const ink = tokens.title.color;
 
   return (
-    <AbsoluteFill style={{ backgroundColor: tokens.bg }}>
+    <AbsoluteFill style={{ backgroundColor: bg }}>
       <div
         style={{
           position: "absolute",

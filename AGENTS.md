@@ -553,6 +553,41 @@ by hand, and resuming is expected and supported.
    `card` for a screenshot whose edges matter; leave it off for a photograph
    that should fill the frame.
 
+45. **A section can have its own glow and its own header.** For a reel with
+   nobody on screen — a tools roundup, an explainer — each section can carry
+   `backdrop: true` (soft glows drifting behind a *generated* clip, in
+   `Tokens.backdrop`), an `accent` (a palette name or CSS colour that tints the
+   glow, the header's label and dashes, and a caption box set to `"accent"`), and
+   `header: { kicker, step, title, subtitle, continued }`. The kicker is a pill
+   with progress dashes (`step: [2, 3]` fills two of three) or, with
+   `kickerStyle: "comment"`, a monospace `// how TLS works` with a blinking
+   caret. The subtitle is a string or a list that swaps at given seconds
+   (`[{ at: 0, text }, { at: 3, text }]`), crossfading in one grid cell so nothing
+   below it moves. Put the same header on every shot of a section and mark the
+   later ones `continued: true`, so it stays still while the picture changes. A
+   header is the title role of rule 15: `verify.ts` fails a shot with both, fails
+   a header starting inside the platform's covered top, and warns on a backdrop
+   over footage (a video covers it). The glow drifts on *reel* time, not shot
+   time, so shots of one section share one continuous glow instead of snapping
+   back at each cut. Generators paint nothing over a backdrop (they read
+   `useGeneratorBg`), so a new generator must use that hook for its root
+   background, never `tokens.bg` directly. The look is `Tokens.backdrop` and
+   `Tokens.header`; `projects/explainer` is a look built for this style.
+46. **Captions can be the headline, and the spoken word can sit in a box.**
+   `captionStyle: "headline"` sets the shot's words in `Tokens.headline`: big, at
+   the top, built word by word as they are spoken (`reveal`: each fades in from
+   a blur, unspoken words hold their space invisible so lines never re-wrap), a
+   card per sentence (`breakOnSentence`), and `emphasis` as an object
+   (`{ cool: ["TLS"], warm: ["network"] }`) so each group takes its own colour
+   from `caption.colours`, the palette, or a CSS value. Separately,
+   `caption.activeBox` puts the word being spoken in a filled box instead of only
+   recolouring it, with the same padding on every word so nothing shifts as the
+   box moves along the line; pair it with a short `windowMs` (about 650) for two
+   or three words a card. Neither changes a look that doesn't set them, so
+   existing reels render as they did. A generated clip with `in` keeps its own
+   `src.seconds`: `in` there is where a borrowed voice starts reading, not a
+   point to trim from (an early version subtracted it and collapsed the shot).
+
 ## What stays human
 
 Take selection, where a cut lands emotionally, whether a crop reads at phone
@@ -592,7 +627,7 @@ engine/          the moves and the contract — general, never show-specific
   spec.ts        the shotlist contract and timeline resolution
   icons.ts       the built-in icons as drawable path segments
   codeMorph.ts   code as positioned tokens, and how one version becomes the next
-  card.ts · zoom.ts · ramp.ts · impact.ts · packet.ts   pure geometry for cards, click zooms, speed ramps and impacts,
+  header.ts · backdrop.ts · emphasis.ts · card.ts · zoom.ts · ramp.ts · impact.ts · packet.ts   pure geometry for cards, click zooms, speed ramps and impacts,
                  shared by the renderer, the timeline and verify.ts
   scale.ts       crop-then-scale, and size tokens that survive a frame change
   words.ts       word anchoring, and the pauses/fillers a cut removes
@@ -601,6 +636,7 @@ engine/          the moves and the contract — general, never show-specific
   moves/         punch · blend · push · captions · title · badge · marks · pointer · bed · hits
   generators/    diagram · code · terminal · compare · data · callout · chat · page · lottie · orb
 projects/        one look per channel; copy default/ and change everything
+                 (explainer/ is the default plus a glow-and-header, box-caption style)
 public/posts/    one folder per reel, self-contained
 public/assets/   fonts and sound effects are committed, so those renders are
                  offline; music is not (public/assets/music/*.gitkeep aside)

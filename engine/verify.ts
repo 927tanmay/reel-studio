@@ -3,6 +3,7 @@ import { wordsInShot } from "./spec";
 import type { TextStyle, Tokens } from "./tokens";
 import { primaryMediaKey } from "./moves/Captions";
 import { normalise } from "./words";
+import { emphasisWords } from "./emphasis";
 import { cardBox, cardTilt } from "./card";
 import { coverRegion } from "./scale";
 
@@ -152,6 +153,54 @@ export const verifySpec = (spec: ReelSpec, timeline: Timeline): Finding[] => {
           `Every keyframe needs \`speed\` above 0 and \`at\` from 0.`,
       });
     }
+  }
+
+  // Header, backdrop and headline captions each need the look that styles
+  // them. A header is the title role, so it never shares a shot with a title,
+  // and it must clear the platform's covered area at the top.
+  for (const resolved of timeline.shots) {
+    const { shot, index, durationInFrames } = resolved;
+    const fps = spec.frame.fps;
+    if (shot.header) {
+      if (!t.header) {
+        findings.push({ level: "fail", message: `Shot ${index} has a header, but the look defines no \`header\` style. Add one to the look's tokens.` });
+      } else {
+        if (t.header.top < t.safe.top) {
+          findings.push({
+            level: "fail",
+            message: `Shot ${index}'s header starts ${(t.header.top * 100).toFixed(1)}% from the top, inside the ${(t.safe.top * 100).toFixed(0)}% the interface covers. Move Tokens.header.top down.`,
+          });
+        }
+        for (const sub of Array.isArray(shot.header.subtitle) ? shot.header.subtitle : []) {
+          if (Math.round(sub.at * fps) >= durationInFrames) {
+            findings.push({ level: "warn", message: `Shot ${index}'s header subtitle "${sub.text}" swaps in at ${sub.at}s, after the shot has ended — it will never show.` });
+          }
+        }
+      }
+      if (shot.title) {
+        findings.push({
+          level: "fail",
+          message: `Shot ${index} has both a header and a title. They are the same role at the top of the frame; keep the header.`,
+        });
+      }
+    }
+    if (shot.backdrop) {
+      if (!t.backdrop) {
+        findings.push({ level: "fail", message: `Shot ${index} has a backdrop, but the look defines no \`backdrop\` style. Add one to the look's tokens.` });
+      }
+      if (typeof shot.src === "string" || shot.bands) {
+        findings.push({
+          level: "warn",
+          message: `Shot ${index} sets a backdrop over footage. A video covers it; the glow only shows behind generated clips.`,
+        });
+      }
+    }
+    if (shot.captionStyle === "headline" && !t.headline) {
+      findings.push({ level: "fail", message: `Shot ${index} asks for headline captions, but the look defines no \`headline\` style. Add one to the look's tokens.` });
+    }
+  }
+  if (t.headline && timeline.shots.some((r) => r.shot.captionStyle === "headline" && willShowCaptions(spec, r))) {
+    findings.push(...checkSafe("Headline captions", t.headline, t));
   }
 
   // A dot travelling an arrow needs the look, an edge between nodes that
@@ -560,7 +609,7 @@ export const verifySpec = (spec: ReelSpec, timeline: Timeline): Finding[] => {
   // warning instead of staying quiet.
   for (const resolvedShot of timeline.shots) {
     const { shot, index } = resolvedShot;
-    if (!shot.emphasis || shot.emphasis.length === 0) continue;
+    if (emphasisWords(shot.emphasis).length === 0) continue;
     if (!willShowCaptions(spec, resolvedShot)) continue;
 
     const key = primaryMediaKey(resolvedShot);
@@ -574,7 +623,7 @@ export const verifySpec = (spec: ReelSpec, timeline: Timeline): Finding[] => {
       wordsInShot(resolvedShot, spec.frame.fps, allWords).map((w) => normalise(w.text)),
     );
 
-    for (const word of shot.emphasis) {
+    for (const word of emphasisWords(shot.emphasis)) {
       if (!spoken.has(normalise(word))) {
         findings.push({
           level: "warn",

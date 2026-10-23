@@ -239,6 +239,32 @@ export type Impact = {
 };
 
 /**
+ * A section header at the top of the frame: a small label, a big title, and a
+ * line under it that can change as the section goes on. It is the *title* role
+ * of the layout (rule 15) with more in it, so a shot carries a header or a
+ * `title`, never both. For a listicle ("TOOL 02 of 3") or an explainer ("//
+ * how TLS works"). Put the same header on every shot of a section and mark the
+ * later ones `continued` so it stays still while the picture below changes.
+ */
+export type Header = {
+  /** The label: "TOOL 02", or a comment like "// how TLS works". */
+  kicker?: string;
+  /**
+   * `"pill"` — a rounded tag, with progress dashes when `step` is set.
+   * `"comment"` — monospace, with a blinking caret. Defaults to a pill when
+   * `step` is given, else a comment.
+   */
+  kickerStyle?: "pill" | "comment";
+  /** Step n of m, drawn as dashes in the pill. */
+  step?: [number, number];
+  title?: string;
+  /** One line, or a list that swaps at the given seconds into the shot. */
+  subtitle?: string | { at: number; text: string }[];
+  /** Skip the entrance: this header is carrying on from the shot before. */
+  continued?: boolean;
+};
+
+/**
  * One big word (or two or three) landing in the middle of the frame on the
  * moment the script names it: the punchline, the number, the verdict. It
  * arrives with a stamp — larger and soft, snapping to size with a small
@@ -310,7 +336,10 @@ export type DiagramVisual =
   | "shield"
   | "user"
   | "clock"
-  | "database";
+  | "database"
+  | "play"
+  | "terminal"
+  | "network";
 
 export type DiagramNode = {
   id: string;
@@ -743,7 +772,28 @@ export type Shot = {
    * spoken range; one that never matches is silently inert, which is worth
    * checking for, not assuming.
    */
-  emphasis?: string[];
+  emphasis?: string[] | Record<string, string[]>;
+  /**
+   * Which caption look this shot's words use. `"caption"` (the default) is the
+   * bottom caption; `"headline"` is the look's big, word-by-word headline
+   * (`Tokens.headline`) — the voice written across the top of the frame as it
+   * is spoken, for a reel with nobody on screen.
+   */
+  captionStyle?: "caption" | "headline";
+  /**
+   * A colour that belongs to this section: the backdrop's accent glow, the
+   * header's label and dashes, and a caption box set to `"accent"` all follow
+   * it. A palette name or a CSS colour; defaults to the look's accent.
+   */
+  accent?: string;
+  /**
+   * Soft glow behind a *generated* clip, in the look's backdrop style, tinted by
+   * `accent`. A video covers it, so it does nothing over footage (`verify.ts`
+   * warns). Keeps drifting across cuts, so shots of one section share a glow.
+   */
+  backdrop?: boolean;
+  /** A section header: label, title, and a subtitle that can change. See `Header`. */
+  header?: Header;
   /** Authored text, not from speech. */
   title?: string | { text: string; top?: number; enterFrames?: number };
   /** A small persistent label. */
@@ -1289,6 +1339,12 @@ export const resolveTimeline = (spec: ReelSpec): Timeline => {
             `Run "npm run ingest" for this post, or set seconds explicitly.`,
         );
         seconds = DEFAULT_GEN_SECONDS;
+      } else if (typeof primary === "object") {
+        // A generated clip states its own length. `in` on such a shot is where
+        // a borrowed voice (`audio: { from }`) starts reading, not a point to
+        // trim the clip from — subtracting it would shrink a 5s diagram that
+        // sits over seconds 6–11 of a voiceover to nothing.
+        seconds = measured;
       } else if (usableRamp(shot)) {
         // A ramp with no `seconds`: find when it has consumed the whole window.
         seconds = rampDuration(shot.speedRamp!, measured - (shot.in ?? 0));

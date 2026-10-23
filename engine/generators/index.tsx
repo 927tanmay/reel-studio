@@ -28,6 +28,17 @@ export const generatedSize = (_spec: GenSpec, frame: Frame) => ({
   height: frame.h,
 });
 
+/**
+ * True while a generated clip is drawn over a section backdrop. Every
+ * generator paints the look's flat background by default; under a backdrop it
+ * must paint nothing, or the glow behind it would be covered. Read it through
+ * `useGeneratorBg`, never directly.
+ */
+export const BackdropContext = React.createContext(false);
+
+/** The background a generator should paint: the look's, or nothing over a backdrop. */
+export const useGeneratorBg = (bg: string): string => (React.useContext(BackdropContext) ? "transparent" : bg);
+
 export type GenProps<T extends GenSpec = GenSpec> = {
   spec: T;
   reel: ReelSpec;

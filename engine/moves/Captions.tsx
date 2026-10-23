@@ -4,6 +4,8 @@ import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
 import type { ReelSpec, ResolvedShot } from "../spec";
 import { dominantSound, wordsInShot } from "../spec";
 import { normalise } from "../words";
+import { emphasisGroups, wordReveal } from "../emphasis";
+import { resolveColour } from "../backdrop";
 import { px } from "../scale";
 import { textStyle, verticalPlacement } from "./text";
 import { surfaceStyle } from "./surface";
@@ -36,7 +38,10 @@ export const Captions: React.FC<{ spec: ReelSpec; resolved: ResolvedShot }> = ({
 }) => {
   const frame = useCurrentFrame();
   const { fps } = spec.frame;
-  const style = spec.style.caption;
+  // The bottom caption, or — for a reel with nobody on screen — the headline
+  // look: the same words, set big across the top and built as they are spoken.
+  const style =
+    resolved.shot.captionStyle === "headline" && spec.style.headline ? spec.style.headline : spec.style.caption;
 
   const key = primaryMediaKey(resolved);
   const allWords = key ? spec.words?.[key] : undefined;
@@ -62,10 +67,21 @@ export const Captions: React.FC<{ spec: ReelSpec; resolved: ResolvedShot }> = ({
 
   if (captions.length === 0) return null;
 
-  const { pages } = createTikTokStyleCaptions({
-    captions,
-    combineTokensWithinMilliseconds: style.windowMs,
-  });
+  // Cards are built from time windows, which know nothing about sentences. A
+  // headline wants each card to be one thought, so the words are split where a
+  // sentence ends and each run is paged on its own; the pages keep their
+  // absolute times, so they concatenate cleanly.
+  const runs: Caption[][] = [[]];
+  for (const c of captions) {
+    runs[runs.length - 1].push(c);
+    if (style.breakOnSentence && /[.?!…]["')\]]*\s*$/.test(c.text)) runs.push([]);
+  }
+  const pages = runs
+    .filter((run) => run.length > 0)
+    .flatMap(
+      (run) =>
+        createTikTokStyleCaptions({ captions: run, combineTokensWithinMilliseconds: style.windowMs }).pages,
+    );
 
   const nowMs = (frame / fps) * 1000;
   // The card leads the voice; the active-word highlight does not. Pages are
@@ -78,7 +94,7 @@ export const Captions: React.FC<{ spec: ReelSpec; resolved: ResolvedShot }> = ({
   const page = pages[pageIndex];
 
   const pageStartFrame = ((page.startMs - (style.leadMs ?? 0)) / 1000) * fps;
-  const opacity = interpolate(
+  const cardFade = interpolate(
     frame,
     [pageStartFrame, pageStartFrame + style.fadeFrames],
     [0, 1],
@@ -93,8 +109,13 @@ export const Captions: React.FC<{ spec: ReelSpec; resolved: ResolvedShot }> = ({
   // be mid-utterance right now. It takes priority over the active-word color:
   // a word the editor deliberately marked stays marked even while it's being
   // spoken, rather than flashing to the ordinary highlight and back.
-  const emphasisSet = new Set((resolved.shot.emphasis ?? []).map(normalise));
+  const groups = emphasisGroups(resolved.shot.emphasis);
   const emphasis = style.emphasis;
+  // When words reveal themselves, each carries its own fade and the card
+  // must not fade as well or the first words arrive twice.
+  const opacity = style.reveal ? 1 : cardFade;
+  const box = style.activeBox;
+  const boxColour = box ? resolveColour(box.color, spec.style.palette, resolved.shot.accent) : undefined;
 
   return (
     <AbsoluteFill
@@ -132,25 +153,64 @@ export const Captions: React.FC<{ spec: ReelSpec; resolved: ResolvedShot }> = ({
         >
           {page.tokens.map((token, i) => {
             const active = nowMs >= token.fromMs && nowMs < token.toMs;
-            const marked = emphasisSet.size > 0 && emphasisSet.has(normalise(token.text));
+            const group = groups.get(normalise(token.text));
+            // The token's text carries its leading space; the box and the
+            // reveal belong on the word alone.
+            const lead = token.text.match(/^\s*/)?.[0] ?? "";
+            const word = token.text.slice(lead.length);
 
-            const color = marked && emphasis ? emphasis.color : active ? style.activeColor : style.color;
+            const defaultMarked = group === "default" && emphasis;
+            const groupColour =
+              group && group !== "default"
+                ? (style.colours?.[group] ?? spec.style.palette[group] ?? group)
+                : undefined;
+            const boxed = Boolean(box && active);
+
+            const color = boxed
+              ? box!.textColor
+              : (groupColour ??
+                (defaultMarked
+                  ? emphasis!.color
+                  : active && !box
+                    ? style.activeColor
+                    : style.color));
+
+            const reveal = style.reveal
+              ? wordReveal(
+                  nowMs,
+                  token.fromMs - (style.leadMs ?? 0),
+                  style.reveal.frames,
+                  fps,
+                  px(spec.style, spec.frame, style.reveal.blur),
+                )
+              : null;
 
             return (
-              <span
-                key={i}
-                style={
-                  marked && emphasis
-                    ? {
-                        color,
-                        fontSize: `${emphasis.scale}em`,
-                        fontWeight: emphasis.weight ?? base.fontWeight,
-                      }
-                    : { color }
-                }
-              >
-                {token.text}
-              </span>
+              <React.Fragment key={i}>
+                {lead}
+                <span
+                  style={{
+                    color,
+                    ...(defaultMarked
+                      ? { fontSize: `${emphasis!.scale}em`, fontWeight: emphasis!.weight ?? base.fontWeight }
+                      : {}),
+                    ...(box
+                      ? {
+                          padding: `${px(spec.style, spec.frame, box.padY)}px ${px(spec.style, spec.frame, box.padX)}px`,
+                          borderRadius: px(spec.style, spec.frame, box.radius),
+                          backgroundColor: boxed ? boxColour : "transparent",
+                          boxDecorationBreak: "clone",
+                          WebkitBoxDecorationBreak: "clone",
+                        }
+                      : {}),
+                    ...(reveal
+                      ? { opacity: reveal.opacity, filter: reveal.blur > 0.2 ? `blur(${reveal.blur}px)` : undefined }
+                      : {}),
+                  }}
+                >
+                  {word}
+                </span>
+              </React.Fragment>
             );
           })}
         </div>

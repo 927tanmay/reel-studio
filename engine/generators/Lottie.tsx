@@ -3,6 +3,7 @@ import { AbsoluteFill, continueRender, delayRender, staticFile } from "remotion"
 import { Lottie, type LottieAnimationData } from "@remotion/lottie";
 import type { GenSpec } from "../spec";
 import type { GenProps } from "./index";
+import { useGeneratorBg } from "./index";
 
 type LottieSpec = Extract<GenSpec, { type: "lottie" }>;
 
@@ -65,11 +66,12 @@ export const LottieIcon: React.FC<{ path: string; width: number; height: number;
 export const LottieGen: React.FC<GenProps<LottieSpec>> = ({ spec, reel }) => {
   const style = reel.style.lottie;
   const tokens = reel.style;
-  if (!style) return <AbsoluteFill style={{ backgroundColor: tokens.bg }} />; // verify.ts says why.
+  const bg = useGeneratorBg(tokens.bg);
+  if (!style) return <AbsoluteFill style={{ backgroundColor: bg }} />; // verify.ts says why.
 
   const width = style.size * reel.frame.w;
   return (
-    <AbsoluteFill style={{ backgroundColor: tokens.bg }}>
+    <AbsoluteFill style={{ backgroundColor: bg }}>
       <div
         style={{
           position: "absolute",

@@ -81,6 +81,13 @@ export type CaptionStyle = TextStyle & {
   activeColor: string;
   /** Milliseconds of speech to gather onto one card. */
   windowMs: number;
+  /**
+   * End a card at the end of a sentence (a word ending in . ? or !) instead of
+   * carrying the next sentence's first words onto it. Right for a headline,
+   * where each card is a thought; optional, and off by default so captions cut
+   * before this existed keep their cards.
+   */
+  breakOnSentence?: boolean;
   /** Frames of cross-fade when a card changes. Keep this small. */
   fadeFrames: number;
   /**
@@ -93,6 +100,26 @@ export type CaptionStyle = TextStyle & {
   leadMs?: number;
   /** Optional plate behind the text, for legibility over bright footage. */
   plate?: Plate | null;
+  /**
+   * Put the word being spoken in a filled box instead of only recolouring it —
+   * the highlight that follows the voice. Every word carries the same padding
+   * whether or not it is lit, so nothing shifts as the box moves along the line.
+   * `color` is a palette name, a CSS colour, or `"accent"` for the shot's accent.
+   */
+  activeBox?: { color: string; textColor: string; radius: number; padX: number; padY: number };
+  /**
+   * Show words as they are spoken instead of the whole card at once: each one
+   * fades in from a blur over `frames`, and the ones still to come hold their
+   * space, invisible, so lines never re-wrap mid-sentence. The way a headline
+   * builds itself on the voice.
+   */
+  reveal?: { frames: number; blur: number };
+  /**
+   * Named colours for emphasis groups: a shot's `emphasis` can be an object
+   * (`{ warm: ["network"], cool: ["TLS"] }`) and each group takes its colour
+   * from here, or from the palette, or is read as a CSS colour.
+   */
+  colours?: Record<string, string>;
   /**
    * The standing treatment for a shot's `emphasis` words — the two or three
    * words per reel that carry the actual claim, marked deliberately rather
@@ -276,6 +303,54 @@ export type PacketStyle = {
   labelSize: number;
   /** Frames it fades in and out. */
   fadeFrames: number;
+};
+
+/**
+ * The look of a section backdrop (`Shot.backdrop`): soft glows drifting behind
+ * a generated clip. Optional — a look without one cannot show a backdrop, and
+ * `verify.ts` says so. A blob's `color` may be `"accent"`, which takes the
+ * shot's own accent, so each section can glow its own colour.
+ */
+export type BackdropStyle = {
+  blobs: {
+    /** Centre, as fractions of the frame. */
+    x: number;
+    y: number;
+    /** Radius as a fraction of frame width. */
+    size: number;
+    /** A palette name, a CSS colour, or "accent". */
+    color: string;
+    /** 0..1 */
+    opacity: number;
+    /** How far it wanders, as a fraction of frame width. */
+    drift: number;
+  }[];
+  /** Drift cycles per second — slow enough to be felt rather than seen. */
+  speed: number;
+};
+
+/**
+ * The look of a section header (`Shot.header`): a small label, a big title and
+ * a line that can change as the section goes on. Optional — a look without one
+ * cannot show a header, and `verify.ts` says so.
+ */
+export type HeaderStyle = {
+  /** Top of the kicker, as a fraction of frame height (below the safe margin). */
+  top: number;
+  kickerSize: number;
+  titleSize: number;
+  subtitleSize: number;
+  titleWeight: number;
+  tracking?: number;
+  /** Space between the kicker, the title and the subtitle, in design pixels. */
+  gap: number;
+  /** The progress dashes in a pill kicker. */
+  dash: { width: number; height: number; gap: number };
+  /** Frames the header takes to arrive, and a subtitle takes to swap. */
+  enterFrames: number;
+  swapFrames: number;
+  /** Frames per blink of the caret after a comment kicker. */
+  caretBlinkFrames: number;
 };
 
 /**
@@ -510,6 +585,12 @@ export type Tokens = {
   slam?: SlamStyle;
   /** The look of a dot travelling along a diagram arrow. Omit and `travel` cannot be used. */
   packet?: PacketStyle;
+  /** The look of the glow behind a generated clip. Omit and `backdrop` cannot be used. */
+  backdrop?: BackdropStyle;
+  /** The look of a section header. Omit and `header` cannot be used. */
+  header?: HeaderStyle;
+  /** A second caption look, for big headline text built on the voice. Omit and `captionStyle: "headline"` cannot be used. */
+  headline?: CaptionStyle;
   /** Where a standalone Lottie sits. Omit and a `lottie` shot cannot be used. */
   lottie?: LottieStyle;
   /** The look of the orb generator. Omit and a shot cannot use one. */

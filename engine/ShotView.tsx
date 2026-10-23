@@ -22,7 +22,9 @@ import { LowerThird } from "./moves/LowerThird";
 import { Marks } from "./moves/Marks";
 import { Pointer } from "./moves/Pointer";
 import { Slams } from "./moves/Slams";
-import { Generated, generatedSize } from "./generators";
+import { Backdrop } from "./moves/Backdrop";
+import { Header } from "./moves/Header";
+import { BackdropContext, Generated, generatedSize } from "./generators";
 import { gradeFilter, needsMatrix } from "./colour";
 import { rampPieces } from "./ramp";
 import { cardBox, cardTilt, tiltAt } from "./card";
@@ -85,7 +87,11 @@ const SourceView: React.FC<{
 
     return (
       <AbsoluteFill style={{ overflow: "hidden" }}>
+        {resolved.shot.backdrop ? (
+          <Backdrop spec={spec} accent={resolved.shot.accent} frameOffset={resolved.startFrame} />
+        ) : null}
         <div style={{ position: "absolute", ...box, width: box.width, height: box.height }}>
+          <BackdropContext.Provider value={Boolean(resolved.shot.backdrop)}>
           <Generated
             spec={source}
             reel={spec}
@@ -99,6 +105,7 @@ const SourceView: React.FC<{
               return all ? wordsInShot(resolved, fps, all) : undefined;
             })()}
           />
+          </BackdropContext.Provider>
         </div>
       </AbsoluteFill>
     );
@@ -650,6 +657,7 @@ export const ShotView: React.FC<{
           {shot.slams ? <Slams spec={spec} slams={shot.slams} /> : null}
           {showCaptions ? <Captions spec={spec} resolved={resolved} /> : null}
           {shot.title ? <Title spec={spec} title={shot.title} /> : null}
+          {shot.header ? <Header spec={spec} header={shot.header} shot={shot} /> : null}
           {shot.badge ? <Badge spec={spec} badge={shot.badge} /> : null}
           {shot.ribbon ? <Ribbon spec={spec} ribbon={shot.ribbon} /> : null}
           {shot.pointer ? <Pointer spec={spec} pointer={shot.pointer} /> : null}

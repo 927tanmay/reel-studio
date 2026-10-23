@@ -387,7 +387,21 @@ from that, two or three words across the whole reel — the actual claim, the
 number, the payoff — can be marked to render larger and in a different colour
 wherever they land, as a standing choice rather than a passing one. Name them
 if you know which they are. If you don't, say so and the editor will propose
-candidates from the transcript for you to approve.
+candidates from the transcript for you to approve. For a reel with nobody on
+screen you can also give them **a colour group**: "TLS in cyan; network and
+encrypted in orange" — the words take that colour wherever they appear.
+
+**Reels with nobody on screen (voice only).** If you record only the voice,
+the whole reel is generated clips under it. Say so in the brief, and structure
+it as **sections**: for each, a short label ("TOOL 02", or a comment like
+"// how TLS works"), a title, a subtitle (and what it changes to, and on which
+word), the clip that carries it (a diagram, a chat, a page, code…), and the
+word the section starts on. Two caption looks exist: the usual lines at the
+bottom with the spoken word in a coloured box, or the words written big across
+the top as they are spoken, a sentence at a time ("headline" captions) —
+choose one per reel. Each section can have its own accent colour and a soft
+glow behind its clips. Record the voice in clean, separate takes per section
+if you can; sections then start exactly on their first word.
 
 ---
 

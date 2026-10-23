@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Faceless-reel toolkit: a per-section glow (`backdrop`, `accent`), a section
+  header (pill with progress dashes, or a typed comment with a caret; a title; a
+  subtitle that swaps), highlight-box captions, and word-by-word "headline"
+  captions with named colour groups. A new `explainer` look puts these together.
+- Fix: a generated clip with `in` (a borrowed voice's offset) no longer has its
+  length reduced by it.
+- Three more icons: play, terminal, network.
+
 - A diagram can set `fit: true`: its cards are sized from what is written on them,
   so a long label wraps inside a taller card instead of overflowing, the icon keeps
   its size, and a row's `window` cards sit inside the frame instead of running off

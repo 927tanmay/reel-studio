@@ -4,6 +4,7 @@ import type { GenSpec } from "../spec";
 import { px } from "../scale";
 import { ease } from "../moves/punch";
 import type { GenProps } from "./index";
+import { useGeneratorBg } from "./index";
 
 type PageSpec = Extract<GenSpec, { type: "page" }>;
 
@@ -22,6 +23,7 @@ export const Page: React.FC<GenProps<PageSpec>> = ({ spec, reel }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const tokens = reel.style;
+  const bg = useGeneratorBg(tokens.bg);
   const P = tokens.palette;
   const g = tokens.generators?.textScale ?? 1;
   const u = (n: number) => px(tokens, reel.frame, n * g);
@@ -98,7 +100,7 @@ export const Page: React.FC<GenProps<PageSpec>> = ({ spec, reel }) => {
   );
 
   return (
-    <AbsoluteFill style={{ backgroundColor: tokens.bg }}>
+    <AbsoluteFill style={{ backgroundColor: bg }}>
       <div
         style={{
           position: "absolute",

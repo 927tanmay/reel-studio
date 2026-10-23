@@ -4,6 +4,7 @@ import type { Frame, GenSpec } from "../spec";
 import type { Tokens } from "../tokens";
 import { px } from "../scale";
 import type { GenProps } from "./index";
+import { useGeneratorBg } from "./index";
 
 type DataSpec = Extract<GenSpec, { type: "data" }>;
 
@@ -15,6 +16,7 @@ export const Data: React.FC<GenProps<DataSpec>> = ({ spec, reel }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const tokens = reel.style;
+  const bg = useGeneratorBg(tokens.bg);
   const P = tokens.palette;
   const g = tokens.generators?.textScale ?? 1;
   const bars = spec.style === "bars";
@@ -28,7 +30,7 @@ export const Data: React.FC<GenProps<DataSpec>> = ({ spec, reel }) => {
   return (
     <AbsoluteFill
       style={{
-        backgroundColor: tokens.bg,
+        backgroundColor: bg,
         justifyContent: "center",
         gap: px(tokens, reel.frame, bars ? 34 : 64),
         padding: px(tokens, reel.frame, 60),
@@ -115,6 +117,7 @@ const TrendChart: React.FC<{
   fps: number;
   frameSize: Frame;
 }> = ({ spec, tokens, frame, fps, frameSize }) => {
+  const bg = useGeneratorBg(tokens.bg);
   const P = tokens.palette;
   const g = tokens.generators?.textScale ?? 1;
   const area = spec.style === "area";
@@ -154,7 +157,7 @@ const TrendChart: React.FC<{
   const gradId = React.useId();
 
   return (
-    <AbsoluteFill style={{ backgroundColor: tokens.bg, alignItems: "center", justifyContent: "center" }}>
+    <AbsoluteFill style={{ backgroundColor: bg, alignItems: "center", justifyContent: "center" }}>
       <div style={{ position: "relative", width: "82%", aspectRatio: `${W} / ${H}` }}>
         <svg
           viewBox={`0 0 ${W} ${H}`}

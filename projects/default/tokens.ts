@@ -322,6 +322,56 @@ export const tokens: Tokens = {
     scrim: { color: "#000000", opacity: 0.45 },
   },
 
+  // A section's glow: an accent-coloured blob up left (each shot's own `accent`
+  // tints it) and a violet one low right, both drifting slowly. Only shows
+  // behind generated clips that ask for a `backdrop`.
+  backdrop: {
+    blobs: [
+      { x: 0.15, y: 0.22, size: 0.8, color: "accent", opacity: 0.32, drift: 0.05 },
+      { x: 0.85, y: 0.8, size: 0.95, color: "#6D3FE0", opacity: 0.26, drift: 0.06 },
+    ],
+    speed: 0.05,
+  },
+
+  // A section header: a label, a big title and a subtitle that can swap. It
+  // starts at 11.5% down, just clear of the 10% the platform interface covers.
+  header: {
+    top: 0.115,
+    kickerSize: 24,
+    titleSize: 88,
+    subtitleSize: 34,
+    titleWeight: 800,
+    tracking: -0.02,
+    gap: 18,
+    dash: { width: 34, height: 6, gap: 8 },
+    enterFrames: 10,
+    swapFrames: 8,
+    caretBlinkFrames: 16,
+  },
+
+  // The voice written across the top of the frame as it is spoken, for a reel
+  // with nobody on screen. Words arrive from a blur; emphasis groups pick colours.
+  headline: {
+    fontFamily: '"Inter", -apple-system, "Helvetica Neue", Arial, sans-serif',
+    size: 84,
+    weight: 800,
+    color: "#FFFFFF",
+    tracking: -0.02,
+    lineHeight: 1.1,
+    textAlign: "center",
+    maxWidth: 0.86,
+    top: 0.19,
+    shadow: { color: "rgba(0,0,0,0.6)", blur: 14, y: 3 },
+    activeColor: "#FFFFFF",
+    windowMs: 2600,
+    breakOnSentence: true,
+    fadeFrames: 2,
+    plate: null,
+    reveal: { frames: 7, blur: 14 },
+    colours: { cool: "#4FD1C5", warm: "#FF7A45", amber: "#FFB23E" },
+    emphasis: { color: "#4FD1C5", scale: 1, weight: 800 },
+  },
+
   // A dot riding a diagram arrow — the data going somewhere. Warn-coloured, so
   // it reads as the thing worth watching rather than part of the chrome, with a
   // short comet trail; a trip takes under a second unless the shot says more.

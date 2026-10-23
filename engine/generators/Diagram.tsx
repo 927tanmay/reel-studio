@@ -5,7 +5,7 @@ import type { DiagramNode, Frame, GenSpec } from "../spec";
 import type { Tokens } from "../tokens";
 import { px } from "../scale";
 import type { GenProps } from "./index";
-import { currentStep } from "./index";
+import { currentStep, useGeneratorBg } from "./index";
 import { evolvePath } from "@remotion/paths";
 import { ICONS, iconProgress, segmentProgress, type IconName } from "../icons";
 import { LottieIcon } from "./Lottie";
@@ -189,6 +189,7 @@ export const Diagram: React.FC<GenProps<DiagramSpec>> = ({ spec, reel }) => {
   const { fps } = useVideoConfig();
   const seconds = frame / fps;
   const tokens = reel.style;
+  const bg = useGeneratorBg(tokens.bg);
   const P = tokens.palette;
   const g = tokens.generators?.textScale ?? 1;
 
@@ -277,7 +278,7 @@ export const Diagram: React.FC<GenProps<DiagramSpec>> = ({ spec, reel }) => {
   const strokeW = px(tokens, reel.frame, 3);
 
   return (
-    <AbsoluteFill style={{ backgroundColor: tokens.bg, overflow: "hidden" }}>
+    <AbsoluteFill style={{ backgroundColor: bg, overflow: "hidden" }}>
       <AbsoluteFill
         style={{
           alignItems: "center",

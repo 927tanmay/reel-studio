@@ -24,6 +24,7 @@ test("the plain icon set includes every icon the docs promise", () => {
   const promised = [
     "phone", "bluetooth", "map-pin", "key", "cloud",
     "document", "globe", "image", "eye-off", "server", "sparkle", "shield", "user", "clock", "database",
+    "play", "terminal", "network",
   ];
   for (const name of promised) {
     assert.ok(name in ICONS, name);

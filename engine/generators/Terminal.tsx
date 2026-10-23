@@ -3,6 +3,7 @@ import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
 import type { GenSpec } from "../spec";
 import { px } from "../scale";
 import type { GenProps } from "./index";
+import { useGeneratorBg } from "./index";
 
 type TerminalSpec = Extract<GenSpec, { type: "terminal" }>;
 
@@ -17,6 +18,7 @@ export const Terminal: React.FC<GenProps<TerminalSpec>> = ({ spec, reel }) => {
   const { fps } = useVideoConfig();
   const seconds = frame / fps;
   const tokens = reel.style;
+  const bg = useGeneratorBg(tokens.bg);
   const P = tokens.palette;
 
   const speed = spec.typeSpeed ?? 22;
@@ -24,7 +26,7 @@ export const Terminal: React.FC<GenProps<TerminalSpec>> = ({ spec, reel }) => {
   const pad = px(tokens, reel.frame, 44);
 
   return (
-    <AbsoluteFill style={{ backgroundColor: tokens.bg, padding: pad, justifyContent: "center" }}>
+    <AbsoluteFill style={{ backgroundColor: bg, padding: pad, justifyContent: "center" }}>
       <div
         style={{
           fontFamily: tokens.fonts.mono,

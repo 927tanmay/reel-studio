@@ -46,7 +46,10 @@ export type IconName =
   | "shield"
   | "user"
   | "clock"
-  | "database";
+  | "database"
+  | "play"
+  | "terminal"
+  | "network";
 
 export const ICONS: Record<IconName, IconSegment[]> = {
   check: [{ d: "M10 25 L19 34 L38 13", from: 0, to: 1 }],
@@ -149,6 +152,22 @@ export const ICONS: Record<IconName, IconSegment[]> = {
     { d: "M10 12 a14 5 0 1 1 28 0 a14 5 0 1 1 -28 0", from: 0, to: 0.4 },
     { d: "M10 12 V36 a14 5 0 0 0 28 0 V12", from: 0.35, to: 0.8 },
     { d: "M10 24 a14 5 0 0 0 28 0", from: 0.75, to: 1 },
+  ],
+  play: [
+    { d: "M18 10 L38 24 L18 38 Z", from: 0, to: 1 },
+  ],
+  terminal: [
+    { d: "M9 9 H39 a3 3 0 0 1 3 3 V36 a3 3 0 0 1 -3 3 H9 a3 3 0 0 1 -3 -3 V12 a3 3 0 0 1 3 -3 Z", from: 0, to: 0.55 },
+    { d: "M14 19 L21 24 L14 29", from: 0.5, to: 0.8 },
+    { d: "M25 30 H33", from: 0.75, to: 1 },
+  ],
+  network: [
+    { d: "M24 14 L12 33", from: 0, to: 0.3 },
+    { d: "M24 14 L36 33", from: 0.25, to: 0.55 },
+    { d: "M15 38 H33", from: 0.5, to: 0.75 },
+    { d: "M24 6 a4 4 0 1 1 0 8 a4 4 0 1 1 0 -8", from: 0.7, to: 0.85 },
+    { d: "M10 33 a4 4 0 1 1 0 8 a4 4 0 1 1 0 -8", from: 0.8, to: 0.93 },
+    { d: "M38 33 a4 4 0 1 1 0 8 a4 4 0 1 1 0 -8", from: 0.88, to: 1 },
   ],
   "trend-up": [
     { d: "M6 34 L18 22 L26 28 L42 10", from: 0, to: 0.75 },

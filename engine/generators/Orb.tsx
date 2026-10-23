@@ -3,6 +3,7 @@ import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
 import type { GenSpec } from "../spec";
 import { px } from "../scale";
 import type { GenProps } from "./index";
+import { useGeneratorBg } from "./index";
 
 type OrbSpec = Extract<GenSpec, { type: "orb" }>;
 
@@ -53,8 +54,9 @@ export const Orb: React.FC<GenProps<OrbSpec>> = ({ spec, reel, words }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const tokens = reel.style;
+  const bg = useGeneratorBg(tokens.bg);
   const style = tokens.orb;
-  if (!style) return <AbsoluteFill style={{ backgroundColor: tokens.bg }} />; // verify.ts says why.
+  if (!style) return <AbsoluteFill style={{ backgroundColor: bg }} />; // verify.ts says why.
 
   const color = tokens.palette[style.color] ?? style.color;
   const t = frame / fps;
@@ -201,7 +203,7 @@ export const Orb: React.FC<GenProps<OrbSpec>> = ({ spec, reel, words }) => {
   const glow = style.glow;
 
   return (
-    <AbsoluteFill style={{ backgroundColor: tokens.bg, overflow: "hidden" }}>
+    <AbsoluteFill style={{ backgroundColor: bg, overflow: "hidden" }}>
       {glow > 0 ? (
         <AbsoluteFill
           style={{
