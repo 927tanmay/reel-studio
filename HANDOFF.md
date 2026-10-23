@@ -475,6 +475,15 @@ A brief is ready to hand over when every one of these is true.
 - [ ] The ending is decided: freeze on the last frame, a generated close, or
       just ending on the last word (the default if you don't say)
 
+**For a reel with nobody on screen (a hot-topic reel, a roundup, an explainer), also:**
+
+- [ ] The shape is named: a list of N, how X works, A versus B, or myth or fact
+- [ ] Every section has the phrase it starts on, as you will say it
+- [ ] Every row, scene item or value that appears on a word names that word
+- [ ] Any web page shown has its URL, what part matters, and the exact words to mark
+- [ ] The voice is one take per section, or the sections are marked in one take
+- [ ] Numbers are written as you will say them; the transcript will print digits
+
 Anything unticked will come back as a question before the cut starts.
 
 ---
@@ -541,6 +550,75 @@ Vocabulary: "<name or filename as it should print>", ... — or "none"
 
 ## Do not
 <anything specifically unwanted for this reel>
+```
+
+---
+
+## The template for a hot-topic reel (voice only)
+
+Use this when nothing is on screen but graphics and your voice. Pick the shape,
+fill in the sections, name the word each thing appears on. The editor builds the
+whole edit from it; you never give seconds.
+
+```markdown
+# <post id, e.g. 013-hot-topic>
+
+## Delivery
+Frame: 1080x1920 at 30fps
+Ceiling: 40s
+Voice: I record it myself, one take per section (or one take, sections marked below)
+
+## The reel
+Topic: <the news or claim, one line>
+Shape: <list of N tools / how X works / A versus B / myth or fact>
+Hook: <the first line you will say>
+Feels: <two adjectives>
+Music: <mood, or none>
+
+## Script, by section
+(Write it as you will say it. Numbers as spoken: "eight", not "8".)
+
+### 1. <section name>
+Starts on: "<the first words of the section>"
+Says: "<the lines>"
+On screen: <rows / a scene / a page / a counter, in words>
+Appears on: "<word>" -> <what appears>; "<word>" -> <what appears>
+
+### 2. <section name>
+...
+
+## Shape details (fill in the one that applies)
+
+List of N:
+Label: "TOOL" (becomes TOOL 01, TOOL 02...)
+Per item: name, one-line subtitle, 2-4 rows (icon, title, second line, status, the word it lands on)
+
+How it works:
+Topic: "how <thing> works"   Title: "<one shared title>"
+Per step: a scene — things (laptop, server, hacker, phone, database...), the wires, what travels along them
+(with its tag), notes that type in; each with the word it appears on
+
+A versus B:
+Sides: <A name + icon>, <B name + icon>
+Per round: the topic; what is true of A; what is true of B; who wins (or a draw); the word each lands on
+Verdict: <who, and the line>
+
+Myth or fact:
+Per claim: the myth (short), the fact (short), the phrase the claim starts on, the word you turn to the fact on
+
+## Pages shown (optional)
+URL: <address>
+Show: <whole page / one part / phone version>   Hide: <cookie banner, chat bubble>
+Mark: "<exact words on the page>" on the word "<word>"
+(The marked words must be on the page as loaded.)
+
+## Text
+Header per section: label, title, subtitle (and the word it changes on)
+Emphasis: "<word>" in <colour group>, ... — or leave blank for the editor to propose
+Vocabulary: "<name or filename as it should print>", ... — or "none"
+
+## Do not
+<anything specifically unwanted>
 ```
 
 ---
