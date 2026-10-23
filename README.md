@@ -103,7 +103,7 @@ program as the word timings, so a diagram advances on the word you say it.
 and a list (five tools, or the steps of how something works), and it writes the
 shotlist: each section starts on the phrase that names it, and everything inside
 — a row landing, a dot leaving a server — appears on the word that names it, so
-re-recording the voice moves the whole edit. `npm run check` reads the shotlist
+re-recording the voice moves the whole edit. `npm run snap` screenshots a page and an image clip shows it in a browser window that scrolls down it, with marks that stay on the line they mark. `npm run check` reads the shotlist
 for mistakes before any render is spent.
 
 **Fixes round-trip drift.** Audio that went through an external repair tool comes

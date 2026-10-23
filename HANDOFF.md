@@ -240,7 +240,7 @@ graphic should get; the rest works the same as any other generated clip
 
 ## 5. Write generated clips out in full
 
-Thirteen kinds of clip can be generated. If you ask for one, supply all of its
+Thirteen kinds of clip can be generated, and a web page can be shown as itself (below). If you ask for one, supply all of its
 content. Half a diagram is a question, not a brief.
 
 **diagram** — nodes that assemble and pan. The one worth reaching for
@@ -361,6 +361,15 @@ Example of a complete diagram request:
 > Code on "ships".
 
 ---
+
+**A web page** (an article, a repo, a post, a changelog) — the editor
+screenshots it and shows it in a browser window, scrolling down it if it is long.
+> The URL. Whether the whole page, one part of it, or the phone version. Anything
+> to hide (a cookie banner, a chat bubble). The exact words on the page to mark
+> ("box the line 'the default is now strict'"), the word you say as it is
+> boxed, and for a long page where it should have scrolled to by then. Keep it
+> to one thing marked per shot. The marked words have to be on the screenshot:
+> you cannot ask for a mark on something that only appears after a click.
 
 ## 6. Name the text on screen
 

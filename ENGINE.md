@@ -77,6 +77,13 @@ Grouped by how loud they are (see §4). Each line is a thing a brief can say.
 - **Screen recording as a card** — the whole recording as a rounded, shadowed
   card floating over a blurred copy of itself, instead of cropped to fill the
   frame. It swings in with a slight 3D turn and comes flat.
+- **A web page, shown as the page.** The editor screenshots a URL (it can take
+  the whole page, one element, or the phone view; it can hide a cookie banner)
+  and shows it in a browser window with the address in the bar. A long page
+  scrolls down inside the window across the shot. A hand-drawn mark on it
+  stays on the line it marks as the page moves. Say the URL, what part of the
+  page matters, and the word it lands on: "on 'strict', box the line 'the
+  default is now strict'".
 - **Hand-drawn mark** — a circle, underline, box, highlight, bracket, strike or
   cross that draws itself over *one* thing, then fades. "On 'timeout', circle
   the 30s value in the config."

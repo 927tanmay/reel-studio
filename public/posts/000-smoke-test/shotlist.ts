@@ -257,5 +257,19 @@ export default reel({
       accent: "#4ADE80",
       header: { kicker: "TOOL 03", step: [3, 3], title: "Jam", subtitle: "1 click = full bug context" },
     },
+
+    {
+      // Proves the screenshot window: a page taller than the window scrolls
+      // inside it, and a mark measured on the picture rides along with it.
+      // The page is `npm run snap`'s own capture of a small original page.
+      src: {
+        type: "image",
+        src: "assets/images/sample-page.png",
+        window: { url: "example.com/release-notes" },
+        scroll: { from: 0, to: 0.7 },
+        marks: [{ kind: "box", region: { x: 0.08, y: 0.09, w: 0.84, h: 0.06 }, at: 0.5, hold: 1.5 }],
+        seconds: 3.5,
+      },
+    },
   ],
 });

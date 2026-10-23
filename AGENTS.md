@@ -35,6 +35,7 @@ Never put a colour, a size, a duration or a structural assumption into
 | 01 | Ingest | `npm run ingest <post>` | `media.json` |
 | 01b | Colour measurement (optional) | `npm run grade <post>` | `media.json` |
 | 02 | Choose | human | — |
+| 02b | Screenshot a web page (optional) | `npm run snap <post> <url>` | `raw/<name>.png`, `<name>.snap.json` |
 | 03 | Clean | human, external | `clean/*.wav` |
 | 04 | Align | `npm run align <post>` | `media.json` |
 | 05 | Word timings | `npm run transcribe <post>` | `words.json`, `transcript.md` |
@@ -651,6 +652,29 @@ by hand, and resuming is expected and supported.
    stop it. It bundles the shotlist with esbuild into `out/.check/`, so a
    shotlist that cannot load is reported there too, in plain words.
 
+51. **A page can be shown as the page.** `npm run snap <post> <url>` captures a
+   web page into `raw/` at twice its pixel density (`--full` for the whole page,
+   `--selector` for one element, `--mobile`, `--dark`, `--hide ".banner"` for a
+   cookie notice, `--wait`), by driving the headless Chrome Remotion already
+   downloads over the DevTools protocol — no new dependency, http and https only —
+   and prints the clip to paste. `{ type: "image", src: "posts/<id>/raw/<name>.png",
+   window: { url } }` shows it in a browser window (`Tokens.window`: bar, address,
+   rounded, shadowed). The picture is laid at the window's width and never shrunk:
+   one taller than `maxHeight` (a full-page capture) scrolls, `scroll: { from, to }`
+   (fractions of how far there is to go, default the whole page, eased across the
+   shot), and `push` scales the viewport. `marks` on the clip have `region` in
+   fractions of the *picture*, not the frame — measure on the PNG — and ride with
+   it through the scroll and the push, so a box drawn on a line stays on that line
+   (and leaves the window with it; mark what is on screen when it draws, so scroll
+   *to* the thing). They count for sounds and for `npm run critique` like any mark.
+   The window must fit between a header above it and the captions below it:
+   `engine/window.ts` gives its box, and `verify.ts` warns when a look's window can
+   reach either (the explainer look's is shorter than the default's for that
+   reason). A screenshot of someone's page is theirs: `<name>.snap.json` records the
+   address and time, whether you may show it is your call. The default look's
+   window also has a `card` sibling for a screenshot whose edges matter without
+   chrome (rule 45); a window replaces `card` when both are set.
+
 ## What stays human
 
 Take selection, where a cut lands emotionally, whether a crop reads at phone
@@ -690,6 +714,7 @@ engine/          the moves and the contract — general, never show-specific
   spec.ts        the shotlist contract and timeline resolution
   icons.ts       the built-in icons as drawable path segments
   codeMorph.ts   code as positioned tokens, and how one version becomes the next
+  window.ts      where a screenshot sits in its browser window, and how far it has scrolled
   formats.ts     sections, listicle, how-it-works: structured content + a voice → a shotlist
   scene.ts · rows.ts · header.ts · backdrop.ts · emphasis.ts · card.ts · zoom.ts · ramp.ts · impact.ts · packet.ts   pure geometry for cards, click zooms, speed ramps and impacts,
                  shared by the renderer, the timeline and verify.ts
@@ -715,6 +740,7 @@ scripts/         ingest · transcribe · align · render · thumbnail · verify 
                  dump-critique.ts its internal) · tighten (reports what a
                  tightening pass would remove) ·
                  check (shotlist gates before a render; render runs it) ·
+                 snap (screenshots a web page into a post's raw/) ·
                  export-timeline (writes an EDL; dump-timeline.ts and
                  ts-resolve-hook.mjs are shared internals, not run directly)
 posts.ts         the register; every reel needs a line here
@@ -743,6 +769,7 @@ node scripts/make-music.mjs  # write the default music bed (not committed)
 npm run beats <track>        # tempo, confidence, real start points for a music file
 npm run beatcheck 001-my-reel  # how far every cut, hit and dip sits from the beat grid
 npm run critique 001-my-reel   # pacing: first change, longest gap, speech coverage, dead air
+npm run snap 001-my-reel https://example.com/post -- --full   # screenshot a page into raw/
 npm run check 001-my-reel      # the shotlist's own gates, before any render (render runs it too)
 ```
 

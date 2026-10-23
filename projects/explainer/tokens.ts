@@ -33,6 +33,11 @@ export const tokens: Tokens = {
     leadMs: 80,
     activeBox: { color: "#27D9F5", textColor: "#04141A", radius: 12, padX: 12, padY: 3 },
   },
+
+  // A screenshot window has to fit between the header (which ends about 22%
+  // down) and the captions (which start about 69% down), so it is shorter than
+  // the default's; a full-page capture scrolls inside it.
+  window: { ...base.window!, top: 0.465, maxHeight: 0.42 },
 };
 
 export default tokens;

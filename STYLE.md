@@ -39,6 +39,9 @@ visibly weaker*, not merely plainer.
 - **Pointer click + mark** is redundant — pick one. A ring says "here was
   clicked"; a mark says "look at this". A static thing wants a mark, a thing
   that was *done* wants a ring.
+- **Screenshot window + one mark** for "here is the thing I mean". The page
+  scrolls *to* the line, then the mark draws on it; a mark on something that
+  has already scrolled away is never seen.
 - **Card + auto-zoom** for a small target on a screen recording. The card gives
   the whole screen context, the zoom gives the detail, in that order.
 - **`audio: "hold"` under any loud effect on B-roll.** The voice carries the

@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Screenshots: `npm run snap <post> <url>` captures a web page into the post's `raw/`
+  at twice its density (whole page, one element, phone view, dark mode, hide a
+  banner) using the headless Chrome Remotion already downloads, over the DevTools
+  protocol — no new dependency. An `image` clip can show it in a browser window
+  (`window: { url }`, `Tokens.window`): a page taller than the window scrolls
+  (`scroll`), and `marks` on the clip are measured on the picture and ride with it.
+  A small original sample page is in the smoke test.
 - Formats (`engine/formats.ts`): structured content and a voice's words in, a whole
   shotlist out. `sections()` is the core; `listicle()` and `howItWorks()` are
   presets. A section starts on a spoken phrase, and any `at`/`until`/`pressAt` inside

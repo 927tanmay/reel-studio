@@ -689,10 +689,43 @@ export type GenSpec =
        * of the frame) to override it. A `push` then happens inside the card.
        */
       card?: boolean | { width?: number; top?: number };
+      /**
+       * Show the picture as a page in a browser window: a bar with the address,
+       * the picture below it, over the look's own background (`Tokens.window`).
+       * For a screenshot of an article, a repo, a post — the thing the script is
+       * about, as the viewer would meet it. `true` is a bar with no address;
+       * `{ url }` writes one. A picture taller than the window allows is not
+       * shrunk: it scrolls (`scroll`). Replaces `card`.
+       */
+      window?: boolean | { url?: string; badge?: string };
+      /**
+       * Scroll down a picture taller than its window, across the whole shot,
+       * eased. `from` and `to` are fractions of how far there is to go (default
+       * 0 to 1, the whole page). Ignored when the picture fits. Time a scroll's
+       * *end* to a word by choosing the shot's length, not by guessing.
+       */
+      scroll?: { from?: number; to?: number };
+      /**
+       * Hand-drawn marks on the picture. Unlike `Shot.marks`, `region` is in
+       * fractions of the *picture* (measure on the screenshot itself), and the
+       * mark travels with it through a scroll or a push, so it stays on what it
+       * marks. Same kinds, same timing, same look (`Tokens.marks`).
+       */
+      marks?: Mark[];
       seconds?: number;
     };
 
 export type Source = string | GenSpec;
+
+/**
+ * Every mark a shot draws: its own (fractions of the frame) and those on a
+ * screenshot it shows (fractions of the picture). For anything that counts or
+ * times them — sounds, pacing — where *which* space they are in is no matter.
+ */
+export const allMarks = (shot: Shot): Mark[] => [
+  ...(shot.marks ?? []),
+  ...(typeof shot.src === "object" && shot.src.type === "image" ? (shot.src.marks ?? []) : []),
+];
 
 // ---------------------------------------------------------------------------
 // Shots
@@ -1800,7 +1833,7 @@ export const resolveTimeline = (spec: ReelSpec): Timeline => {
           }
         }
       }
-      for (const m of shot.marks ?? []) {
+      for (const m of allMarks(shot)) {
         if (!m.silent) fire("mark", startFrame + Math.round((m.at ?? 0) * fps));
       }
       for (const sl of shot.slams ?? []) {

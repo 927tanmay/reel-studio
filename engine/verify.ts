@@ -41,6 +41,22 @@ const extent = (style: TextStyle): { top: number; bottom: number } => {
   return { top: topEdge, bottom: topEdge + height };
 };
 
+/**
+ * Where a header ends, in frame pixels, from the look's own numbers (type at a
+ * line height of 1). An estimate on purpose: close enough to tell two things
+ * that overlap from two that do not.
+ */
+const headerBottom = (
+  header: NonNullable<import("./spec").Shot["header"]>,
+  style: NonNullable<Tokens["header"]>,
+  frameHeight: number,
+): number => {
+  const kicker = header.kicker || header.step ? style.kickerSize + 16 + style.gap : 0;
+  const title = header.title ? style.titleSize : 0;
+  const subtitle = header.subtitle ? style.gap + style.subtitleSize : 0;
+  return style.top * frameHeight + kicker + title + subtitle;
+};
+
 const checkSafe = (name: string, style: TextStyle, tokens: Tokens): Finding[] => {
   const { top, bottom } = extent(style);
   const out: Finding[] = [];
@@ -126,6 +142,73 @@ export const verifySpec = (spec: ReelSpec, timeline: Timeline): Finding[] => {
           level: "warn",
           message: `Shot ${index} mark ${i} (${m.kind}) starts at ${m.at}s, after the shot has ended — it will never show.`,
         });
+      }
+    });
+  }
+
+  // A screenshot in a browser window, and the marks drawn on it. Marks here are
+  // in fractions of the *picture*, not the frame, so the frame-based check
+  // above does not cover them.
+  for (const resolved of timeline.shots) {
+    const { shot, index, durationInFrames } = resolved;
+    const src = typeof shot.src === "object" ? shot.src : undefined;
+    if (!src || src.type !== "image") continue;
+    if (src.window && !t.window) {
+      findings.push({ level: "fail", message: `Shot ${index} shows a screenshot in a window, but the look defines no \`window\` style. Add one to the look's tokens.` });
+    }
+    if (src.window && src.card) {
+      findings.push({ level: "warn", message: `Shot ${index} sets both \`window\` and \`card\` on a picture. The window is used; drop \`card\`.` });
+    }
+    if (src.scroll && !src.window) {
+      findings.push({ level: "warn", message: `Shot ${index} sets \`scroll\` without a \`window\`; there is no window to scroll in, so it is ignored.` });
+    }
+    // A window is centred on `top` and as tall as the picture needs, up to
+    // `maxHeight`. A tall picture fills it, so check the most it can reach
+    // against the header above it and the captions below it.
+    if (src.window && t.window) {
+      const H = spec.frame.h;
+      const topEdge = (t.window.top - t.window.maxHeight / 2) * H;
+      const bottomEdge = (t.window.top + t.window.maxHeight / 2) * H;
+      if (shot.header && t.header) {
+        const hb = headerBottom(shot.header, t.header, H);
+        if (topEdge < hb) {
+          findings.push({
+            level: "warn",
+            message: `Shot ${index}: a tall picture would fill its window up to ${Math.round(topEdge)}px, over the header, which ends about ${Math.round(hb)}px. Lower Tokens.window.maxHeight or move its top down.`,
+          });
+        }
+      }
+      if (willShowCaptions(spec, resolved)) {
+        const style = shot.captionStyle === "headline" && t.headline ? t.headline : t.caption;
+        const captionTop = extent(style).top * H;
+        if (bottomEdge > captionTop) {
+          findings.push({
+            level: "warn",
+            message: `Shot ${index}: a tall picture would fill its window down to ${Math.round(bottomEdge)}px, over the captions, which start about ${Math.round(captionTop)}px. Lower Tokens.window.maxHeight or move its top up.`,
+          });
+        }
+      }
+    }
+    if (!src.marks?.length) continue;
+    if (!t.marks) {
+      findings.push({ level: "fail", message: `Shot ${index} has marks on its picture, but the look defines no \`marks\` style. Add one to the look's tokens.` });
+      continue;
+    }
+    if (!src.window) {
+      findings.push({ level: "warn", message: `Shot ${index} has marks on a picture shown without a \`window\`. They are drawn only inside a window; add one.` });
+    }
+    src.marks.forEach((m, i) => {
+      const { x, y, w, h } = m.region;
+      if (x < 0 || y < 0 || w <= 0 || h <= 0 || x + w > 1 || y + h > 1) {
+        findings.push({
+          level: "fail",
+          message:
+            `Shot ${index} picture mark ${i} (${m.kind}) has a region outside the picture ` +
+            `(x ${x}, y ${y}, w ${w}, h ${h}) — these are fractions of the picture, 0 to 1.`,
+        });
+      }
+      if ((m.at ?? 0) * spec.frame.fps >= durationInFrames) {
+        findings.push({ level: "warn", message: `Shot ${index} picture mark ${i} (${m.kind}) starts at ${m.at}s, after the shot has ended — it will never show.` });
       }
     });
   }
@@ -257,10 +340,9 @@ export const verifySpec = (spec: ReelSpec, timeline: Timeline): Finding[] => {
     // passes; a kicker alone always does, it sits above.
     if (shot.header && t.header && t.headline && shot.captionStyle === "headline" && willShowCaptions(spec, resolved)) {
       const h = t.header;
-      const kicker = shot.header.kicker || shot.header.step ? h.kickerSize + 16 + h.gap : 0;
       const title = shot.header.title ? h.titleSize : 0;
       const subtitle = shot.header.subtitle ? h.gap + h.subtitleSize : 0;
-      const bottom = h.top * spec.frame.h + kicker + title + subtitle;
+      const bottom = headerBottom(shot.header, h, spec.frame.h);
       const headlineTop = extent(t.headline).top * spec.frame.h;
       if ((title || subtitle) && bottom > headlineTop) {
         findings.push({

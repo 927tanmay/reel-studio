@@ -269,6 +269,30 @@ export const tokens: Tokens = {
     tilt: { x: 6, y: -16, perspective: 1800, settleFrames: 22, parallax: 3 },
   },
 
+  // A screenshot in a browser window: the look's own card idea with a bar on
+  // top. Narrower than the card so the shadow has room, and scrolls rather
+  // than shrinking when a full-page capture is taller than the frame allows.
+  window: {
+    width: 0.9,
+    // Between the top of the frame and the captions (which start about 75% down).
+    top: 0.44,
+    maxHeight: 0.6,
+    radius: 22,
+    shadow: { color: "rgba(0,0,0,0.55)", blur: 60, y: 24 },
+    border: { color: "rgba(255,255,255,0.14)", weight: 2 },
+    enterFrames: 10,
+    enterScale: 0.95,
+    bar: {
+      height: 64,
+      fill: "#1B222C",
+      dots: ["#F97583", "#E5B93C", "#4ADE80"],
+      dotSize: 14,
+      url: { fill: "#10151C", color: "#9AA7B4", fontSize: 24, radius: 12 },
+      divider: "rgba(255,255,255,0.08)",
+    },
+    page: "#FFFFFF",
+  },
+
   // Shake, flash and glitch. Short and hard: a shake settles in about a third
   // of a second, a flash is gone in 8 frames, a glitch in 7. The flash is
   // warm white rather than pure, so it reads as light and not a missing frame.

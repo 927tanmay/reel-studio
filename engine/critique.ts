@@ -1,4 +1,4 @@
-import { dominantSound, shotLabel, wordsInShot, type ReelSpec, type Timeline } from "./spec";
+import { allMarks, dominantSound, shotLabel, wordsInShot, type ReelSpec, type Timeline } from "./spec";
 import { rowStarts } from "./rows";
 
 /**
@@ -88,7 +88,7 @@ export const critiqueTimeline = (
     if (r.index > 0) push(start, "cut", r.index, label);
 
     const at = (seconds: number | undefined) => start + (seconds ?? 0);
-    for (const m of r.shot.marks ?? []) push(at(m.at), "mark", r.index, `${m.kind} mark`);
+    for (const m of allMarks(r.shot)) push(at(m.at), "mark", r.index, `${m.kind} mark`);
     for (const sl of r.shot.slams ?? []) push(at(sl.at), "slam", r.index, "slam");
     for (const p of r.shot.pointer?.path ?? []) if (p.click) push(at(p.at), "pointer", r.index, "click");
     if (r.shot.ribbon) push(at(r.shot.ribbon.at), "ribbon", r.index, "ribbon");
@@ -129,7 +129,7 @@ export const critiqueTimeline = (
     for (const sl of r.shot.slams ?? []) loudRaw.push({ seconds: start + (sl.at ?? 0), kind: "slam" });
     for (const im of r.shot.impacts ?? []) loudRaw.push({ seconds: start + (im.at ?? 0), kind: im.kind });
     if (typeof r.shot.src === "object" && r.shot.src?.type === "orb") loudRaw.push({ seconds: start, kind: "orb" });
-    medium.marks += r.shot.marks?.length ?? 0;
+    medium.marks += allMarks(r.shot).length;
     medium.clicks += (r.shot.pointer?.path ?? []).filter((p) => p.click).length;
     if (r.shot.card) medium.cards++;
     if (r.shot.speedRamp?.length) medium.ramps++;

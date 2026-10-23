@@ -526,6 +526,45 @@ export type CardStyle = {
 };
 
 /**
+ * A screenshot in a browser window (`image` clip's `window`): a rounded window
+ * with a bar and an address on top, the page below it, over the look's own
+ * background. Placement is the card's idea, so the numbers read the same way:
+ * `width` of the frame, centred on `top`, never taller than `maxHeight` — a
+ * picture taller than that scrolls inside it instead of shrinking to nothing.
+ * Optional; a look without it cannot show a window and `verify.ts` says so.
+ */
+export type WindowStyle = {
+  /** Window width as a fraction of frame width. */
+  width: number;
+  /** Vertical centre as a fraction of frame height. */
+  top: number;
+  /** The tallest it may be, as a fraction of frame height. */
+  maxHeight: number;
+  /** Corner radius, design pixels. */
+  radius: number;
+  shadow: { color: string; blur: number; y: number };
+  border?: { color: string; weight: number } | null;
+  /** Frames to settle in, and the scale it settles from. */
+  enterFrames: number;
+  enterScale: number;
+  /** The bar across the top. */
+  bar: {
+    height: number;
+    /** Fill of the bar. */
+    fill: string;
+    /** The three dots, left to right. */
+    dots: [string, string, string];
+    dotSize: number;
+    /** The address pill. */
+    url: { fill: string; color: string; fontSize: number; radius: number };
+    /** A hairline under the bar, or null. */
+    divider?: string | null;
+  };
+  /** Behind the picture while it loads, and where a transparent screenshot shows through. */
+  page: string;
+};
+
+/**
  * The look of impact moves (`Shot.impacts`): a camera shake, a flash and a
  * glitch. Optional — a look without it cannot show them, and `verify.ts` says
  * so if a shot asks. Everything is a strength-1 baseline; a shot scales it.
@@ -642,6 +681,8 @@ export type Tokens = {
   orb?: OrbStyle;
   /** The look of a floating screen card. Omit and a shot cannot use one. */
   card?: CardStyle;
+  /** A screenshot in a browser window. Omit and an `image` clip cannot use `window`. */
+  window?: WindowStyle;
   /** The look of shake, flash and glitch. Omit and a shot cannot use them. */
   impact?: ImpactStyle;
   /** Sounds played automatically on events (clicks, marks, zooms). Omit for silence. */
