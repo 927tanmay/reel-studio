@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { packetAt, travelFrames } from "../engine/packet";
+import { alongLink, packetAt, travelFrames } from "../engine/packet";
 
 const trip = { at: 1 };
 const near = (a: number, b: number, eps = 1e-9) => assert.ok(Math.abs(a - b) < eps, `${a} !~ ${b}`);
@@ -40,4 +40,12 @@ test("it fades in and out at the ends", () => {
   const last = packetAt(60, 30, trip, 1, 4)!.opacity;
   assert.ok(first < middle && last < middle);
   assert.equal(middle, 1);
+});
+
+test("a back trip counts from the far end of the link, and is the same trip run the other way", () => {
+  assert.equal(alongLink(0.25), 0.25);
+  assert.equal(alongLink(0.25, false), 0.25);
+  assert.equal(alongLink(0.25, true), 0.75);
+  near(alongLink(packetAt(30, 30, trip, 1, 4)!.progress, true), 1); // sets off at the `to` end
+  near(alongLink(packetAt(60, 30, trip, 1, 4)!.progress, true), 0); // arrives at the `from` end
 });

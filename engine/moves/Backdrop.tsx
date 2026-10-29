@@ -2,6 +2,7 @@ import React from "react";
 import { AbsoluteFill, useCurrentFrame } from "remotion";
 import type { ReelSpec } from "../spec";
 import { blobCentre, resolveColour } from "../backdrop";
+import { px } from "../scale";
 
 /**
  * Soft glows drifting behind a generated clip. Each is a radial gradient that
@@ -46,6 +47,26 @@ export const Backdrop: React.FC<{ spec: ReelSpec; accent?: string; frameOffset: 
           />
         );
       })}
+      {style.grid ? (
+        <AbsoluteFill
+          style={{
+            backgroundImage: `radial-gradient(circle, ${style.grid.color} ${px(spec.style, spec.frame, style.grid.dot)}px, transparent ${px(spec.style, spec.frame, style.grid.dot) + 1}px)`,
+            backgroundSize: `${px(spec.style, spec.frame, style.grid.size)}px ${px(spec.style, spec.frame, style.grid.size)}px`,
+            backgroundPosition: "center",
+            opacity: style.grid.opacity,
+            WebkitMaskImage: `radial-gradient(ellipse at center, black ${style.grid.fade * 100}%, transparent 100%)`,
+            maskImage: `radial-gradient(ellipse at center, black ${style.grid.fade * 100}%, transparent 100%)`,
+          }}
+        />
+      ) : null}
+      {style.vignette ? (
+        <AbsoluteFill
+          style={{
+            background: `radial-gradient(ellipse at center, transparent 45%, ${spec.style.bg} 135%)`,
+            opacity: style.vignette,
+          }}
+        />
+      ) : null}
     </AbsoluteFill>
   );
 };

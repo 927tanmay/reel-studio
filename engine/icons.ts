@@ -52,7 +52,9 @@ export type IconName =
   | "network"
   | "laptop"
   | "rack"
-  | "hacker";
+  | "hacker"
+  | "card"
+  | "battery";
 
 export const ICONS: Record<IconName, IconSegment[]> = {
   check: [{ d: "M10 25 L19 34 L38 13", from: 0, to: 1 }],
@@ -192,6 +194,16 @@ export const ICONS: Record<IconName, IconSegment[]> = {
   hacker: [
     { d: "M24 5 C15 5 11 13 11 20 C11 24 13 27 15 29 L8 43 H40 L33 29 C35 27 37 24 37 20 C37 13 33 5 24 5 Z", from: 0, to: 0.7 },
     { d: "M17 21 C17 17 20 14 24 14 C28 14 31 17 31 21 C31 26 28 29 24 29 C20 29 17 26 17 21 Z", from: 0.6, to: 1 },
+  ],
+  card: [
+    { d: "M7 12 H41 a3 3 0 0 1 3 3 V33 a3 3 0 0 1 -3 3 H7 a3 3 0 0 1 -3 -3 V15 a3 3 0 0 1 3 -3 Z", from: 0, to: 0.5 },
+    { d: "M11 19 H19 a1.5 1.5 0 0 1 1.5 1.5 V25.5 a1.5 1.5 0 0 1 -1.5 1.5 H11 a1.5 1.5 0 0 1 -1.5 -1.5 V20.5 a1.5 1.5 0 0 1 1.5 -1.5 Z", from: 0.45, to: 0.8 },
+    { d: "M26 31 H38", from: 0.8, to: 1 },
+  ],
+  battery: [
+    { d: "M8 15 H34 a3 3 0 0 1 3 3 V30 a3 3 0 0 1 -3 3 H8 a3 3 0 0 1 -3 -3 V18 a3 3 0 0 1 3 -3 Z", from: 0, to: 0.55 },
+    { d: "M37 21 H41 a1.5 1.5 0 0 1 1.5 1.5 V25.5 a1.5 1.5 0 0 1 -1.5 1.5 H37", from: 0.5, to: 0.75 },
+    { d: "M10 20 V28", from: 0.75, to: 1 },
   ],
   "trend-up": [
     { d: "M6 34 L18 22 L26 28 L42 10", from: 0, to: 0.75 },

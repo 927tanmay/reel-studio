@@ -221,7 +221,7 @@ by hand, and resuming is expected and supported.
    naming a specific interface state, and `check` / `cross` / `arrow-right`
    / `star` / `lock` / `warning` / `info` / `trend-up` / `phone` / `bluetooth`
    / `map-pin` / `key` / `cloud` / `document` / `globe` / `image` / `eye-off`
-   / `server` / `sparkle` / `shield` / `user` / `clock` / `database` for a
+   / `server` / `sparkle` / `shield` / `user` / `clock` / `database` / `card` / `battery` for a
    plain concept with no UI attached. `{ src: "assets/..." }` drops in anything else — a
    logo, a brand mark — at the same footprint the built-ins use, so swapping
    one for another moves nothing else in the layout.
@@ -598,11 +598,18 @@ by hand, and resuming is expected and supported.
    `label` ("CLIENT"), and an `at` when it draws itself on and an optional
    `until` when it leaves; `links` join two items (dotted by default, solid on
    request) and carry `travel` trips — the same eased, trailing dots as a diagram
-   arrow, with a tag riding along (`password: hunter2`); `notes` are monospace
+   arrow, with a tag riding along (`password: hunter2`; `back: true` on a trip
+   rides the wire from its `to` end to its `from` end, so one wire carries a
+   request out and a reply back); `notes` are monospace
    lines that appear, type in (`typeSpeed`) and change — two notes in one place
    one after the other is a value being transformed. Use it for client/server,
    request lifecycles, an eavesdropper, a cache, a queue: anything with a few
-   things, the wires between them, and something travelling. Pin every `at` to
+   things, the wires between them, and something travelling. An item can show a
+   picture instead of an icon (`image: { src, aspect? }`, a path under `public/`,
+   fitted to its tile and blended with `lighten`, never recoloured). A look may
+   give each item a glass tile (`Tokens.scene.tile`; `bare: true` on an item opts
+   out) and each note a pill (`scene.notePlate`), and a backdrop a dot grid and
+   vignette; all optional, absent they change nothing. Pin every `at` to
    the word that names it so the scene builds on the voice. `verify.ts` fails an
    item id used twice, a link or note pointing at a missing item, and a dot with
    no `Tokens.packet`; it warns on anything after the shot ends. Look:
@@ -739,6 +746,8 @@ engine/          the moves and the contract — general, never show-specific
   generators/    diagram · code · terminal · compare · data · callout · chat · page · rows · scene · lottie · orb
 projects/        one look per channel; copy default/ and change everything
                  (explainer/ is the default plus a glow-and-header, box-caption style)
+                 (pay/ is a bright ultramarine-and-yellow look for faceless explainers)
+                 (obsidian/ is a dark developer-product look: dot grid, glass tiles, note pills)
 public/posts/    one folder per reel, self-contained
 public/assets/   fonts and sound effects are committed, so those renders are
                  offline; music is not (public/assets/music/*.gitkeep aside)

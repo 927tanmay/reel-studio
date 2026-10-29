@@ -342,7 +342,9 @@ export type DiagramVisual =
   | "network"
   | "laptop"
   | "rack"
-  | "hacker";
+  | "hacker"
+  | "card"
+  | "battery";
 
 export type DiagramNode = {
   id: string;
@@ -375,6 +377,12 @@ export type Travel = {
   label?: string;
   /** A palette name or CSS colour for this trip. Defaults to the look's. */
   color?: string;
+  /**
+   * `scene` links only: ride from the link's `to` back to its `from`, so one
+   * wire carries dots both ways (a request out, a reply back). Ignored on a
+   * diagram arrow, which has a direction of its own.
+   */
+  back?: boolean;
 };
 export type DiagramEdge = { from: string; to: string; label?: string; travel?: Travel[] };
 
@@ -401,7 +409,18 @@ export type SceneKind = Exclude<DiagramVisual, "button" | "spinner" | "debounce"
 /** One thing standing in a `scene`: a glowing wireframe glyph at a place in the frame. */
 export type SceneItem = {
   id: string;
-  kind: SceneKind;
+  /** The plain icon to draw. Leave out when `image` is set. */
+  kind?: SceneKind;
+  /**
+   * A picture instead of an icon: a path under `public/` (as `src` is on a
+   * diagram node), shown to fit on the item's tile, never stretched, recoloured
+   * or animated itself (it is blended with `lighten`, so a picture's near-black
+   * background takes the tile's colour instead of showing as a box). The item's `size` is the tile's width and `aspect` its
+   * width over height (default 1.586, a bank card). The tile is the look's
+   * `scene.tile`; without one the picture simply sits there. A picture draws
+   * on by fading in over the look's `drawFrames`.
+   */
+  image?: { src: string; aspect?: number };
   /** The small monospace caption under it: "CLIENT", "SERVER", "OBSERVER". */
   label?: string;
   /** Centre, as fractions of the frame. */
@@ -415,6 +434,11 @@ export type SceneItem = {
   at?: number;
   /** Seconds it leaves. Omit and it stays. */
   until?: number;
+  /**
+   * Skip the look's `scene.tile` for this item: for a glyph that sits on top
+   * of another (a spark over a chip) and should not get a card of its own.
+   */
+  bare?: boolean;
 };
 
 /** A line between two items, optionally carrying dots. */

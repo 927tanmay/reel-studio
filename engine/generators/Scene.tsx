@@ -1,12 +1,13 @@
 import React from "react";
-import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
+import { AbsoluteFill, Img, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import { evolvePath } from "@remotion/paths";
 import type { GenSpec } from "../spec";
 import { px } from "../scale";
 import { ICONS, segmentProgress } from "../icons";
 import { linkEnds, presence, typedText } from "../scene";
-import { packetAt } from "../packet";
+import { alongLink, packetAt } from "../packet";
 import { resolveColour } from "../backdrop";
+import { surfaceStyle } from "../moves/surface";
 import type { GenProps } from "./index";
 import { useGeneratorBg } from "./index";
 
@@ -75,26 +76,58 @@ export const Scene: React.FC<GenProps<SceneSpec>> = ({ spec, reel, accent }) => 
         if (draw <= 0) return null;
         const alpha = here(item) / Math.max(draw, 1e-6);
         const colour = tone(item.tone);
+        // A picture sits on a tile of its own shape; an icon's box is square.
+        const boxH = item.image ? size / (item.image.aspect ?? 1.586) : size;
         return (
           <div
             key={item.id}
             style={{
               position: "absolute",
               left: item.x * w - size / 2,
-              top: item.y * h - size / 2,
+              top: item.y * h - boxH / 2,
               width: size,
-              height: size,
-              opacity: Math.min(1, alpha),
+              height: boxH,
+              opacity: Math.min(1, alpha) * (item.image ? draw : 1),
             }}
           >
+            {item.image && style.tile && !item.bare ? (
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  borderRadius: u(style.tile.radius),
+                  ...surfaceStyle(tokens, reel.frame, style.tile),
+                }}
+              />
+            ) : null}
+            {item.image ? (
+              <Img
+                src={staticFile(item.image.src)}
+                style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "contain", padding: size * 0.03, boxSizing: "border-box", mixBlendMode: "lighten" }}
+              />
+            ) : null}
+            {!item.image && style.tile && !item.bare ? (
+              <div
+                style={{
+                  position: "absolute",
+                  left: -size * style.tile.pad,
+                  right: -size * style.tile.pad,
+                  top: -size * style.tile.pad,
+                  height: (item.label ? size * 1.02 + u(style.labelSize) * 1.7 : size) + size * style.tile.pad * 2,
+                  borderRadius: u(style.tile.radius),
+                  ...surfaceStyle(tokens, reel.frame, style.tile),
+                }}
+              />
+            ) : null}
+            {item.image || !item.kind ? null : (
             <svg
               width={size}
               height={size}
               viewBox="0 0 48 48"
-              style={{ filter: `drop-shadow(0 0 ${u(style.glow)}px ${colour})`, overflow: "visible" }}
+              style={{ position: "relative", filter: `drop-shadow(0 0 ${u(style.glow)}px ${colour})`, overflow: "visible" }}
             >
               <g fill="none" stroke={colour} strokeWidth={style.stroke} strokeLinecap="round" strokeLinejoin="round">
-                {ICONS[item.kind].map((seg, i) => {
+                {ICONS[item.kind!].map((seg, i) => {
                   const p = segmentProgress(draw, seg);
                   if (seg.dot) return p > 0 ? <circle key={i} cx={seg.dot.cx} cy={seg.dot.cy} r={seg.dot.r + 0.6} fill={colour} opacity={p} /> : null;
                   if (p <= 0) return null;
@@ -102,6 +135,7 @@ export const Scene: React.FC<GenProps<SceneSpec>> = ({ spec, reel, accent }) => 
                 })}
               </g>
             </svg>
+            )}
             {item.label ? (
               <div
                 style={{
@@ -137,7 +171,10 @@ export const Scene: React.FC<GenProps<SceneSpec>> = ({ spec, reel, accent }) => 
               const state = packetAt(frame, fps, trip, packet.seconds, packet.fadeFrames);
               if (!state) return [];
               const colour = trip.color ? tone(trip.color) : (P[packet.color] ?? packet.color);
-              const at = (p: number) => ({ x: ends.x1 + (ends.x2 - ends.x1) * p, y: ends.y1 + (ends.y2 - ends.y1) * p });
+              const at = (p: number) => {
+                const q = alongLink(p, trip.back);
+                return { x: ends.x1 + (ends.x2 - ends.x1) * q, y: ends.y1 + (ends.y2 - ends.y1) * q };
+              };
               const head = at(state.progress);
               const ghosts = Array.from({ length: packet.trail + 1 }, (_, g) => {
                 const earlier = packetAt(Math.round(trip.at * fps) + Math.max(0, state.local - g * 2), fps, trip, packet.seconds, packet.fadeFrames);
@@ -204,6 +241,13 @@ export const Scene: React.FC<GenProps<SceneSpec>> = ({ spec, reel, accent }) => 
               whiteSpace: "pre",
               opacity: shown,
               textShadow: `0 0 ${u(10)}px ${tone(note.tone)}55`,
+              ...(style.notePlate
+                ? {
+                    padding: `${u(style.notePlate.padY)}px ${u(style.notePlate.padX)}px`,
+                    borderRadius: u(style.notePlate.radius),
+                    ...surfaceStyle(tokens, reel.frame, style.notePlate),
+                  }
+                : {}),
             }}
           >
             {typedText(note, seconds)}

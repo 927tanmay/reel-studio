@@ -23,7 +23,7 @@ test("every shipped Lottie file is a well-formed animation", () => {
 test("the plain icon set includes every icon the docs promise", () => {
   const promised = [
     "phone", "bluetooth", "map-pin", "key", "cloud",
-    "document", "globe", "image", "eye-off", "server", "sparkle", "shield", "user", "clock", "database",
+    "document", "globe", "image", "eye-off", "server", "sparkle", "shield", "user", "clock", "database", "card", "battery",
     "play", "terminal", "network",
   ];
   for (const name of promised) {

@@ -344,6 +344,19 @@ export type SceneStyle = {
   tones: Record<string, string>;
   /** The colour of a link with no tone of its own. */
   link: string;
+  /**
+   * A card behind every item, so each thing in the scene sits on its own
+   * tile (a bento cell, frosted glass over the backdrop) instead of floating
+   * as bare lines. `pad` is the margin round the glyph, as a fraction of the
+   * glyph's width; a labelled item's tile reaches down over its label.
+   * Optional: absent, a scene draws exactly as it always has.
+   */
+  tile?: Surface & { pad: number; radius: number };
+  /**
+   * A pill behind every note — the monospace string as a badge. Optional:
+   * absent, a note is bare text, as it always was.
+   */
+  notePlate?: Plate;
 };
 
 /**
@@ -368,6 +381,15 @@ export type BackdropStyle = {
   }[];
   /** Drift cycles per second — slow enough to be felt rather than seen. */
   speed: number;
+  /**
+   * A dot-matrix grid under the glows, fading to nothing toward the edges.
+   * `size` is the spacing and `dot` the dot's radius, both in design pixels;
+   * `fade` is how far out (0..1 of the half-diagonal) the grid is still at
+   * full strength before it dissolves. Optional.
+   */
+  grid?: { size: number; dot: number; color: string; opacity: number; fade: number };
+  /** Darkens the corners with the look's own `bg`: 0 is none, 1 is solid at the edge. Optional. */
+  vignette?: number;
 };
 
 /**

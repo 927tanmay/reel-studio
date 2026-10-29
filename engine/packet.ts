@@ -41,3 +41,6 @@ export const packetAt = (
   const fadeOut = Math.min(1, (frames - local + 1) / Math.max(1, fadeFrames));
   return { progress: easeInOut(t), opacity: Math.min(fadeIn, fadeOut), local, frames };
 };
+
+/** How far along a link a dot is, counted from the end it set off from: a `back` trip rides to → from. */
+export const alongLink = (progress: number, back?: boolean): number => (back ? 1 - progress : progress);
