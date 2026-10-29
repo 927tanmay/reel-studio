@@ -46,6 +46,18 @@ const sounds = {
     "-af", "afade=t=out:st=0.05:d=0.04,volume=0.95",
   ],
   /**
+   * A contactless-payment beep: two short, bright sine tones, the second a
+   * fourth higher, the way a terminal says "paid". For a reel about tapping a
+   * card; nothing else here sounds like money.
+   */
+  beep: [
+    "-f", "lavfi",
+    "-i",
+      "aevalsrc=exprs='if(lt(t,0.09),0.8*sin(2*PI*1568*t)*min(1,t/0.004)*exp(-6*t)," +
+      "if(lt(t,0.1),0,0.8*sin(2*PI*2093*(t-0.1))*min(1,(t-0.1)/0.004)*exp(-9*(t-0.1))))':d=0.32:s=48000",
+    "-af", "afade=t=out:st=0.24:d=0.08,volume=0.9",
+  ],
+  /**
    * A toggle switch: two clicks a few milliseconds apart, the second a little
    * lower and heavier — the throw, then the stop. For a state flipping from
    * one thing to another.
