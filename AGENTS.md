@@ -112,13 +112,13 @@ by hand, and resuming is expected and supported.
    Build the ranges with `pauses()`, `fillers()` or `tighten()` from
    `words.ts`, never by hand: they are derived from the same word timings the
    cuts are anchored to, so they survive a re-transcribe. Run
-   A cut made by `pauses()` or `fillers()` lands where the voice is near silent
-   and is inaudible (measured: the join is 13-33 dB below the speech around it);
-   a range cut by hand through the middle of a word clicks, because the engine's
-   volume changes per frame and cannot fade a join smoothly. Cut between words.
    `npm run tighten <post>` first to see what a threshold would actually
    remove, and propose it the way you propose transitions. Captions follow on
-   their own.
+   their own. A cut made by `pauses()` or `fillers()` lands where the voice is
+   near silent and is inaudible (measured: the join is 13-33 dB below the
+   speech around it); a range cut by hand through the middle of a word clicks,
+   because the engine's volume changes per frame and cannot fade a join
+   smoothly. Cut between words.
 13. **B-roll goes *on* a sentence, not after it.** A shot with `audio: "hold"`
    keeps the previous take's voice running underneath it, continuing from
    exactly where it left off, at its own rate whatever `speed` is doing to the
