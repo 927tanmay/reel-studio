@@ -1,5 +1,6 @@
 import { Easing as RemotionEasing, interpolate } from "remotion";
 import type { Easing, Enter, Exit, Push } from "../spec";
+import { wipeClip, zoomEnter } from "../transition";
 
 // Standard overshoot/exponential formulas (Penner-style), not Remotion
 // built-ins — `interpolate`'s `easing` only needs to be a `t => number`
@@ -50,6 +51,7 @@ export const ease = (t: number, name?: Easing) => curve(name)(Math.max(0, Math.m
  * multiply by.
  */
 export const enterScale = (frame: number, enter?: Enter): number => {
+  if (enter?.kind === "zoom") return zoomEnter(frame, enter.frames, enter.to, enter.blur).scale;
   if (!enter || (enter.kind !== "punch" && enter.kind !== "blend")) return 1;
   return interpolate(frame, [0, enter.frames], [enter.to, 1], {
     extrapolateLeft: "clamp",
@@ -64,6 +66,7 @@ export const enterScale = (frame: number, enter?: Enter): number => {
  * opaque throughout, which is what makes this safe to apply unconditionally.
  */
 export const enterOpacity = (frame: number, enter?: Enter): number => {
+  if (enter?.kind === "zoom") return zoomEnter(frame, enter.frames, enter.to, enter.blur).opacity;
   if (!enter || enter.kind !== "blend") return 1;
   return interpolate(frame, [0, enter.frames], [0, 1], {
     extrapolateLeft: "clamp",
@@ -177,13 +180,42 @@ export const pushMotionBlur = (
  * quick audio crossfade under a hard visual cut to avoid a pop.
  */
 export const enterAudioFade = (frame: number, enter?: Enter): number => {
-  if (!enter || (enter.kind !== "blend" && enter.kind !== "push")) return 1;
+  if (!enter || (enter.kind !== "blend" && enter.kind !== "push" && enter.kind !== "zoom" && enter.kind !== "wipe")) return 1;
   return interpolate(frame, [0, enter.frames], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
-    easing: curve(enter.easing),
+    easing: curve("easing" in enter ? enter.easing : undefined),
   });
 };
+
+/**
+ * Gaussian blur on the picture, in frame pixels, from a zoom-through: the
+ * incoming side coming into focus and the outgoing side losing it. `scale`
+ * converts the look's design pixels to this frame's.
+ */
+export const transitionBlur = (
+  frame: number,
+  durationInFrames: number,
+  enter: Enter | undefined,
+  exit: Exit | undefined,
+  scale: number,
+): number => {
+  const incoming = enter?.kind === "zoom" ? zoomEnter(frame, enter.frames, enter.to, enter.blur).blur : 0;
+  let outgoing = 0;
+  if (exit?.blur) {
+    const start = Math.max(0, durationInFrames - exit.frames);
+    outgoing = interpolate(frame, [start, durationInFrames], [0, exit.blur], {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+      easing: curve(exit.easing),
+    });
+  }
+  return (incoming + outgoing) * scale;
+};
+
+/** The incoming picture's clip during a wipe, or undefined for every other enter. */
+export const enterClip = (frame: number, enter?: Enter): string | undefined =>
+  enter?.kind === "wipe" && frame < enter.frames ? wipeClip(frame, enter.frames, enter.direction) : undefined;
 
 /**
  * The mirror of `enterAudioFade`, applied to the shot being overlapped rather

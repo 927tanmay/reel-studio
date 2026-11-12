@@ -156,6 +156,13 @@ Grouped by how loud they are (see §4). Each line is a thing a brief can say.
   or story is more honest when one can be shown; the rebuilt card is for when it
   cannot, and never for words someone did not write.
 
+- **More transitions.** A **wipe** (a clean edge uncovers the next picture, for a
+  list moving on or a before and after), a **zoom-through** (the picture flies into
+  the camera and the next settles out of the blur, for a new section) and a **whip**
+  (a fast smeared slide). Any transition can carry a sound, usually a whoosh.
+- **Punchy captions.** Two words a card, uppercase, each word popping in as it is
+  said, the spoken word boxed in colour. A look choice for fast hot-topic reels.
+
 ### Loud — a beat that should hurt. Two or three in a 30-second reel
 - **Key-word slam** — one to three words land huge in the middle of the frame on
   the beat that names them: the punchline, the number, the verdict. "On 'free',

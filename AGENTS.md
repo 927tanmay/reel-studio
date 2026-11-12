@@ -720,6 +720,26 @@ by hand, and resuming is expected and supported.
    sharp. The arithmetic (compact numbers, count-up, highlight runs, wall columns)
    is `engine/blocks.ts`, unit-tested. Loudness: each is a *medium* move (`STYLE.md`).
 
+53. **Three more transitions, a sound on any of them, and punchy captions.**
+   `zoomThrough({ frames, to?, blur? })` flies the outgoing picture into the
+   camera and soft, and settles the incoming one out of the same blur — the two
+   halves of one move, handing over mid-flight; it overlaps like a blend and gives
+   the outgoing shot the matching exit (`Exit.blur`) unless it has its own. It is
+   the loudest transition: a section change, not every cut. `wipe({ frames,
+   direction })` uncovers the whole incoming shot, text included, behind a clean
+   edge while the old one stands still — a list moving on, a before and an after.
+   `whip({ direction })` is a preset push: eight frames, eased both ends, heavily
+   blurred; not for a shot carrying text that must be read mid-move. Blend, push,
+   zoom and wipe all take `hit` and `hitVolume`, placed on the transition's first
+   frame like a punch's. The arithmetic is `engine/transition.ts` (pure, tested).
+   Captions: `caption.maxWords` cuts cards to that many words whatever the time
+   between them (pair it with `breakOnSentence`, or a hidden next word holds its
+   space on a second line and lifts the card), and `caption.pop: { frames, from }`
+   pops each word in as it is spoken, overshooting a touch and resting at exactly
+   scale 1. `projects/punchy` is the explainer look with two-word uppercase cards
+   that pop. A word whose partner is not yet spoken sits off-centre by that
+   partner's width: the same no-reflow choice as `reveal`.
+
 ## What stays human
 
 Take selection, where a cut lands emotionally, whether a crop reads at phone
@@ -740,7 +760,9 @@ size, and final playback. Offer comparisons and measurements; never choose.
   everything to a plain cut: `blend` between two B-roll shots that share a
   subject and should feel like one continuous idea, `push` between two that
   are more clearly separate beats, `punch` when a talking-head take was split
-  for a jump-cut fix, a plain `cut` at every A-roll-to-B-roll boundary. Show
+  for a jump-cut fix, a plain `cut` at every A-roll-to-B-roll boundary,
+  `wipe` between two items of a list, and at most one or two `zoomThrough`s
+  a reel, where a section changes. Show
   the shotlist with these filled in and let the user override any of them —
   propose, do not silently decide and hide the choice.
 - Manual tweaks after a render are real and expected, not a failure of the
@@ -760,6 +782,8 @@ engine/          the moves and the contract — general, never show-specific
   icons.ts       the built-in icons as drawable path segments
   codeMorph.ts   code as positioned tokens, and how one version becomes the next
   blocks.ts      numbers, count-ups, highlight runs and logo-wall columns for the hot-topic blocks
+  transition.ts  zoom-through and wipe, as pure functions of the frame
+  chunks.ts      caption cards of n words, and a word popping in
   window.ts      where a screenshot sits in its browser window, and how far it has scrolled
   formats.ts     sections, listicle, how-it-works: structured content + a voice → a shotlist
   scene.ts · rows.ts · header.ts · backdrop.ts · emphasis.ts · card.ts · zoom.ts · ramp.ts · impact.ts · packet.ts   pure geometry for cards, click zooms, speed ramps and impacts,
@@ -775,6 +799,8 @@ projects/        one look per channel; copy default/ and change everything
                  (explainer/ is the default plus a glow-and-header, box-caption style)
                  (pay/ is a bright ultramarine-and-yellow look for faceless explainers)
                  (obsidian/ is a dark developer-product look: dot grid, glass tiles, note pills)
+                 (linear/ is a dark slate-card look with one sky accent and colour per meaning)
+                 (punchy/ is explainer with two-word uppercase captions that pop)
 public/posts/    one folder per reel, self-contained
 public/assets/   fonts and sound effects are committed, so those renders are
                  offline; music is not (public/assets/music/*.gitkeep aside)

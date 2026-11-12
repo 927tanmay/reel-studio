@@ -1,4 +1,4 @@
-import { blend, exitPunch, push, punch, reel } from "../../../engine/spec";
+import { blend, exitPunch, push, punch, reel, whip, wipe, zoomThrough } from "../../../engine/spec";
 import tokens from "../../../projects/default/tokens";
 import config from "./post.json";
 
@@ -303,6 +303,8 @@ export default reel({
         theme: "light",
         seconds: 3,
       },
+      // A zoom-through: the post flies into the camera, the headline settles out of it.
+      enter: zoomThrough({ frames: 14, hit: "whoosh" }),
     },
     {
       // A big number counting up, with what it counts and a change.
@@ -316,6 +318,8 @@ export default reel({
         delta: { text: "+340% in a year", direction: "up" },
         seconds: 3,
       },
+      // A wipe: a clean edge uncovers the number, the headline standing still behind it.
+      enter: wipe({ frames: 12, direction: "left" }),
     },
     {
       // A logo wall of monograms, then one singled out.
@@ -326,6 +330,8 @@ export default reel({
         focus: [{ at: 2, name: "Remotion" }],
         seconds: 3.2,
       },
+      // A whip: a fast, smeared push.
+      enter: whip({ direction: "up", hit: "whoosh", hitVolume: 0.6 }),
     },
     {
       // Events on a line that draws down to each as it lands.

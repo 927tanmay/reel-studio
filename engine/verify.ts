@@ -621,7 +621,7 @@ export const verifySpec = (spec: ReelSpec, timeline: Timeline): Finding[] => {
       const enter = shot.enter;
       if (
         im.kind === "flash" &&
-        (enter?.kind === "blend" || enter?.kind === "push") &&
+        (enter?.kind === "blend" || enter?.kind === "push" || enter?.kind === "zoom") &&
         Math.round((im.at ?? 0) * spec.frame.fps) < enter.frames
       ) {
         findings.push({

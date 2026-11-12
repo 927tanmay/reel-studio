@@ -4,6 +4,7 @@ import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
 import type { ReelSpec, ResolvedShot } from "../spec";
 import { dominantSound, wordsInShot } from "../spec";
 import { normalise } from "../words";
+import { chunkCards, popState } from "../chunks";
 import { emphasisGroups, wordReveal } from "../emphasis";
 import { resolveColour } from "../backdrop";
 import { px } from "../scale";
@@ -76,12 +77,13 @@ export const Captions: React.FC<{ spec: ReelSpec; resolved: ResolvedShot }> = ({
     runs[runs.length - 1].push(c);
     if (style.breakOnSentence && /[.?!…]["')\]]*\s*$/.test(c.text)) runs.push([]);
   }
-  const pages = runs
-    .filter((run) => run.length > 0)
-    .flatMap(
-      (run) =>
-        createTikTokStyleCaptions({ captions: run, combineTokensWithinMilliseconds: style.windowMs }).pages,
-    );
+  const filled = runs.filter((run) => run.length > 0);
+  const pages = style.maxWords
+    ? chunkCards(filled.map((run) => run.map((c) => ({ text: c.text, startMs: c.startMs, endMs: c.endMs }))), style.maxWords)
+    : filled.flatMap(
+        (run) =>
+          createTikTokStyleCaptions({ captions: run, combineTokensWithinMilliseconds: style.windowMs }).pages,
+      );
 
   const nowMs = (frame / fps) * 1000;
   // The card leads the voice; the active-word highlight does not. Pages are
@@ -113,7 +115,7 @@ export const Captions: React.FC<{ spec: ReelSpec; resolved: ResolvedShot }> = ({
   const emphasis = style.emphasis;
   // When words reveal themselves, each carries its own fade and the card
   // must not fade as well or the first words arrive twice.
-  const opacity = style.reveal ? 1 : cardFade;
+  const opacity = style.reveal || style.pop ? 1 : cardFade;
   const box = style.activeBox;
   const boxColour = box ? resolveColour(box.color, spec.style.palette, resolved.shot.accent) : undefined;
 
@@ -175,6 +177,8 @@ export const Captions: React.FC<{ spec: ReelSpec; resolved: ResolvedShot }> = ({
                     ? style.activeColor
                     : style.color));
 
+            const pop = style.pop ? popState(nowMs, token.fromMs, style.pop.frames, fps, style.pop.from) : null;
+
             const reveal = style.reveal
               ? wordReveal(
                   nowMs,
@@ -205,6 +209,13 @@ export const Captions: React.FC<{ spec: ReelSpec; resolved: ResolvedShot }> = ({
                       : {}),
                     ...(reveal
                       ? { opacity: reveal.opacity, filter: reveal.blur > 0.2 ? `blur(${reveal.blur}px)` : undefined }
+                      : {}),
+                    ...(pop
+                      ? {
+                          display: "inline-block",
+                          opacity: pop.opacity,
+                          transform: pop.scale === 1 ? undefined : `scale(${pop.scale})`,
+                        }
                       : {}),
                   }}
                 >

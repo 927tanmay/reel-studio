@@ -12,6 +12,8 @@ import {
   exitOverlayVisible,
   pushMotionBlur,
   ease,
+  transitionBlur,
+  enterClip,
 } from "./moves/punch";
 import { Captions, primaryMediaKey } from "./moves/Captions";
 import { wordsInShot } from "./spec";
@@ -545,8 +547,12 @@ export const ShotView: React.FC<{
   const glitchId = `glitch-${resolved.key}`;
   const glitchOn = Boolean(impact?.glitch);
 
+  // A zoom-through softens the picture as it flies, in and out.
+  const zoomBlur = transitionBlur(frame, resolved.durationInFrames, shot.enter, resolved.effectiveExit, spec.frame.w / spec.style.designWidth);
+  const zoomBlurFilter = zoomBlur > 0.3 ? `blur(${zoomBlur.toFixed(2)}px)` : null;
+
   const filter =
-    [gradeFilterValue, hasBlur ? `url(#${blurId})` : null, glitchOn ? `url(#${glitchId})` : null, extraFilter ?? null]
+    [gradeFilterValue, hasBlur ? `url(#${blurId})` : null, glitchOn ? `url(#${glitchId})` : null, zoomBlurFilter, extraFilter ?? null]
       .filter(Boolean)
       .join(" ") || undefined;
 
@@ -586,7 +592,9 @@ export const ShotView: React.FC<{
   const showCaptions = shot.captions !== false && hasTranscript;
 
   return (
-    <AbsoluteFill style={{ opacity, transform: `translate(${translate.x}px, ${translate.y}px)` }}>
+    // A wipe uncovers the whole incoming shot — picture and text together — the
+    // way a push moves both together, so nothing of it shows ahead of the edge.
+    <AbsoluteFill style={{ opacity, transform: `translate(${translate.x}px, ${translate.y}px)`, clipPath: enterClip(frame, shot.enter) }}>
       {needsMatrix(shot.grade) && gain ? (
         <svg width={0} height={0} style={{ position: "absolute" }}>
           <defs>

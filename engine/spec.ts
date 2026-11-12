@@ -69,7 +69,15 @@ export type BandsOpen = { kind: "bands"; frames: number; easing?: Easing };
  * drops by `frames` for every blend, the same way a crossfade shortens a
  * timeline in a conventional editor.
  */
-export type Blend = { kind: "blend"; frames: number; to: number; easing?: Easing };
+export type Blend = {
+  kind: "blend";
+  frames: number;
+  to: number;
+  easing?: Easing;
+  /** A sound effect key from public/assets/sfx, landing as the transition starts. */
+  hit?: string;
+  hitVolume?: number;
+};
 
 /**
  * A slide. The incoming shot enters fully opaque from off-frame and covers
@@ -93,18 +101,78 @@ export type Push = {
    * that has to stay readable mid-slide; anything else scales it.
    */
   blur?: number;
+  hit?: string;
+  hitVolume?: number;
 };
 
-export type Enter = Punch | Cut | BandsOpen | Blend | Push;
+/**
+ * Zoom-through: the outgoing picture flies toward the camera and goes soft,
+ * and the incoming one arrives already enlarged and soft and settles into
+ * focus. The hand-over happens mid-flight, where the eye cannot follow either
+ * picture — which is why it reads as one continuous move into the next idea.
+ * It overlaps the previous shot like a blend, and gives it the matching exit
+ * unless that shot has its own. The loudest of the transitions: a section
+ * change, not every cut.
+ */
+export type ZoomThrough = {
+  kind: "zoom";
+  frames: number;
+  /** How far the pictures fly. Default 1.6. */
+  to?: number;
+  /** Blur at the hand-over, in design pixels. Default 22. */
+  blur?: number;
+  hit?: string;
+  hitVolume?: number;
+};
+
+/**
+ * A wipe: a clean edge crosses the frame and the new picture is uncovered
+ * behind it, the old one standing still. For a list moving to its next item,
+ * a before and an after. `direction` is the way the edge travels.
+ */
+export type Wipe = {
+  kind: "wipe";
+  frames: number;
+  direction: "left" | "right" | "up" | "down";
+  hit?: string;
+  hitVolume?: number;
+};
+
+export type Enter = Punch | Cut | BandsOpen | Blend | Push | ZoomThrough | Wipe;
 
 export const punch = (o: Omit<Punch, "kind">): Punch => ({ kind: "punch", ...o });
 export const cut = (): Cut => ({ kind: "cut" });
 export const bandsOpen = (o: Omit<BandsOpen, "kind">): BandsOpen => ({ kind: "bands", ...o });
 export const blend = (o: Omit<Blend, "kind">): Blend => ({ kind: "blend", ...o });
 export const push = (o: Omit<Push, "kind">): Push => ({ kind: "push", ...o });
+export const zoomThrough = (o: Omit<ZoomThrough, "kind">): ZoomThrough => ({ kind: "zoom", ...o });
+export const wipe = (o: Omit<Wipe, "kind">): Wipe => ({ kind: "wipe", ...o });
+/**
+ * A whip pan: a push that is fast, eased at both ends and heavily blurred, so
+ * the frame smears across. Not for a shot carrying text that must stay legible
+ * mid-move. Pair it with the `whoosh` sound.
+ */
+export const whip = (o: Omit<Push, "kind" | "frames"> & { frames?: number }): Push => ({
+  kind: "push",
+  frames: 8,
+  easing: "easeInOut",
+  blur: 2.4,
+  ...o,
+});
+
+/** Every enter that overlaps the shot before it rather than cutting. */
+export const overlaps = (enter?: Enter): enter is Blend | Push | ZoomThrough | Wipe =>
+  enter?.kind === "blend" || enter?.kind === "push" || enter?.kind === "zoom" || enter?.kind === "wipe";
 
 /** An exit ramp on the outgoing shot. Pair with an enter punch for a full swap. */
-export type Exit = { kind: "punch"; to: number; frames: number; easing?: Easing };
+export type Exit = {
+  kind: "punch";
+  to: number;
+  frames: number;
+  easing?: Easing;
+  /** Blur reached at the last frame, in design pixels: the outgoing side of a zoom-through. */
+  blur?: number;
+};
 export const exitPunch = (o: Omit<Exit, "kind">): Exit => ({ kind: "punch", ...o });
 
 /**
@@ -1715,7 +1783,7 @@ export const resolveTimeline = (spec: ReelSpec): Timeline => {
     const durationInFrames = Math.max(1, frameCursor);
 
     let startFrame = cursor;
-    if (shot.enter?.kind === "blend" || shot.enter?.kind === "push") {
+    if (overlaps(shot.enter)) {
       const overlapping = shot.enter;
       const previous = shots[shots.length - 1];
       if (!previous) {
@@ -1745,6 +1813,16 @@ export const resolveTimeline = (spec: ReelSpec): Timeline => {
             to: overlapping.to,
             frames: overlap,
             easing: overlapping.easing,
+          });
+        }
+        // A zoom-through is two halves of one move; the outgoing half flies in
+        // and goes soft into the cut unless the shot already says otherwise.
+        if (overlapping.kind === "zoom" && previous.effectiveExit === undefined) {
+          previous.effectiveExit = exitPunch({
+            to: overlapping.to ?? 1.6,
+            frames: overlap,
+            easing: "easeIn",
+            blur: overlapping.blur ?? 22,
           });
         }
 
@@ -1925,7 +2003,7 @@ export const resolveTimeline = (spec: ReelSpec): Timeline => {
       effectiveExit: shot.exit,
     });
 
-    if (shot.enter?.kind === "punch" && shot.enter.hit) {
+    if (shot.enter && "hit" in shot.enter && shot.enter.hit) {
       hits.push({ frame: startFrame, sfx: shot.enter.hit, volume: shot.enter.hitVolume ?? 1 });
     }
 

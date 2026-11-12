@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Transitions: `zoomThrough` (fly into the camera and settle out of the blur, with the
+  matching exit on the outgoing shot), `wipe` (a clean edge uncovers the whole incoming
+  shot) and `whip` (a fast, heavily blurred push preset). Blend, push, zoom and wipe take
+  a `hit` sound.
+- Captions: `maxWords` (n words a card) and `pop` (each word pops in as it is spoken).
+  New look `projects/punchy`: two-word uppercase cards that pop.
 - Hot-topic blocks: `post` (a social post rebuilt as a card, with counts that run up and
   a reply), `headline` (a news story card), `stat` (one big number counting up), `logos`
   (a logo wall that singles one out, `plates` for dark marks) and `timeline` (dated

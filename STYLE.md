@@ -21,9 +21,9 @@ this file is wrong. Offer the comparison; do not choose for them.
 
 | Loudness | What | Rule of thumb |
 |---|---|---|
-| **Quiet** — always fine | captions, cuts, matched-zoom punches, blends and pushes, audio crossfades, J/L-cuts, titles, badges, lower thirds | Use freely. This is the texture of the reel. |
+| **Quiet** — always fine | captions, cuts, matched-zoom punches, blends, pushes and wipes, audio crossfades, J/L-cuts, titles, badges, lower thirds | Use freely. This is the texture of the reel. |
 | **Medium** — earns its place | `marks`, `pointer` (rings, spotlight), click `zoom`, `card`, ribbon, section headers and glows, diagram steps, travelling dots, code morphs, speed ramps, lottie icons, chat mockups, the hidden-text page reveal, the hot-topic blocks (post, headline, stat, logo wall, timeline) and their highlights | One at a time. Each should answer "where do I look?" |
-| **Loud** — a beat that should hurt | `slams`, `impacts` (shake, flash, glitch), the orb | **Two or three in a 30-second reel.** Never two at once, unless they are one beat (see §2). |
+| **Loud** — a beat that should hurt | `slams`, `impacts` (shake, flash, glitch), the orb, a zoom-through or whip | **Two or three in a 30-second reel.** Never two at once, unless they are one beat (see §2). |
 
 If you can't say what a moment would lose without the effect, it didn't need it.
 The test for a loud effect is stricter: *remove it and the line should be
@@ -57,6 +57,10 @@ visibly weaker*, not merely plainer.
 - **Slam + title on one shot** — two things said at once. Keep the slam.
 - **Flash + glitch together** — both blow the frame out; you get mush.
 - **Impact on every cut.** Then none of them is an impact.
+- **A zoom-through or whip on every cut.** One or two a reel, where a section
+  changes; between items of a list, a wipe or a plain cut.
+- **A zoom-through into a shot with a flash at its start.** The zoom's fade dims
+  the flash (`verify.ts` warns).
 - **Orb as filler.** It is for a line that says an AI is working, searching or
   listening, with nothing real to show. Nothing else.
 - **Card tilt with marks or a click in the first second.** They're measured on

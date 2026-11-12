@@ -173,6 +173,19 @@ export type CaptionStyle = TextStyle & {
    */
   reveal?: { frames: number; blur: number };
   /**
+   * At most this many words a card, whatever the time between them: the
+   * punchy two- or three-word card short-form uses. Overrides `windowMs`.
+   * Cards still break at a sentence when `breakOnSentence` is set.
+   */
+  maxWords?: number;
+  /**
+   * Each word pops in as it is spoken: hidden until then, scaling from `from`
+   * (0.5 to 0.8) to 1 with a small overshoot over `frames`. Words not yet
+   * spoken keep their space, so the line never re-wraps. The one other place
+   * type scales on purpose, and only while it arrives.
+   */
+  pop?: { frames: number; from: number };
+  /**
    * Named colours for emphasis groups: a shot's `emphasis` can be an object
    * (`{ warm: ["network"], cool: ["TLS"] }`) and each group takes its colour
    * from here, or from the palette, or is read as a CSS colour.
