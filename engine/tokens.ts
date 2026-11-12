@@ -66,6 +66,64 @@ export type Surface = {
   gradient?: Gradient;
   glass?: Glass;
   glow?: Glow;
+  /** A 1px hairline round the card, as a CSS colour. A glass `borderColor` wins over it. */
+  border?: string;
+  /** A 1px highlight along the card's top inner edge, so it reads as a lit physical slab. */
+  specular?: string;
+  /** A soft drop shadow under the card. */
+  shadow?: { color: string; blur: number; y: number; spread?: number };
+};
+
+/**
+ * One card look for the generators that draw cards (rows, chat, page, diagram):
+ * an elevated slab with a hairline, a top highlight and a drop shadow. Optional
+ * — a look without one keeps every generator's own card, as it always was.
+ */
+export type PanelStyle = {
+  color: string;
+  /** The highlighted or active card. */
+  hot: string;
+  border: string;
+  specular: string;
+  shadow: { color: string; blur: number; y: number; spread?: number };
+  /** Backdrop blur behind the card, in design pixels. */
+  blur?: number;
+  radius: number;
+  /** The small square behind an icon in a row. */
+  iconTile: string;
+};
+
+/**
+ * The look of the `chat` generator's bubbles and its ask-first prompt. Optional
+ * — absent, a chat draws exactly as it always has. Radii are CSS order: top-left,
+ * top-right, bottom-right, bottom-left, in design pixels.
+ */
+export type ChatStyle = {
+  user: { color: string; border: string; radii: [number, number, number, number] };
+  ai: { color: string; border: string; radii: [number, number, number, number] };
+  /** The "Load image from …?" prompt inside an AI reply. */
+  prompt: {
+    color: string;
+    /** Dashed hairline. */
+    border: string;
+    /** The host, as a code badge. */
+    host: { color: string; text: string };
+    /** The button the prompt waits on. */
+    button: { color: string; text: string };
+  };
+};
+
+/**
+ * Where a graphic region meets the picture below it: a soft shadow up the
+ * graphic's last stretch and an optional hairline, so the graphic looks docked
+ * above the video rather than cut off. Optional; used by bands that set `seam`.
+ */
+export type SeamStyle = {
+  /** Height of the shadow, in design pixels. */
+  height: number;
+  /** The colour it fades to at the seam. */
+  color: string;
+  line?: { weight: number; color: string };
 };
 
 /**
@@ -323,6 +381,12 @@ export type RowsStyle = {
   enterFrames: number;
   /** Seconds between rows that don't name their own `at`. */
   stagger: number;
+  /**
+   * What a `pending` row shows at the right. `"clock"` (default) is a clock
+   * icon on every row; `"dot"` is a small hollow ring, quiet enough that a row
+   * with a different status (a warning) is the one the eye lands on.
+   */
+  pending?: "clock" | "dot";
 };
 
 /**
@@ -414,6 +478,14 @@ export type HeaderStyle = {
   swapFrames: number;
   /** Frames per blink of the caret after a comment kicker. */
   caretBlinkFrames: number;
+  /**
+   * `"stacked"` (default) puts the kicker above the title, centred. `"inline"`
+   * puts them on one line, kicker first — the shorter option, for a reel whose
+   * title strip has to stay thin.
+   */
+  layout?: "stacked" | "inline";
+  /** The pill's own colours; absent it borrows the palette's `surface` and `chrome`. */
+  pill?: { color: string; border: string; text: string; padX: number; padY: number; tracking?: number };
 };
 
 /**
@@ -689,6 +761,12 @@ export type Tokens = {
   packet?: PacketStyle;
   /** The look of the rows generator. Omit and `rows` clips cannot be used. */
   rows?: RowsStyle;
+  /** One card look for rows, chat, page and diagram cards. Omit and each keeps its own. */
+  panel?: PanelStyle;
+  /** The look of chat bubbles and the ask-first prompt. Omit and the chat keeps its own. */
+  chat?: ChatStyle;
+  /** The shadow where a graphic band meets the picture below. Omit and `seam` does nothing. */
+  seam?: SeamStyle;
   /** The look of the scene generator. Omit and `scene` clips cannot be used. */
   scene?: SceneStyle;
   /** The look of the glow behind a generated clip. Omit and `backdrop` cannot be used. */

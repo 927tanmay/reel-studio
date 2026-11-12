@@ -70,6 +70,17 @@ const Bubble: React.FC<{
   const arrive = ease((frame - at) / 10, "easeOut");
   const user = m.from === "user";
   const maxW = reel.frame.w * 0.78;
+  // The look's own bubbles, when it has them: surfaces, hairlines and the
+  // asymmetric corners (the tail corner is the small one).
+  const cs = tokens.chat;
+  const side = cs ? (user ? cs.user : cs.ai) : null;
+  const corners = side
+    ? { borderRadius: side.radii.map((r) => `${u(r)}px`).join(" ") }
+    : {
+        borderRadius: u(26),
+        borderBottomRightRadius: user ? u(8) : u(26),
+        borderBottomLeftRadius: user ? u(26) : u(8),
+      };
 
   return (
     <div
@@ -78,11 +89,18 @@ const Bubble: React.FC<{
         maxWidth: maxW,
         opacity: arrive,
         transform: `translateY(${(1 - arrive) * u(24)}px)`,
-        backgroundColor: user ? tint(accent, 0.18, P.highlight ?? "rgba(79,209,197,0.12)") : (P.surface ?? "rgba(255,255,255,0.05)"),
-        border: `${u(2)}px solid ${user ? accent : (P.chrome ?? "#3E6E6A")}`,
-        borderRadius: u(26),
-        borderBottomRightRadius: user ? u(8) : u(26),
-        borderBottomLeftRadius: user ? u(26) : u(8),
+        backgroundColor: side
+          ? side.color
+          : user
+            ? tint(accent, 0.18, P.highlight ?? "rgba(79,209,197,0.12)")
+            : (P.surface ?? "rgba(255,255,255,0.05)"),
+        border: side ? `${u(1.5)}px solid ${side.border}` : `${u(2)}px solid ${user ? accent : (P.chrome ?? "#3E6E6A")}`,
+        ...corners,
+        ...(side && tokens.panel
+          ? {
+              boxShadow: `inset 0 ${u(1.5)}px 0 0 ${tokens.panel.specular}, 0 ${u(tokens.panel.shadow.y)}px ${u(tokens.panel.shadow.blur)}px ${tokens.panel.shadow.color}`,
+            }
+          : {}),
         padding: `${u(22)}px ${u(28)}px`,
       }}
     >
@@ -145,6 +163,9 @@ const ImageSlot: React.FC<{
   const dip = press !== null && frame >= press && frame < press + 5 ? 0.92 : 1;
   const outcome = image.outcome ?? "loaded";
   const height = width * 0.56;
+  // The look's ask-first prompt: a tinted sandbox box with a dashed hairline,
+  // the host as a code badge, and the button in the look's warning colour.
+  const ps = tokens.chat?.prompt;
 
   return (
     <div
@@ -156,8 +177,13 @@ const ImageSlot: React.FC<{
         borderRadius: u(18),
         overflow: "hidden",
         position: "relative",
-        border: `${u(2)}px ${done ? "solid" : "dashed"} ${done && outcome === "blocked" ? warn : (P.chrome ?? "#3E6E6A")}`,
-        background: done && outcome === "loaded" ? `linear-gradient(135deg, ${P.chrome ?? "#3E6E6A"}, ${accent})` : tokens.bg,
+        border: `${ps && !done ? u(1.5) : u(2)}px ${done ? "solid" : "dashed"} ${done && outcome === "blocked" ? warn : ps && !done ? ps.border : (P.chrome ?? "#3E6E6A")}`,
+        background:
+          done && outcome === "loaded"
+            ? `linear-gradient(135deg, ${P.chrome ?? "#3E6E6A"}, ${accent})`
+            : ps && !done
+              ? ps.color
+              : tokens.bg,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -184,7 +210,24 @@ const ImageSlot: React.FC<{
           <div style={{ fontFamily: tokens.fonts.display, fontSize: u(32), color: ink, fontWeight: 600, lineHeight: 1.25 }}>
             {image.prompt ?? (
               <>
-                Load image from <span style={{ color: warn, fontFamily: tokens.fonts.mono }}>{image.host}</span>?
+                Load image from{" "}
+                {ps ? (
+                  <span
+                    style={{
+                      fontFamily: tokens.fonts.mono,
+                      fontSize: "0.86em",
+                      backgroundColor: ps.host.color,
+                      color: ps.host.text,
+                      padding: `${u(2)}px ${u(10)}px`,
+                      borderRadius: u(7),
+                    }}
+                  >
+                    {image.host}
+                  </span>
+                ) : (
+                  <span style={{ color: warn, fontFamily: tokens.fonts.mono }}>{image.host}</span>
+                )}
+                ?
               </>
             )}
           </div>
@@ -195,8 +238,8 @@ const ImageSlot: React.FC<{
               fontSize: u(30),
               padding: `${u(10)}px ${u(34)}px`,
               borderRadius: u(12),
-              backgroundColor: accent,
-              color: tokens.bg,
+              backgroundColor: ps ? ps.button.color : accent,
+              color: ps ? ps.button.text : tokens.bg,
               transform: `scale(${dip})`,
             }}
           >

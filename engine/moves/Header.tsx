@@ -33,6 +33,8 @@ export const Header: React.FC<{ spec: ReelSpec; header: HeaderSpec; shot: Shot }
 
   const kickerStyle = header.kickerStyle ?? (header.step ? "pill" : "comment");
   const kicker = header.kicker ?? "";
+  const inline = style.layout === "inline";
+  const pill = style.pill;
 
   const kickerNode =
     kickerStyle === "pill" ? (
@@ -41,16 +43,17 @@ export const Header: React.FC<{ spec: ReelSpec; header: HeaderSpec; shot: Shot }
           display: "inline-flex",
           alignItems: "center",
           gap: u(14),
-          padding: `${u(8)}px ${u(20)}px`,
+          padding: pill ? `${u(pill.padY)}px ${u(pill.padX)}px` : `${u(8)}px ${u(20)}px`,
           borderRadius: 999,
-          backgroundColor: P.surface ?? "rgba(255,255,255,0.06)",
-          border: `${u(2)}px solid ${P.chrome ?? "#3E6E6A"}`,
+          backgroundColor: pill?.color ?? P.surface ?? "rgba(255,255,255,0.06)",
+          border: `${pill ? u(1.5) : u(2)}px solid ${pill?.border ?? P.chrome ?? "#3E6E6A"}`,
           fontFamily: tokens.fonts.mono,
           fontSize: u(style.kickerSize),
           fontWeight: 700,
-          letterSpacing: "0.1em",
-          color: accent,
+          letterSpacing: pill?.tracking !== undefined ? `${pill.tracking}em` : "0.1em",
+          color: pill?.text ?? accent,
           textTransform: "uppercase",
+          flex: "none",
         }}
       >
         <span>{kicker}</span>
@@ -103,8 +106,9 @@ export const Header: React.FC<{ spec: ReelSpec; header: HeaderSpec; shot: Shot }
           left: 0,
           right: 0,
           display: "flex",
-          flexDirection: "column",
+          flexDirection: inline ? "row" : "column",
           alignItems: "center",
+          justifyContent: inline ? "center" : undefined,
           gap: u(style.gap),
           opacity: arrive,
           transform: `translateY(${(1 - arrive) * u(14)}px)`,

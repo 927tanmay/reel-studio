@@ -762,6 +762,12 @@ export type BandSpec = {
   reframe?: { from: Rect; to?: Rect };
   /** Bands slide in from this edge when the shot opens. */
   from?: "top" | "bottom" | "left" | "right" | "none";
+  /**
+   * Shade this region's last stretch down into the picture below it, and draw
+   * the look's hairline there (`Tokens.seam`), so a graphic reads as docked
+   * above the video instead of cut off. Needs the look's `seam`; absent, nothing.
+   */
+  seam?: boolean;
 };
 
 /**

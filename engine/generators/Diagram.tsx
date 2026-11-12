@@ -4,6 +4,7 @@ import { measureText } from "@remotion/layout-utils";
 import type { DiagramNode, Frame, GenSpec } from "../spec";
 import type { Tokens } from "../tokens";
 import { px } from "../scale";
+import { panelStyle } from "../moves/surface";
 import type { GenProps } from "./index";
 import { currentStep, useGeneratorBg } from "./index";
 import { evolvePath } from "@remotion/paths";
@@ -369,6 +370,7 @@ export const Diagram: React.FC<GenProps<DiagramSpec>> = ({ spec, reel }) => {
                   borderRadius: px(tokens, reel.frame, 18),
                   border: `${strokeW}px solid ${node.color ?? P.chrome ?? "#555"}`,
                   backgroundColor: P.surface ?? "rgba(255,255,255,.04)",
+                  ...(panelStyle(tokens, reel.frame, { edge: node.color }) ?? {}),
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",

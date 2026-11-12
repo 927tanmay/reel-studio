@@ -2,6 +2,7 @@ import React from "react";
 import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
 import type { GenSpec } from "../spec";
 import { px } from "../scale";
+import { panelStyle } from "../moves/surface";
 import { ease } from "../moves/punch";
 import type { GenProps } from "./index";
 import { useGeneratorBg } from "./index";
@@ -111,6 +112,7 @@ export const Page: React.FC<GenProps<PageSpec>> = ({ spec, reel }) => {
           overflow: "hidden",
           border: `${u(2)}px solid ${P.chrome ?? "#3E6E6A"}`,
           backgroundColor: P.surface ?? "rgba(255,255,255,0.05)",
+          ...(panelStyle(tokens, reel.frame) ?? {}),
         }}
       >
         {/* Browser chrome */}

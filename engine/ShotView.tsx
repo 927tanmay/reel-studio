@@ -68,7 +68,9 @@ const SourceView: React.FC<{
   carryAudio: boolean;
   /** Crossfades this shot's own audio across a blend or push overlap. */
   audioVolume: number;
-}> = ({ source, spec, resolved, reframe, segments, carryAudio, audioVolume }) => {
+  /** The shot already drew one backdrop behind every region (a banded shot), so this one skips its own. */
+  sharedBackdrop?: boolean;
+}> = ({ source, spec, resolved, reframe, segments, carryAudio, audioVolume, sharedBackdrop }) => {
   const frame = useCurrentFrame();
   const { fps } = spec.frame;
   const progress = resolved.durationInFrames <= 1 ? 0 : frame / (resolved.durationInFrames - 1);
@@ -87,7 +89,7 @@ const SourceView: React.FC<{
 
     return (
       <AbsoluteFill style={{ overflow: "hidden" }}>
-        {resolved.shot.backdrop ? (
+        {resolved.shot.backdrop && !sharedBackdrop ? (
           <Backdrop spec={spec} accent={resolved.shot.accent} frameOffset={resolved.startFrame} />
         ) : null}
         <div style={{ position: "absolute", ...box, width: box.width, height: box.height }}>
@@ -342,6 +344,12 @@ const Bands: React.FC<{ spec: ReelSpec; resolved: ResolvedShot; bandAudioVolume:
 
   return (
     <AbsoluteFill>
+      {/* One backdrop behind the whole frame, not one per region: a region's own
+          would restart its glow and grid at the region's edge, which showed as a
+          two-tone seam between the title strip and the graphic below it. */}
+      {resolved.shot.backdrop ? (
+        <Backdrop spec={spec} accent={resolved.shot.accent} frameOffset={resolved.startFrame} />
+      ) : null}
       {bands.regions.map((band: BandSpec, i: number) => {
         const height = band.height * spec.frame.h;
         const top = offsetY;
@@ -391,7 +399,36 @@ const Bands: React.FC<{ spec: ReelSpec; resolved: ResolvedShot; bandAudioVolume:
                 ]}
                 carryAudio
                 audioVolume={bandAudioVolume}
+                sharedBackdrop
               />
+              {band.seam && spec.style.seam ? (
+                <>
+                  <div
+                    style={{
+                      position: "absolute",
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      height: px(spec.style, spec.frame, spec.style.seam.height),
+                      background: `linear-gradient(to bottom, transparent, ${spec.style.seam.color})`,
+                      pointerEvents: "none",
+                    }}
+                  />
+                  {spec.style.seam.line ? (
+                    <div
+                      style={{
+                        position: "absolute",
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        height: px(spec.style, spec.frame, spec.style.seam.line.weight),
+                        backgroundColor: spec.style.seam.line.color,
+                        pointerEvents: "none",
+                      }}
+                    />
+                  ) : null}
+                </>
+              ) : null}
             </div>
             {bands.divider && i < bands.regions.length - 1 ? (
               <div

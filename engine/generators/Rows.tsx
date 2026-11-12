@@ -6,6 +6,7 @@ import { ease } from "../moves/punch";
 import { rowStarts } from "../rows";
 import { resolveColour } from "../backdrop";
 import { StaticIcon } from "./StaticIcon";
+import { panelStyle } from "../moves/surface";
 import type { GenProps } from "./index";
 import { useGeneratorBg } from "./index";
 
@@ -36,6 +37,23 @@ export const Rows: React.FC<GenProps<RowsSpec>> = ({ spec, reel, accent }) => {
   const warn = tones.warn ?? P.warn ?? "#F97583";
 
   const statusNode = (status: NonNullable<RowsSpec["rows"][number]["status"]>) => {
+    if (status === "pending" && style.pending === "dot") {
+      // A quiet hollow ring: every row in a list marked pending would otherwise
+      // carry the same clock, and the one row that differs would not stand out.
+      return (
+        <div
+          style={{
+            width: u(20),
+            height: u(20),
+            borderRadius: "50%",
+            border: `${u(2.5)}px solid ${P.muted ?? "#8A959F"}`,
+            opacity: 0.55,
+            flex: "none",
+            margin: `0 ${u(10)}px`,
+          }}
+        />
+      );
+    }
     const icon = status === "check" ? "check" : status === "warn" ? "warning" : status === "error" ? "cross" : "clock";
     const colour = status === "check" ? ok : status === "pending" ? (P.muted ?? "#8A959F") : warn;
     return <StaticIcon name={icon} size={u(40)} colour={colour} stroke={4} />;
@@ -86,7 +104,11 @@ export const Rows: React.FC<GenProps<RowsSpec>> = ({ spec, reel, accent }) => {
           const start = Math.round(starts[i] * fps);
           const arrive = ease((frame - start) / Math.max(1, style.enterFrames), "easeOut");
           if (arrive <= 0) return null;
-          const colour = tone(row.tone);
+          // With the look's elevated card, a warning row takes the warning tone
+          // and glows, so the mystery row is where the eye lands.
+          const warnRow = row.status === "warn" || row.status === "error";
+          const colour = tokens.panel && warnRow && !row.tone ? warn : tone(row.tone);
+          const card = panelStyle(tokens, reel.frame, { hot: warnRow, edge: warnRow ? tint(colour, 0.5) : undefined });
           return (
             <div
               key={i}
@@ -95,9 +117,16 @@ export const Rows: React.FC<GenProps<RowsSpec>> = ({ spec, reel, accent }) => {
                 alignItems: "center",
                 gap: u(22),
                 padding: `${u(18)}px ${u(22)}px`,
-                borderRadius: u(style.radius),
-                backgroundColor: tint(colour, 0.08),
-                border: `${u(2)}px solid ${tint(colour, 0.45)}`,
+                ...(card
+                  ? {
+                      ...card,
+                      ...(warnRow ? { boxShadow: `${card.boxShadow}, 0 0 ${u(26)}px ${tint(colour, 0.3)}` } : {}),
+                    }
+                  : {
+                      borderRadius: u(style.radius),
+                      backgroundColor: tint(colour, 0.08),
+                      border: `${u(2)}px solid ${tint(colour, 0.45)}`,
+                    }),
                 opacity: arrive,
                 transform: `translateY(${(1 - arrive) * u(26)}px)`,
               }}
@@ -108,7 +137,7 @@ export const Rows: React.FC<GenProps<RowsSpec>> = ({ spec, reel, accent }) => {
                     width: u(style.tile),
                     height: u(style.tile),
                     borderRadius: u(style.radius * 0.6),
-                    backgroundColor: tint(colour, 0.2),
+                    backgroundColor: tokens.panel ? tokens.panel.iconTile : tint(colour, 0.2),
                     display: "grid",
                     placeItems: "center",
                     flex: "none",
