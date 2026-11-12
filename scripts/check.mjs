@@ -22,22 +22,28 @@ import { ROOT, fmt, postDir, requirePost } from "./lib.mjs";
 
 const MARK = "@@CHECK@@";
 
-/** Bundles the post's shotlist with the checks and runs it, returning what they found. */
-export const check = async (id) => {
+/**
+ * Bundles the post's shotlist with a few lines of `body` that end in
+ * `emit(value)`, runs it, and returns the value. The engine's modules are in
+ * scope as `engine.*`; the shotlist is `spec`. Shared by `check` and `review`.
+ */
+export const runWithShotlist = async (id, body, name = "check") => {
   if (!existsSync(path.join(postDir(id), "shotlist.ts"))) throw new Error(`public/posts/${id}/shotlist.ts does not exist.`);
   const outDir = path.join(ROOT, "out", ".check");
   await mkdir(outDir, { recursive: true });
-  const outfile = path.join(outDir, `${id}.mjs`);
+  const outfile = path.join(outDir, `${id}.${name}.mjs`);
   const at = (...p) => JSON.stringify(path.join(ROOT, ...p));
 
   await build({
     stdin: {
       contents: `
-        import { resolveTimeline } from ${at("engine", "spec.ts")};
-        import { verifySpec } from ${at("engine", "verify.ts")};
+        import * as spec_ from ${at("engine", "spec.ts")};
+        import * as verify_ from ${at("engine", "verify.ts")};
+        import * as critique_ from ${at("engine", "critique.ts")};
         import spec from ${JSON.stringify(path.join(postDir(id), "shotlist.ts"))};
-        const timeline = resolveTimeline(spec);
-        console.log(${JSON.stringify(MARK)} + JSON.stringify({ warnings: timeline.warnings, findings: verifySpec(spec, timeline) }));
+        const engine = { ...spec_, ...verify_, ...critique_ };
+        const emit = (value) => console.log(${JSON.stringify(MARK)} + JSON.stringify(value));
+        ${body}
       `,
       resolveDir: ROOT,
       loader: "ts",
@@ -61,9 +67,17 @@ export const check = async (id) => {
   });
 
   const line = stdout.split("\n").find((l) => l.startsWith(MARK));
-  if (!line) throw new Error("The check produced no result.");
+  if (!line) throw new Error("The shotlist produced no result.");
   return JSON.parse(line.slice(MARK.length));
 };
+
+/** Runs the gates that need no render against a post's shotlist. */
+export const check = (id) =>
+  runWithShotlist(
+    id,
+    `const timeline = engine.resolveTimeline(spec);
+     emit({ warnings: timeline.warnings, findings: engine.verifySpec(spec, timeline) });`,
+  );
 
 /** Prints a result the way the rest of the pipeline does. Returns the failure count. */
 export const report = ({ warnings, findings }) => {

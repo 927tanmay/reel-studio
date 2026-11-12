@@ -698,6 +698,9 @@ No stock footage. No generated video.
 
 ## What happens next
 
+Each draft comes with a storyboard page: the reel beside its shots, what happens
+on each word, and the pacing. Comments on it can name a shot by its number.
+
 The brief and the footage go to the reel repository. Durations are measured from
 the recordings rather than taken from this document, so if a take runs long the
 edit says so before anything renders. Everything above is the starting point, not

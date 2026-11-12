@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- `npm run review <post>` (run at the end of every render; `--no-review` skips it):
+  a storyboard page of the render — the video beside a track of the shots drawn
+  from their own frames, an event lane coloured by loudness, the pacing numbers,
+  the findings, and a card per shot with three frames, its transition and effects,
+  and the words spoken under it; click to jump, and the current shot and word light
+  up as it plays. Also `sheet.jpg`, every shot's middle frame in one image.
+- `npm run critique` counts a zoom-through and a whip as loud beats.
 - Transitions: `zoomThrough` (fly into the camera and settle out of the blur, with the
   matching exit on the outgoing shot), `wipe` (a clean edge uncovers the whole incoming
   shot) and `whip` (a fast, heavily blurred push preset). Blend, push, zoom and wipe take

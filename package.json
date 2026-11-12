@@ -21,6 +21,7 @@
     "beatcheck": "node scripts/beatcheck.mjs",
     "critique": "node scripts/critique.mjs",
     "check": "node scripts/check.mjs",
+    "review": "node scripts/review.mjs",
     "render": "node scripts/render.mjs",
     "thumbnail": "node scripts/thumbnail.mjs",
     "verify": "node scripts/verify.mjs",

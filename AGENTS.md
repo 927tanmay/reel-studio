@@ -47,6 +47,7 @@ Never put a colour, a size, a duration or a structural assumption into
 | 07 | Compose | `npm run studio` | — |
 | 08 | Render and verify | `npm run render <post>` | `out/<post>/reel.mp4`, a take |
 | 08b | Thumbnail (optional) | `npm run thumbnail <post>` | `out/<post>/thumbnail.jpg` |
+| 08c | Review (every render runs it) | `npm run review <post>` | `out/<post>/review/index.html`, `sheet.jpg` |
 | 09 | Export timeline (optional) | `npm run export-timeline <post>` | `out/<post>/timeline.edl` |
 
 Each stage writes a file the next one reads. Stopping after any of them, editing
@@ -740,6 +741,23 @@ by hand, and resuming is expected and supported.
    that pop. A word whose partner is not yet spoken sits off-centre by that
    partner's width: the same no-reflow choice as `reveal`.
 
+54. **Look at the cut, don't trust it.** Every `npm run render` ends with `npm run
+   review <post>` (skip with `--no-review`), which writes `out/<post>/review/`:
+   `sheet.jpg`, every shot's middle frame in shot order in one image, and
+   `index.html`, a storyboard — the video beside a track of the shots drawn from
+   their own frames, an event lane coloured by loudness (quiet, medium, loud, and
+   every sound), the pacing numbers with the ones past a rule of thumb flagged, the
+   findings, and a card per shot with three frames (just in, middle, just before
+   the cut), its transition and effects as chips, its header and title, and the
+   words spoken under it; findings about a shot sit on its card. Clicking a shot, a
+   word or the track jumps the video there, and while it plays the current shot and
+   the word being spoken are lit. After any render, *read `sheet.jpg`* before
+   telling the user the reel is done: it is one image, and it is where a blank
+   shot, a clipped card or a picture that never arrived shows. It does not replace
+   watching it on a phone (rule 11). The page opens from disk; `--open` opens it.
+   It is built from the same resolved timeline, `verifySpec` and
+   `critiqueTimeline` the rest use, through `runWithShotlist` in `scripts/check.mjs`.
+
 ## What stays human
 
 Take selection, where a cut lands emotionally, whether a crop reads at phone
@@ -816,6 +834,7 @@ scripts/         ingest · transcribe · align · render · thumbnail · verify 
                  tightening pass would remove) ·
                  check (shotlist gates before a render; render runs it) ·
                  snap (screenshots a web page into a post's raw/) ·
+                 review (storyboard page and contact sheet of a render; render runs it) ·
                  logo (fetches a site's own icon into a post's raw/) ·
                  export-timeline (writes an EDL; dump-timeline.ts and
                  ts-resolve-hook.mjs are shared internals, not run directly)
@@ -847,6 +866,7 @@ npm run beatcheck 001-my-reel  # how far every cut, hit and dip sits from the be
 npm run critique 001-my-reel   # pacing: first change, longest gap, speech coverage, dead air
 npm run snap 001-my-reel https://example.com/post -- --full   # screenshot a page into raw/
 npm run logo 001-my-reel vercel.com   # a site's own icon into raw/, for a logo wall
+npm run review 001-my-reel -- --open   # storyboard of the render: track, events, pacing, shot cards
 npm run check 001-my-reel      # the shotlist's own gates, before any render (render runs it too)
 ```
 

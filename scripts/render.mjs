@@ -23,9 +23,10 @@ const stillAt = args.includes("--still") ? Number(args[args.indexOf("--still") +
 // for when `npm run takes` lists ten of them and "3" alone doesn't say which
 // one mattered.
 const skipCheck = args.includes("--no-check");
+const skipReview = args.includes("--no-review");
 const noteIndex = args.indexOf("--note");
 const note = noteIndex > -1 ? (args[noteIndex + 1] ?? null) : null;
-const forwardArgs = args.filter((a, i) => a !== "--no-check" && i !== noteIndex && i !== noteIndex + 1);
+const forwardArgs = args.filter((a, i) => a !== "--no-check" && a !== "--no-review" && i !== noteIndex && i !== noteIndex + 1);
 
 await requireFfmpeg();
 
@@ -157,6 +158,13 @@ if (existsSync(final)) {
   });
 
   fmt.ok(`Saved as take ${number} (${path.relative(ROOT, takeDir)}) — npm run takes ${id}`);
+
+  // The storyboard and contact sheet of what was just rendered: look at the
+  // cut, don't trust it. A failure here never fails the render.
+  if (!skipReview) {
+    fmt.head("Reviewing");
+    await shell("node", [path.join(ROOT, "scripts", "review.mjs"), id]).catch(() => fmt.warn("The review could not be written; the render is fine. Run npm run review to see why."));
+  }
 }
 
 if (!gatesPassed) {

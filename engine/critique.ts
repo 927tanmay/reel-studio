@@ -129,6 +129,9 @@ export const critiqueTimeline = (
     for (const sl of r.shot.slams ?? []) loudRaw.push({ seconds: start + (sl.at ?? 0), kind: "slam" });
     for (const im of r.shot.impacts ?? []) loudRaw.push({ seconds: start + (im.at ?? 0), kind: im.kind });
     if (typeof r.shot.src === "object" && r.shot.src?.type === "orb") loudRaw.push({ seconds: start, kind: "orb" });
+    // The loud transitions (STYLE.md): a zoom-through, and a whip — a push blurred well past the default.
+    if (r.shot.enter?.kind === "zoom") loudRaw.push({ seconds: start, kind: "zoom-through" });
+    if (r.shot.enter?.kind === "push" && (r.shot.enter.blur ?? 1) >= 2) loudRaw.push({ seconds: start, kind: "whip" });
     medium.marks += allMarks(r.shot).length;
     medium.clicks += (r.shot.pointer?.path ?? []).filter((p) => p.click).length;
     if (r.shot.card) medium.cards++;
