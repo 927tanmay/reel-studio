@@ -271,5 +271,73 @@ export default reel({
         seconds: 3.5,
       },
     },
+
+    // The hot-topic blocks. Every name, post and headline here is made up.
+    {
+      // A post: counts run up as it lands, a phrase is highlighted, a reply lands under it.
+      src: {
+        type: "post",
+        author: { name: "Ana Ruiz", handle: "@ana", verified: true },
+        time: "2h",
+        text: "We shipped the whole feature in a day. The model wrote the code; we wrote the tests.",
+        highlights: [{ phrase: "we wrote the tests", at: 1.1 }],
+        metrics: [
+          { label: "replies", value: 1240, from: 0 },
+          { label: "reposts", value: 3100, from: 0 },
+          { label: "likes", value: 52400, from: 0 },
+        ],
+        reply: { author: { name: "Dev Lee", handle: "@devlee" }, text: "Tests are the spec now.", at: 1.9 },
+        seconds: 3.2,
+      },
+    },
+    {
+      // A headline in the light theme, with a kicker and a highlighted phrase.
+      src: {
+        type: "headline",
+        publication: "The Daily Build",
+        kicker: "Breaking",
+        title: "Browsers will ask before an AI agent fills in a form",
+        dek: "A new permission prompt lands in the next release, on by default.",
+        date: "Nov 12, 2026",
+        highlights: [{ phrase: "ask before", at: 1 }],
+        theme: "light",
+        seconds: 3,
+      },
+    },
+    {
+      // A big number counting up, with what it counts and a change.
+      src: {
+        type: "stat",
+        value: 4200000,
+        compact: true,
+        prefix: "$",
+        label: "lost to one leaked key",
+        context: "2024 to 2026",
+        delta: { text: "+340% in a year", direction: "up" },
+        seconds: 3,
+      },
+    },
+    {
+      // A logo wall of monograms, then one singled out.
+      src: {
+        type: "logos",
+        title: "the stack",
+        items: [{ name: "Remotion" }, { name: "FFmpeg" }, { name: "Whisper" }, { name: "Shiki" }, { name: "Lottie" }, { name: "Chrome" }],
+        focus: [{ at: 2, name: "Remotion" }],
+        seconds: 3.2,
+      },
+    },
+    {
+      // Events on a line that draws down to each as it lands.
+      src: {
+        type: "timeline",
+        events: [
+          { date: "2019", title: "Video as code" },
+          { date: "2024", title: "Agents write the code" },
+          { date: "Nov 2026", title: "Agents cut the reel", sub: "this repository", tone: "warn" },
+        ],
+        seconds: 3,
+      },
+    },
   ],
 });

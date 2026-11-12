@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- Hot-topic blocks: `post` (a social post rebuilt as a card, with counts that run up and
+  a reply), `headline` (a news story card), `stat` (one big number counting up), `logos`
+  (a logo wall that singles one out, `plates` for dark marks) and `timeline` (dated
+  events on a line). Phrases in a post or headline can be highlighted on their word.
+  They share one style (`Tokens.blocks`) and use the look's `panel` card. `npm run logo
+  <post> <domain>` fetches a site's own icon. `verify.ts` reports a highlight phrase
+  that is not in the text and a focus on a logo that is not on the wall.
+- The linear look, a shared card style (`Tokens.panel`), a chat look and a band seam,
+  from reel 013.
 - README and CONTRIBUTING now say that transcription needs an Apple Silicon Mac (it runs
   `mlx-whisper`) while everything else runs on Linux and Intel Macs, and show the
   `words.json` shape for supplying timings from any other Whisper tool. `npm run

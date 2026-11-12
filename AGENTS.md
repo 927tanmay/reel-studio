@@ -695,6 +695,31 @@ by hand, and resuming is expected and supported.
    window also has a `card` sibling for a screenshot whose edges matter without
    chrome (rule 45); a window replaces `card` when both are set.
 
+52. **A hot-topic reel has its own pieces: a post, a headline, a number, a logo
+   wall, a timeline.** Five generators share one style (`Tokens.blocks`) and one
+   card (the look's `panel` when it has one), so they read as one family and match
+   the look they sit in. `post` rebuilds a social post (author, text, picture,
+   counts that run up, a reply landing under it, `theme: "light"` for the way most
+   feeds draw one); it is deliberately no platform's interface — name the platform
+   in `source`, supply its mark as `logo` — and a screenshot (rule 51) is the more
+   honest choice wherever the real post can be shown; never use it to put words in
+   someone's mouth. `headline` is a news story as a card (publication, kicker,
+   headline, standfirst, date, picture); quote the headline as published. `stat`
+   is one number counting up on its word, fitted to the frame from its *final*
+   figure so the type never resizes mid-count, with a label, a context line and an
+   up or down change. `logos` is a wall that fills row by row, each tile on its word,
+   then `focus` steps that light one and dim the rest (`plates: true` puts each on
+   a light plate, which fetched icons usually need: a dark mark vanishes on a dark
+   tile). `timeline` drops dated events onto a line that draws itself down to each.
+   `highlights: [{ phrase, at }]` on a post or headline sweeps a highlighter across
+   a phrase on its word; a phrase that is not in the text is reported by
+   `verify.ts`, as is a focus naming a logo that is not on the wall. Every `at` takes
+   a phrase in the formats (rule 49). `npm run logo <post> <domain>` fetches the
+   icon the site declares for itself (SVG first, then the largest PNG, then
+   `/favicon.ico` converted) into `raw/`, and says when it is too small to look
+   sharp. The arithmetic (compact numbers, count-up, highlight runs, wall columns)
+   is `engine/blocks.ts`, unit-tested. Loudness: each is a *medium* move (`STYLE.md`).
+
 ## What stays human
 
 Take selection, where a cut lands emotionally, whether a crop reads at phone
@@ -734,6 +759,7 @@ engine/          the moves and the contract — general, never show-specific
   spec.ts        the shotlist contract and timeline resolution
   icons.ts       the built-in icons as drawable path segments
   codeMorph.ts   code as positioned tokens, and how one version becomes the next
+  blocks.ts      numbers, count-ups, highlight runs and logo-wall columns for the hot-topic blocks
   window.ts      where a screenshot sits in its browser window, and how far it has scrolled
   formats.ts     sections, listicle, how-it-works: structured content + a voice → a shotlist
   scene.ts · rows.ts · header.ts · backdrop.ts · emphasis.ts · card.ts · zoom.ts · ramp.ts · impact.ts · packet.ts   pure geometry for cards, click zooms, speed ramps and impacts,
@@ -743,7 +769,8 @@ engine/          the moves and the contract — general, never show-specific
   colour.ts      matching one clip's colour to another's
   verify.ts      gates that need no render
   moves/         punch · blend · push · captions · title · badge · marks · pointer · bed · hits
-  generators/    diagram · code · terminal · compare · data · callout · chat · page · rows · scene · lottie · orb
+  generators/    diagram · code · terminal · compare · data · callout · chat · page · rows · scene · lottie · orb ·
+                 post · headline · stat · logos · timeline (blockKit.tsx is what the last five share)
 projects/        one look per channel; copy default/ and change everything
                  (explainer/ is the default plus a glow-and-header, box-caption style)
                  (pay/ is a bright ultramarine-and-yellow look for faceless explainers)
@@ -763,6 +790,7 @@ scripts/         ingest · transcribe · align · render · thumbnail · verify 
                  tightening pass would remove) ·
                  check (shotlist gates before a render; render runs it) ·
                  snap (screenshots a web page into a post's raw/) ·
+                 logo (fetches a site's own icon into a post's raw/) ·
                  export-timeline (writes an EDL; dump-timeline.ts and
                  ts-resolve-hook.mjs are shared internals, not run directly)
 posts.ts         the register; every reel needs a line here
@@ -792,6 +820,7 @@ npm run beats <track>        # tempo, confidence, real start points for a music 
 npm run beatcheck 001-my-reel  # how far every cut, hit and dip sits from the beat grid
 npm run critique 001-my-reel   # pacing: first change, longest gap, speech coverage, dead air
 npm run snap 001-my-reel https://example.com/post -- --full   # screenshot a page into raw/
+npm run logo 001-my-reel vercel.com   # a site's own icon into raw/, for a logo wall
 npm run check 001-my-reel      # the shotlist's own gates, before any render (render runs it too)
 ```
 

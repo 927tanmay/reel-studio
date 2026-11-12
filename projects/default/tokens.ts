@@ -269,6 +269,28 @@ export const tokens: Tokens = {
     tilt: { x: 6, y: -16, perspective: 1800, settleFrames: 22, parallax: 3 },
   },
 
+  // The hot-topic blocks: a post, a headline, a big number, a logo wall, a
+  // timeline. One family, centred a little above the middle so a header fits
+  // over them and captions under them. The highlighter is a warm yellow at a
+  // third strength, so highlighted words stay readable in white.
+  blocks: {
+    width: 0.88,
+    top: 0.45,
+    enterFrames: 12,
+    sweepFrames: 10,
+    countFrames: 36,
+    stagger: 0.45,
+    card: { color: "#11161D", border: "rgba(255,255,255,0.10)", radius: 30, shadow: { color: "rgba(0,0,0,0.5)", blur: 50, y: 20 } },
+    text: "#E8EDF2",
+    muted: "#8A959F",
+    highlight: "rgba(255,214,10,0.38)",
+    verified: "#4FA3F7",
+    up: "#4ADE80",
+    down: "#F97583",
+    light: { card: "#FFFFFF", border: "rgba(0,0,0,0.08)", text: "#0F1419", muted: "#536471" },
+    sizes: { name: 34, meta: 28, body: 42, headline: 56, dek: 32, stat: 220, label: 40, logo: 150, event: 46 },
+  },
+
   // A screenshot in a browser window: the look's own card idea with a bar on
   // top. Narrower than the card so the shadow has room, and scrolls rather
   // than shrinking when a full-page capture is taller than the frame allows.

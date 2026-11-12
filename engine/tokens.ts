@@ -620,6 +620,53 @@ export type CardStyle = {
 };
 
 /**
+ * The hot-topic blocks: `post`, `headline`, `stat`, `logos`, `timeline`. One
+ * style for all five, because they sit in the same place and should read as one
+ * family. Cards use the look's `panel` when it has one, else `card` here. A look
+ * without `blocks` cannot show them, and `verify.ts` says so.
+ */
+export type BlocksStyle = {
+  /** Card width, a fraction of frame width. */
+  width: number;
+  /** Vertical centre of a block, a fraction of frame height: clear of a header above and captions below. */
+  top: number;
+  /** Frames a block, a row or a logo takes to arrive. */
+  enterFrames: number;
+  /** Frames a highlight takes to sweep across its phrase. */
+  sweepFrames: number;
+  /** Frames a number takes to count up. */
+  countFrames: number;
+  /** Seconds between list entries that name no `at`. */
+  stagger: number;
+  /** The card when the look has no `panel`. */
+  card: { color: string; border: string; radius: number; shadow?: { color: string; blur: number; y: number } };
+  text: string;
+  muted: string;
+  /** Behind a highlighted phrase. */
+  highlight: string;
+  /** A highlighted phrase's own colour; omit to keep the text colour. */
+  highlightText?: string;
+  /** The verified tick, a stat going up, a stat going down. */
+  verified: string;
+  up: string;
+  down: string;
+  /** A `theme: "light"` card. */
+  light: { card: string; border: string; text: string; muted: string };
+  /** Type sizes, in design pixels. */
+  sizes: {
+    name: number;
+    meta: number;
+    body: number;
+    headline: number;
+    dek: number;
+    stat: number;
+    label: number;
+    logo: number;
+    event: number;
+  };
+};
+
+/**
  * A screenshot in a browser window (`image` clip's `window`): a rounded window
  * with a bar and an address on top, the page below it, over the look's own
  * background. Placement is the card's idea, so the numbers read the same way:
@@ -783,6 +830,8 @@ export type Tokens = {
   card?: CardStyle;
   /** A screenshot in a browser window. Omit and an `image` clip cannot use `window`. */
   window?: WindowStyle;
+  /** The hot-topic blocks (post, headline, stat, logos, timeline). Omit and none can be shown. */
+  blocks?: BlocksStyle;
   /** The look of shake, flash and glitch. Omit and a shot cannot use them. */
   impact?: ImpactStyle;
   /** Sounds played automatically on events (clicks, marks, zooms). Omit for silence. */

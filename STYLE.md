@@ -22,7 +22,7 @@ this file is wrong. Offer the comparison; do not choose for them.
 | Loudness | What | Rule of thumb |
 |---|---|---|
 | **Quiet** — always fine | captions, cuts, matched-zoom punches, blends and pushes, audio crossfades, J/L-cuts, titles, badges, lower thirds | Use freely. This is the texture of the reel. |
-| **Medium** — earns its place | `marks`, `pointer` (rings, spotlight), click `zoom`, `card`, ribbon, section headers and glows, diagram steps, travelling dots, code morphs, speed ramps, lottie icons, chat mockups, the hidden-text page reveal | One at a time. Each should answer "where do I look?" |
+| **Medium** — earns its place | `marks`, `pointer` (rings, spotlight), click `zoom`, `card`, ribbon, section headers and glows, diagram steps, travelling dots, code morphs, speed ramps, lottie icons, chat mockups, the hidden-text page reveal, the hot-topic blocks (post, headline, stat, logo wall, timeline) and their highlights | One at a time. Each should answer "where do I look?" |
 | **Loud** — a beat that should hurt | `slams`, `impacts` (shake, flash, glitch), the orb | **Two or three in a 30-second reel.** Never two at once, unless they are one beat (see §2). |
 
 If you can't say what a moment would lose without the effect, it didn't need it.
@@ -39,6 +39,10 @@ visibly weaker*, not merely plainer.
 - **Pointer click + mark** is redundant — pick one. A ring says "here was
   clicked"; a mark says "look at this". A static thing wants a mark, a thing
   that was *done* wants a ring.
+- **Post or headline + one highlight** on the phrase the take is about. Two at
+  most; a highlighted paragraph says nothing.
+- **A stat on its own.** A big number is already the loudest thing on the
+  frame; a slam on the same figure is the same beat twice.
 - **Screenshot window + one mark** for "here is the thing I mean". The page
   scrolls *to* the line, then the mark draws on it; a mark on something that
   has already scrolled away is never seen.

@@ -146,6 +146,16 @@ Grouped by how loud they are (see §4). Each line is a thing a brief can say.
   it is said). Nothing is timed by seconds, so re-recording the voice moves
   everything. Record the voice as one take per section if you can.
 
+- **Hot-topic pieces.** A **post** rebuilt as a card (author, text, picture, counts
+  that run up, a reply landing under it; dark or light), a **news headline** card
+  (publication, a "BREAKING" tag, headline, standfirst, date), one **big number**
+  counting up with what it counts and a change ("+340% in a year"), a **logo wall**
+  that fills tile by tile and then singles one out, and a **timeline** of dated
+  events. Phrases in a post or headline can be **highlighted** on the word that
+  names them. The editor can fetch a site's own logo. A screenshot of the real post
+  or story is more honest when one can be shown; the rebuilt card is for when it
+  cannot, and never for words someone did not write.
+
 ### Loud — a beat that should hurt. Two or three in a 30-second reel
 - **Key-word slam** — one to three words land huge in the middle of the frame on
   the beat that names them: the punchline, the number, the verdict. "On 'free',

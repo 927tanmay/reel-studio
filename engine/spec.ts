@@ -497,7 +497,137 @@ export type ChatMessage = {
   buttons?: { label: string; kind?: "primary" | "danger" | "neutral"; pressAt?: number }[];
 };
 
+/** A phrase in a block's text to mark with the highlighter, sweeping across it at `at`. */
+export type Highlight = {
+  phrase: string;
+  /** Seconds into the shot it sweeps on. Defaults to when the block has arrived. */
+  at?: number;
+  /** A palette name or CSS colour. Defaults to the look's `blocks.highlight`. */
+  color?: string;
+};
+
+/** Who wrote a `post` or a reply to one. */
+export type PostAuthor = {
+  name: string;
+  /** "@ana" or "u/ana" — written as given. */
+  handle?: string;
+  /** A picture under `public/`. Without one, a monogram. */
+  avatar?: string;
+  /** A small tick beside the name. */
+  verified?: boolean;
+};
+
 export type GenSpec =
+  | {
+      /**
+       * A social post, rebuilt: who wrote it, what it says, a picture, its counts,
+       * and a reply landing under it — for a hot-topic reel that is *about* a post.
+       * Phrases in the text can be highlighted on the word that names them. It is
+       * deliberately not any one platform's interface: name the platform in
+       * `source` ("on X", "r/webdev") and supply its mark as `logo` if you want
+       * one. Where the real post can be shown, a screenshot (`npm run snap`, rule
+       * 51) is the more honest choice; this is for when it cannot, or for quoting
+       * one line of it. Never put words in someone's mouth with it.
+       */
+      type: "post";
+      author: PostAuthor;
+      text: string;
+      source?: string;
+      /** A picture under `public/`, shown beside `source`. */
+      logo?: string;
+      /** "2h", "Nov 12". */
+      time?: string;
+      /** A picture attached to the post, under `public/`. */
+      image?: string;
+      /** Counts under the post. `from` makes one count up to `value` as the post arrives. */
+      metrics?: { label: string; value: number; from?: number }[];
+      highlights?: Highlight[];
+      /** A reply that lands under the post at `at`. */
+      reply?: { author: PostAuthor; text: string; at: number };
+      /** "light" draws it as a light card, the way most feeds show a post. */
+      theme?: "dark" | "light";
+      /** Seconds it arrives. Default 0. */
+      at?: number;
+      seconds?: number;
+    }
+  | {
+      /**
+       * A news story as a card: the publication, an optional kicker ("BREAKING"),
+       * the headline, a standfirst, the byline and date, and a picture. Phrases in
+       * the headline or standfirst can be highlighted on their word. For "this was
+       * reported", when a screenshot of the story is not available or is too busy
+       * to read on a phone. Quote the headline as published.
+       */
+      type: "headline";
+      publication: string;
+      logo?: string;
+      kicker?: string;
+      title: string;
+      dek?: string;
+      byline?: string;
+      date?: string;
+      image?: string;
+      highlights?: Highlight[];
+      theme?: "dark" | "light";
+      at?: number;
+      seconds?: number;
+    }
+  | {
+      /**
+       * One number, big, counting up to its value on the word that names it, with
+       * what it counts underneath and an optional change ("+340% since 2024"). For
+       * the figure a hot take turns on. `compact` writes 1,250,000 as 1.25M.
+       */
+      type: "stat";
+      value: number;
+      /** Where the count starts. Default 0; set it equal to `value` to show it still. */
+      from?: number;
+      decimals?: number;
+      compact?: boolean;
+      prefix?: string;
+      suffix?: string;
+      label: string;
+      /** A smaller line under the label: the source, the period. */
+      context?: string;
+      delta?: { text: string; direction: "up" | "down" };
+      /** Seconds the count starts. Default 0.2. */
+      at?: number;
+      seconds?: number;
+    }
+  | {
+      /**
+       * A wall of logos — the companies in a story, the tools in a roundup — each
+       * landing on its word, and then one singled out (`focus`) while the rest dim.
+       * A logo is a picture under `public/` (`npm run logo <post> <domain>` fetches
+       * a site's own icon); without one, a monogram stands in.
+       */
+      type: "logos";
+      items: { name: string; src?: string; at?: number }[];
+      title?: string;
+      columns?: number;
+      /** From `at`, light `name` and dim the others; a step with no `name` lights them all again. */
+      focus?: { at: number; name?: string }[];
+      /** Show each name under its logo. Default true. */
+      names?: boolean;
+      /**
+       * Draw each logo on a light plate (the look's `blocks.light.card`), like an
+       * app icon. For marks that are dark or transparent and would vanish on a
+       * dark tile — most fetched site icons.
+       */
+      plates?: boolean;
+      seconds?: number;
+    }
+  | {
+      /**
+       * Dated events on a line that draws itself down to each one as it arrives —
+       * how a story unfolded. Each event lands on its word (`at`), or a stagger
+       * after the one above. `tone` picks one out (a scene tone, palette name or
+       * CSS colour), for the event the reel is about.
+       */
+      type: "timeline";
+      events: { date: string; title: string; sub?: string; at?: number; tone?: string }[];
+      seconds?: number;
+    }
   | {
       /**
        * A list of rows landing one by one — an icon tile, a title, a monospace

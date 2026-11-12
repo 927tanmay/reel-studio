@@ -371,6 +371,17 @@ screenshots it and shows it in a browser window, scrolling down it if it is long
 > to one thing marked per shot. The marked words have to be on the screenshot:
 > you cannot ask for a mark on something that only appears after a click.
 
+**Hot-topic pieces** — say which, and give the content exactly:
+> **Post:** the author's name and handle, the post's text as written, the time,
+> the platform (as words), any picture, the counts, and a reply if one matters.
+> **Headline:** the publication, the headline as published, the standfirst, the
+> date. For either, the phrase to highlight and the word you say as it is marked.
+> **Big number:** the figure, what it counts, where it is from, and any change
+> ("+340% in a year"), and the word it lands on.
+> **Logo wall:** the names (and sites, so the editor can fetch the logos), the word
+> each lands on, and which one to single out on which word.
+> **Timeline:** each date and what happened, and the word each lands on.
+
 ## 6. Name the text on screen
 
 **Captions happen on their own.** Any shot with a transcript gets them

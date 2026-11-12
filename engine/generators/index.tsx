@@ -13,6 +13,11 @@ import { Scene } from "./Scene";
 import { Rows } from "./Rows";
 import { Page } from "./Page";
 import { LottieGen } from "./Lottie";
+import { Post } from "./Post";
+import { Headline } from "./Headline";
+import { Stat } from "./Stat";
+import { Logos } from "./Logos";
+import { Timeline } from "./Timeline";
 import type { WordTiming } from "../spec";
 
 /**
@@ -78,6 +83,16 @@ export const Generated: React.FC<GenProps> = ({ spec, reel, durationInFrames, wo
       return <Chat spec={spec} reel={reel} durationInFrames={durationInFrames} />;
     case "page":
       return <Page spec={spec} reel={reel} durationInFrames={durationInFrames} />;
+    case "post":
+      return <Post spec={spec} reel={reel} durationInFrames={durationInFrames} accent={accent} />;
+    case "headline":
+      return <Headline spec={spec} reel={reel} durationInFrames={durationInFrames} accent={accent} />;
+    case "stat":
+      return <Stat spec={spec} reel={reel} durationInFrames={durationInFrames} accent={accent} />;
+    case "logos":
+      return <Logos spec={spec} reel={reel} durationInFrames={durationInFrames} accent={accent} />;
+    case "timeline":
+      return <Timeline spec={spec} reel={reel} durationInFrames={durationInFrames} accent={accent} />;
     case "lottie":
       return <LottieGen spec={spec} reel={reel} durationInFrames={durationInFrames} />;
     case "orb":

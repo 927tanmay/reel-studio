@@ -8,6 +8,7 @@ import { missingRefs } from "./scene";
 import { rowStarts } from "./rows";
 import { cardBox, cardTilt } from "./card";
 import { coverRegion } from "./scale";
+import { missingPhrases } from "./blocks";
 
 /** Mirrors ShotView's own decision, so this gate can't drift from what renders. */
 const willShowCaptions = (spec: ReelSpec, resolved: ResolvedShot): boolean => {
@@ -144,6 +145,49 @@ export const verifySpec = (spec: ReelSpec, timeline: Timeline): Finding[] => {
         });
       }
     });
+  }
+
+  // The hot-topic blocks need the look's `blocks` style; a highlight must name
+  // words that are in the text, and every timed thing must land inside the shot.
+  const BLOCKS = new Set(["post", "headline", "stat", "logos", "timeline"]);
+  for (const resolved of timeline.shots) {
+    const { shot, index, durationInFrames } = resolved;
+    const src = typeof shot.src === "object" ? shot.src : undefined;
+    if (!src || !BLOCKS.has(src.type)) continue;
+    if (!t.blocks) {
+      findings.push({ level: "fail", message: `Shot ${index} shows a ${src.type}, but the look defines no \`blocks\` style. Add one to the look's tokens.` });
+      continue;
+    }
+    const late = (at: number | undefined, what: string) => {
+      if (at !== undefined && Math.round(at * spec.frame.fps) >= durationInFrames) {
+        findings.push({ level: "warn", message: `Shot ${index}'s ${what} is timed at ${at}s, after the shot has ended — it will never show.` });
+      }
+    };
+    if (src.type === "post" || src.type === "headline") {
+      const text = src.type === "post" ? src.text : [src.title, src.dek ?? ""].join("\n");
+      for (const phrase of missingPhrases(text, (src.highlights ?? []).map((h) => h.phrase))) {
+        findings.push({ level: "warn", message: `Shot ${index} highlights "${phrase}", which is not in the ${src.type}'s text, so nothing is marked.` });
+      }
+      (src.highlights ?? []).forEach((h) => late(h.at, `highlight "${h.phrase}"`));
+      late(src.at, src.type);
+      if (src.type === "post" && src.reply) late(src.reply.at, "reply");
+    }
+    if (src.type === "stat") late(src.at, "count");
+    if (src.type === "logos") {
+      if (src.items.length === 0) findings.push({ level: "fail", message: `Shot ${index} is a logo wall with no logos.` });
+      const names = new Set(src.items.map((i) => i.name));
+      for (const f of src.focus ?? []) {
+        if (f.name && !names.has(f.name)) {
+          findings.push({ level: "warn", message: `Shot ${index} focuses "${f.name}", which is not one of its logos (${[...names].join(", ")}).` });
+        }
+        late(f.at, `focus on "${f.name ?? "all"}"`);
+      }
+      src.items.forEach((i) => late(i.at, `logo "${i.name}"`));
+    }
+    if (src.type === "timeline") {
+      if (src.events.length === 0) findings.push({ level: "fail", message: `Shot ${index} is a timeline with no events.` });
+      src.events.forEach((e) => late(e.at, `event "${e.title}"`));
+    }
   }
 
   // A screenshot in a browser window, and the marks drawn on it. Marks here are
