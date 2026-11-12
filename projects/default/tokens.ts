@@ -276,6 +276,8 @@ export const tokens: Tokens = {
   blocks: {
     width: 0.88,
     top: 0.45,
+    // Between a section header (ends about 22% down) and captions (start about 69%).
+    maxHeight: 0.46,
     enterFrames: 12,
     sweepFrames: 10,
     countFrames: 36,

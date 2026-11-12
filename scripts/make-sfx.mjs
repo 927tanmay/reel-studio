@@ -69,6 +69,45 @@ const sounds = {
       "+if(gte(t,0.055),0.9*sin(2*PI*1700*(t-0.055))*exp(-600*(t-0.055))+0.7*sin(2*PI*190*(t-0.055))*exp(-85*(t-0.055)),0)':d=0.2:s=48000",
     "-af", "afade=t=out:st=0.14:d=0.06,volume=0.9",
   ],
+  /**
+   * A bubble pop: a tone that drops fast in pitch and dies, for something small
+   * landing — a row, a logo, a word. Softer than `snap`, rounder than `tick`.
+   */
+  pop: [
+    "-f", "lavfi",
+    "-i", "aevalsrc=exprs='0.9*sin(2*PI*(620*t-2600*t*t))*min(1,t/0.002)*exp(-38*t)':d=0.12:s=48000",
+    "-af", "afade=t=out:st=0.08:d=0.04,volume=0.9",
+  ],
+  /**
+   * A riser: a tone climbing for a second with air building under it, cut off
+   * at the top — put it so it ends on the frame something big lands (a slam, a
+   * stat, a zoom-through). Its \`at\` is the start, so start it one second early.
+   */
+  riser: [
+    "-f", "lavfi",
+    "-i",
+      "aevalsrc=exprs='(0.35*sin(2*PI*(180*t+380*t*t))+0.22*(2*random(0)-1)*(t/1.1))*pow(t/1.1,1.6)':d=1.1:s=48000",
+    "-af", "highpass=f=120,afade=t=out:st=1.06:d=0.04,volume=1.6",
+  ],
+  /** A notification: one bright bell-like tone and its octave, ringing out. For a message arriving. */
+  ding: [
+    "-f", "lavfi",
+    "-i",
+      "aevalsrc=exprs='(0.6*sin(2*PI*1318*t)+0.25*sin(2*PI*2637*t)+0.1*sin(2*PI*3955*t))*min(1,t/0.003)*exp(-5.5*t)':d=0.7:s=48000",
+    "-af", "afade=t=out:st=0.55:d=0.15,volume=0.8",
+  ],
+  /** A camera shutter: the blade opening and closing, two clicks of air. For a screenshot being taken. */
+  shutter: [
+    "-f", "lavfi",
+    "-i",
+      "aevalsrc=exprs='(2*random(0)-1)*(0.8*exp(-160*t)+if(gte(t,0.07),0.65*exp(-130*(t-0.07)),0))+0.35*sin(2*PI*140*t)*exp(-60*t)':d=0.2:s=48000",
+    "-af", "highpass=f=500,lowpass=f=9000,afade=t=out:st=0.15:d=0.05,volume=1.2",
+  ],
+  /** One key of a keyboard: a short, dry, bright click. Repeat it for typing, with a little space between. */
+  type: [
+    "-f", "lavfi", "-i", "anoisesrc=d=0.035:c=white:a=0.6:r=48000:seed=7",
+    "-af", "highpass=f=2200,lowpass=f=8500,afade=t=out:st=0.002:d=0.032:curve=exp,volume=1.3",
+  ],
 };
 
 fmt.head("Generating default sound effects");

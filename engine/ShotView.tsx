@@ -32,6 +32,7 @@ import { rampPieces } from "./ramp";
 import { cardBox, cardTilt, tiltAt } from "./card";
 import { zoomState } from "./zoom";
 import { impactState } from "./impact";
+import { takeGain } from "./level";
 
 /** Shown instead of a black hole when a shotlist names media that is not there. */
 const Missing: React.FC<{ what: string }> = ({ what }) => (
@@ -142,6 +143,8 @@ const SourceView: React.FC<{
   //
   // The crop is computed above, outside these sequences, so it keeps easing
   // across the shot as a whole rather than restarting at every join.
+  const own = audioVolume * takeGain(spec.media, entry.key, spec.levelTakes !== false);
+
   return (
     <AbsoluteFill style={{ overflow: "hidden" }}>
       {parts.map((segment, i) => (
@@ -156,7 +159,7 @@ const SourceView: React.FC<{
             trimBefore={segment.sourceStart > 0 ? Math.round(segment.sourceStart * fps) : undefined}
             muted={!carryAudio || useCleanAudio || !entry.hasAudio}
             playbackRate={segment.rate}
-            volume={audioVolume}
+            volume={own}
             style={{
               position: "absolute",
               width: box.width,
@@ -173,7 +176,7 @@ const SourceView: React.FC<{
                 Math.round((segment.sourceStart + (entry.audioOffset ?? 0)) * fps),
               )}
               playbackRate={segment.rate}
-              volume={audioVolume}
+              volume={own}
             />
           ) : null}
         </Sequence>
@@ -313,6 +316,7 @@ const SoundLayer: React.FC<{ spec: ReelSpec; sound: Sound; volume: number }> = (
 
   const file = entry.cleanAudio ?? entry.file;
   const offset = entry.cleanAudio ? (entry.audioOffset ?? 0) : 0;
+  const gain = takeGain(spec.media, sound.key, spec.levelTakes !== false);
 
   return (
     <>
@@ -321,7 +325,7 @@ const SoundLayer: React.FC<{ spec: ReelSpec; sound: Sound; volume: number }> = (
           <Audio
             src={staticFile(file)}
             trimBefore={Math.max(0, Math.round((segment.sourceStart + offset) * fps))}
-            volume={volume}
+            volume={volume * gain}
           />
         </Sequence>
       ))}

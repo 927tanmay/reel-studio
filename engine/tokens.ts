@@ -643,6 +643,8 @@ export type BlocksStyle = {
   width: number;
   /** Vertical centre of a block, a fraction of frame height: clear of a header above and captions below. */
   top: number;
+  /** The tallest a block may be, a fraction of frame height. A taller one shrinks to fit. */
+  maxHeight: number;
   /** Frames a block, a row or a logo takes to arrive. */
   enterFrames: number;
   /** Frames a highlight takes to sweep across its phrase. */

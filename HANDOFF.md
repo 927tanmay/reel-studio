@@ -100,10 +100,13 @@ Bad: `On the word "the", cut to the screen recording.`
 The beats you can ask for at a moment are: a plain cut, a sharp punch, a quiet
 punch, a **blend** (two shots overlap and zoom together instead of meeting at a
 hard edge), a **slide** (one shot sweeps in and covers the other, no zoom), a
-band opening, or a dip in the music. Both blend and slide crossfade their own
-audio automatically, even if the picture doesn't. A punch can carry a sound;
-the ones that exist are **snap**, **whoosh** and **tick**. Ask for any other
-sound and someone has to go find it first.
+**wipe**, a **zoom-through**, a **whip**, a band opening, or a dip in the music.
+The overlapping ones crossfade their own audio automatically, even if the picture
+doesn't. Any of them can carry a sound, and a sound can sit on any word. The ones
+that exist are **snap**, **whoosh**, **tick**, **tap**, **switch**, **beep**,
+**pop** (something small landing), **riser** (one second of build that ends where
+something big lands), **ding** (a notification), **shutter** (a screenshot) and
+**type** (one key). Ask for any other sound and someone has to go find it first.
 
 **Blend is for B-roll, not for two takes of you talking.** Ask for it between
 two B-roll moments that share a subject and should feel like one continuous
@@ -438,7 +441,8 @@ bottom with the spoken word in a coloured box, or the words written big across
 the top as they are spoken, a sentence at a time ("headline" captions) —
 choose one per reel. Each section can have its own accent colour and a soft
 glow behind its clips. Record the voice in clean, separate takes per section
-if you can; sections then start exactly on their first word.
+if you can; sections then start exactly on their first word. Takes recorded on
+different days at different distances are brought to the same loudness for you.
 
 *Write it as content, not as shots.* The editor builds the whole edit from a
 list, so for each section give: **the phrase it starts on** (the words you say
@@ -457,6 +461,10 @@ each lands on; and the verdict. For **myth or fact** give, per claim, the myth
 and the fact in a few words each, the phrase the claim starts on, and the word
 where you turn to the correction. Keep each line short: it sits on a row, not a
 paragraph.
+
+For the **cover** of a voice-only reel, name the moment (a block after it has
+landed: the number after it has counted) and a short cover line; the line goes
+above the block, not across it.
 
 Don't ask for headline-style captions together with a
 title and subtitle in the header: they sit in the same place.

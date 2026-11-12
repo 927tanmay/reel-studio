@@ -120,3 +120,19 @@ export const fmt = {
   fail: (s) => console.log(`  ✗ ${s}`),
   head: (s) => console.log(`\n${s}`),
 };
+
+/**
+ * Integrated loudness of a file's sound, in LUFS (EBU R128), or null when it has
+ * none or ffmpeg cannot say. Used to level takes against each other.
+ */
+export const measureLoudness = async (file) => {
+  try {
+    const { stderr } = await run("ffmpeg", ["-nostats", "-i", file, "-vn", "-af", "ebur128=framelog=quiet", "-f", "null", "-"]);
+    const m = /Integrated loudness:\s*I:\s*(-?[\d.]+|-inf)\s*LUFS/.exec(stderr);
+    if (!m || m[1] === "-inf") return null;
+    const v = Number(m[1]);
+    return Number.isFinite(v) && v > -70 ? Number(v.toFixed(1)) : null;
+  } catch {
+    return null;
+  }
+};

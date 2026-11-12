@@ -24,6 +24,10 @@ export const tokens: Tokens = {
     pop: { frames: 6, from: 0.62 },
     leadMs: 0,
   },
+  // The captions are bigger here and start higher (about 65% down), so the block
+  // and window spaces end higher to clear them.
+  blocks: { ...base.blocks!, top: 0.44, maxHeight: 0.42 },
+  window: { ...base.window!, top: 0.445, maxHeight: 0.4 },
 };
 
 export default tokens;

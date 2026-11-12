@@ -2,7 +2,7 @@ import React from "react";
 import { AbsoluteFill, Img, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import type { GenSpec, PostAuthor } from "../spec";
 import { compactNumber, countValue, progress } from "../blocks";
-import { Avatar, Marked, Mark, Verified, arrive, blockFrame, blockKit, type Kit } from "./blockKit";
+import { Avatar, Marked, Mark, Verified, arrive, BlockFrame, blockKit, type Kit } from "./blockKit";
 import type { GenProps } from "./index";
 import { useGeneratorBg } from "./index";
 
@@ -29,14 +29,14 @@ export const Post: React.FC<GenProps<PostSpec>> = ({ spec, reel, accent }) => {
 
   return (
     <AbsoluteFill style={{ backgroundColor: bg }}>
-      <div style={{ ...blockFrame(kit, reel.frame), display: "flex", flexDirection: "column", gap: u(22) }}>
+      <BlockFrame kit={kit} frame={reel.frame} style={{ display: "flex", flexDirection: "column", gap: u(22) }}>
         <div style={{ ...kit.card, ...arrive(frame, start, kit), padding: u(40), display: "flex", flexDirection: "column", gap: u(26) }}>
           <Byline author={spec.author} kit={kit} font={font} size={u(88)} source={spec.source} logo={spec.logo} time={spec.time} />
           <div style={{ fontFamily: font, fontSize: u(style.sizes.body), lineHeight: 1.32, color: ink.text, fontWeight: 500, whiteSpace: "pre-wrap" }}>
             <Marked text={spec.text} highlights={spec.highlights} frame={frame} fps={fps} defaultFrame={landed + 6} kit={kit} palette={tokens.palette} />
           </div>
           {spec.image ? (
-            <Img src={staticFile(spec.image)} style={{ width: "100%", maxHeight: u(560), objectFit: "cover", borderRadius: u(20), display: "block" }} />
+            <Img src={staticFile(spec.image)} style={{ width: "100%", height: u(340), objectFit: "cover", borderRadius: u(20), display: "block" }} />
           ) : null}
           {spec.metrics?.length ? (
             <div style={{ display: "flex", flexWrap: "wrap", columnGap: u(36), rowGap: u(8), fontFamily: font, fontSize: u(style.sizes.meta), color: ink.muted }}>
@@ -65,7 +65,7 @@ export const Post: React.FC<GenProps<PostSpec>> = ({ spec, reel, accent }) => {
             <div style={{ fontFamily: font, fontSize: u(style.sizes.body * 0.82), lineHeight: 1.32, color: ink.text, whiteSpace: "pre-wrap" }}>{spec.reply.text}</div>
           </div>
         ) : null}
-      </div>
+      </BlockFrame>
     </AbsoluteFill>
   );
 };

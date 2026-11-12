@@ -12,7 +12,7 @@ import path from "node:path";
 import { existsSync } from "node:fs";
 import { mkdir } from "node:fs/promises";
 import {
-  AUDIO_EXT, IMAGE_EXT, VIDEO_EXT, fmt, keyFor, listFiles, postDir,
+  AUDIO_EXT, IMAGE_EXT, VIDEO_EXT, fmt, keyFor, listFiles, measureLoudness, postDir,
   probe, readJson, relToPublic, requireFfmpeg, requirePost, run, writeJson,
 } from "./lib.mjs";
 
@@ -47,6 +47,9 @@ const limitFor = (key) => {
   if (!c?.width) return MAX_WIDTH;
   return !c.keys || c.keys.includes(key) ? c.width : MAX_WIDTH;
 };
+
+/** A measured loudness as a manifest field, or nothing when there was none to measure. */
+const loudnessOf = (lufs) => (lufs === null ? {} : { loudness: lufs });
 
 const rawDir = path.join(dir, "raw");
 const outDir = path.join(dir, "conformed");
@@ -106,6 +109,7 @@ for (const file of videos) {
     height: final.height,
     fps: final.fps,
     hasAudio: final.hasAudio,
+    ...(final.hasAudio ? loudnessOf(await measureLoudness(use)) : {}),
     ...(manifest[key]?.cleanAudio ? { cleanAudio: manifest[key].cleanAudio } : {}),
     ...(manifest[key]?.audioOffset !== undefined ? { audioOffset: manifest[key].audioOffset } : {}),
   };
@@ -129,10 +133,11 @@ for (const file of audios) {
     height: 0,
     fps: 0,
     hasAudio: true,
+    ...loudnessOf(await measureLoudness(file)),
     ...(manifest[key]?.cleanAudio ? { cleanAudio: manifest[key].cleanAudio } : {}),
     ...(manifest[key]?.audioOffset !== undefined ? { audioOffset: manifest[key].audioOffset } : {}),
   };
-  fmt.ok(`${key}  audio only  ${info.seconds.toFixed(2)}s`);
+  fmt.ok(`${key}  audio only  ${info.seconds.toFixed(2)}s${manifest[key].loudness !== undefined ? `  ${manifest[key].loudness} LUFS` : ""}`);
 }
 
 for (const file of images) {

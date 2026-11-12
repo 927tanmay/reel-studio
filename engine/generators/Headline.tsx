@@ -1,7 +1,7 @@
 import React from "react";
 import { AbsoluteFill, Img, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import type { GenSpec } from "../spec";
-import { Marked, Mark, arrive, blockFrame, blockKit } from "./blockKit";
+import { Marked, Mark, arrive, BlockFrame, blockKit } from "./blockKit";
 import type { GenProps } from "./index";
 import { useGeneratorBg } from "./index";
 
@@ -29,7 +29,7 @@ export const Headline: React.FC<GenProps<HeadlineSpec>> = ({ spec, reel, accent 
 
   return (
     <AbsoluteFill style={{ backgroundColor: bg }}>
-      <div style={{ ...blockFrame(kit, reel.frame) }}>
+      <BlockFrame kit={kit} frame={reel.frame}>
         <div style={{ ...kit.card, ...arrive(frame, start, kit), padding: u(44), display: "flex", flexDirection: "column", gap: u(24) }}>
           <div
             style={{
@@ -73,11 +73,11 @@ export const Headline: React.FC<GenProps<HeadlineSpec>> = ({ spec, reel, accent 
             <div style={{ fontFamily: font, fontSize: u(style.sizes.dek), lineHeight: 1.4, color: ink.muted }}>{marked(spec.dek)}</div>
           ) : null}
           {spec.image ? (
-            <Img src={staticFile(spec.image)} style={{ width: "100%", maxHeight: u(480), objectFit: "cover", borderRadius: u(18), display: "block" }} />
+            <Img src={staticFile(spec.image)} style={{ width: "100%", height: u(400), objectFit: "cover", borderRadius: u(18), display: "block" }} />
           ) : null}
           {spec.byline ? <div style={{ fontFamily: font, fontSize: u(style.sizes.meta), color: ink.muted }}>{spec.byline}</div> : null}
         </div>
-      </div>
+      </BlockFrame>
     </AbsoluteFill>
   );
 };

@@ -1,4 +1,4 @@
-import React, { type CSSProperties } from "react";
+import React, { useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { Img, staticFile } from "remotion";
 import type { Frame, Highlight, PostAuthor } from "../spec";
 import type { BlocksStyle, Tokens } from "../tokens";
@@ -50,14 +50,49 @@ export const blockKit = (tokens: Tokens, frame: Frame, accent: string | undefine
   };
 };
 
-/** Where a block sits: centred on the look's `top`, at its width. Space for what has not arrived is kept. */
-export const blockFrame = (kit: Kit, frame: Frame): CSSProperties => ({
-  position: "absolute",
-  left: (frame.w * (1 - kit.style.width)) / 2,
-  width: frame.w * kit.style.width,
-  top: kit.style.top * frame.h,
-  transform: "translateY(-50%)",
-});
+/**
+ * Where a block sits: centred on the look's `top`, at its width, and never
+ * taller than the look's `maxHeight` — a block that would be (a post with a
+ * picture and a reply, a long timeline) shrinks to fit about its centre rather
+ * than running under the header above or the captions below.
+ *
+ * The height is measured from layout, which a transform does not change, so
+ * the shrink cannot feed back into the measurement. It is the same on every
+ * frame because every block keeps the space of what has not arrived yet and
+ * gives its pictures a fixed height: nothing about its size waits on a load.
+ */
+export const BlockFrame: React.FC<{ kit: Kit; frame: Frame; style?: CSSProperties; children: React.ReactNode }> = ({
+  kit,
+  frame,
+  style,
+  children,
+}) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+  const max = kit.style.maxHeight * frame.h;
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const next = el.offsetHeight > max ? max / el.offsetHeight : 1;
+    if (Math.abs(next - scale) > 0.001) setScale(next);
+  });
+  return (
+    <div
+      ref={ref}
+      style={{
+        position: "absolute",
+        left: (frame.w * (1 - kit.style.width)) / 2,
+        width: frame.w * kit.style.width,
+        top: kit.style.top * frame.h,
+        ...style,
+        transform: scale === 1 ? "translateY(-50%)" : `translateY(-50%) scale(${scale})`,
+        transformOrigin: "center center",
+      }}
+    >
+      {children}
+    </div>
+  );
+};
 
 /** Rises and fades in from `startFrame`. Before it, invisible but still taking its space. */
 export const arrive = (frame: number, startFrame: number, kit: Kit): CSSProperties => {

@@ -3,7 +3,7 @@ import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
 import { fitText } from "@remotion/layout-utils";
 import type { GenSpec } from "../spec";
 import { compactNumber, countValue, formatFigure, progress } from "../blocks";
-import { arrive, blockFrame, blockKit } from "./blockKit";
+import { arrive, BlockFrame, blockKit } from "./blockKit";
 import type { GenProps } from "./index";
 import { useGeneratorBg } from "./index";
 
@@ -13,6 +13,11 @@ type StatSpec = Extract<GenSpec, { type: "stat" }>;
  * One number, as big as the frame allows. The size is fitted once to the
  * *final* figure, so the type does not change size as the count climbs; digits
  * are tabular, so the number does not shimmy sideways either.
+ *
+ * What it counts arrives with the shot, so the screen says what is coming
+ * while the voice sets it up; the number itself lands and counts on its word.
+ * (A first version held everything back for the number, and a reel's stat sat
+ * on an empty frame for the two seconds before "four point two million".)
  */
 export const Stat: React.FC<GenProps<StatSpec>> = ({ spec, reel, accent }) => {
   const frame = useCurrentFrame();
@@ -40,7 +45,7 @@ export const Stat: React.FC<GenProps<StatSpec>> = ({ spec, reel, accent }) => {
 
   return (
     <AbsoluteFill style={{ backgroundColor: bg }}>
-      <div style={{ ...blockFrame(kit, reel.frame), display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: u(18) }}>
+      <BlockFrame kit={kit} frame={reel.frame} style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: u(18) }}>
         <div
           style={{
             ...arrive(frame, Math.max(0, start - style.enterFrames), kit),
@@ -56,11 +61,11 @@ export const Stat: React.FC<GenProps<StatSpec>> = ({ spec, reel, accent }) => {
         >
           {shown}
         </div>
-        <div style={{ ...arrive(frame, start, kit), fontFamily: font, fontWeight: 700, fontSize: u(style.sizes.label), color: ink.text, lineHeight: 1.2 }}>
+        <div style={{ ...arrive(frame, 0, kit), fontFamily: font, fontWeight: 700, fontSize: u(style.sizes.label), color: ink.text, lineHeight: 1.2 }}>
           {spec.label}
         </div>
         {spec.context ? (
-          <div style={{ ...arrive(frame, start + 4, kit), fontFamily: tokens.fonts.mono, fontSize: u(style.sizes.meta), color: ink.muted }}>{spec.context}</div>
+          <div style={{ ...arrive(frame, 4, kit), fontFamily: tokens.fonts.mono, fontSize: u(style.sizes.meta), color: ink.muted }}>{spec.context}</div>
         ) : null}
         {spec.delta ? (
           <div
@@ -85,7 +90,7 @@ export const Stat: React.FC<GenProps<StatSpec>> = ({ spec, reel, accent }) => {
             {spec.delta.text}
           </div>
         ) : null}
-      </div>
+      </BlockFrame>
     </AbsoluteFill>
   );
 };

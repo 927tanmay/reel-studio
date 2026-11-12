@@ -2,7 +2,7 @@ import React from "react";
 import { AbsoluteFill, Img, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import type { GenSpec } from "../spec";
 import { arrivals, logoColumns, monogram, progress } from "../blocks";
-import { arrive, blockFrame, blockKit } from "./blockKit";
+import { arrive, BlockFrame, blockKit } from "./blockKit";
 import type { GenProps } from "./index";
 import { useGeneratorBg } from "./index";
 
@@ -52,7 +52,7 @@ export const Logos: React.FC<GenProps<LogosSpec>> = ({ spec, reel, accent }) => 
 
   return (
     <AbsoluteFill style={{ backgroundColor: bg }}>
-      <div style={{ ...blockFrame(kit, reel.frame), display: "flex", flexDirection: "column", gap: u(30) }}>
+      <BlockFrame kit={kit} frame={reel.frame} style={{ display: "flex", flexDirection: "column", gap: u(30) }}>
         {spec.title ? (
           <div
             style={{
@@ -147,7 +147,7 @@ export const Logos: React.FC<GenProps<LogosSpec>> = ({ spec, reel, accent }) => 
             );
           })}
         </div>
-      </div>
+      </BlockFrame>
     </AbsoluteFill>
   );
 };

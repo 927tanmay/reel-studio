@@ -1291,6 +1291,13 @@ export type ReelSpec = {
   allowCaptionsWithBadge?: boolean;
   /** Checked when the timeline is built, so a long reel fails before it renders. */
   target?: { maxSeconds?: number; minSeconds?: number };
+  /**
+   * Bring every take's sound to the median loudness of the post's takes, from the
+   * levels `npm run ingest` measured. On by default; it does nothing until those
+   * measurements exist, so a post ingested before it renders as it always did.
+   * Set false to play every take at the level it was recorded.
+   */
+  levelTakes?: boolean;
   /** Durations and dimensions written by scripts/ingest.mjs. */
   media?: MediaManifest;
   /** Word timings per media key, written by scripts/transcribe.mjs. */
@@ -1381,6 +1388,8 @@ export type MediaEntry = {
   audioOffset?: number;
   /** Mean channel levels, written by scripts/grade.mjs. Feeds `matchGrade()`. */
   colour?: Colour;
+  /** Integrated loudness in LUFS, measured by `npm run ingest`. Feeds take leveling (`engine/level.ts`). */
+  loudness?: number;
 };
 
 export type MediaManifest = Record<string, MediaEntry>;

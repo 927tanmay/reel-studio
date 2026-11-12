@@ -50,7 +50,8 @@ Grouped by how loud they are (see §4). Each line is a thing a brief can say.
 ### Quiet — use freely
 - **Cut** — the default. Most cuts should be plain.
 - **Sharp punch / quiet punch** — a small push-in on a word; sharp for emphasis,
-  quiet to hide a jump cut. A sharp one can carry a sound: *snap, whoosh, tick*.
+  quiet to hide a jump cut. A sharp one can carry a sound: *snap, whoosh, tick*,
+  and any word can carry *pop, riser, ding, shutter, type, tap, switch or beep*.
 - **Matched zoom** — between two takes of *you* talking: the outgoing take zooms
   in a little, the incoming starts there and eases back. Smoother than a blend.
 - **Blend** — two shots overlap and zoom together. For two **B-roll** shots on
@@ -144,7 +145,8 @@ Grouped by how loud they are (see §4). Each line is a thing a brief can say.
   *the phrase it starts on* ("number two"), and anything inside it that should
   appear on a word names that word ("the server", or "server#2" for the second time
   it is said). Nothing is timed by seconds, so re-recording the voice moves
-  everything. Record the voice as one take per section if you can.
+  everything. Record the voice as one take per section if you can; their loudness
+  is matched for you.
 
 - **Hot-topic pieces.** A **post** rebuilt as a card (author, text, picture, counts
   that run up, a reply landing under it; dark or light), a **news headline** card

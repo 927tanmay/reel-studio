@@ -3,7 +3,7 @@ import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
 import type { GenSpec } from "../spec";
 import { arrivals, progress } from "../blocks";
 import { resolveColour } from "../backdrop";
-import { arrive, blockFrame, blockKit } from "./blockKit";
+import { arrive, BlockFrame, blockKit } from "./blockKit";
 import type { GenProps } from "./index";
 import { useGeneratorBg } from "./index";
 
@@ -32,7 +32,7 @@ export const Timeline: React.FC<GenProps<TimelineSpec>> = ({ spec, reel, accent 
 
   return (
     <AbsoluteFill style={{ backgroundColor: bg }}>
-      <div style={{ ...blockFrame(kit, reel.frame), display: "flex", flexDirection: "column" }}>
+      <BlockFrame kit={kit} frame={reel.frame} style={{ display: "flex", flexDirection: "column" }}>
         {spec.events.map((event, i) => {
           const colour = toneOf(event.tone);
           const next = starts[i + 1];
@@ -75,7 +75,7 @@ export const Timeline: React.FC<GenProps<TimelineSpec>> = ({ spec, reel, accent 
             </div>
           );
         })}
-      </div>
+      </BlockFrame>
     </AbsoluteFill>
   );
 };

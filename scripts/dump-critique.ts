@@ -17,9 +17,14 @@ if (!id) {
   process.exit(1);
 }
 
+// Whatever the shotlist prints while it loads (a format's plan, say) would land
+// in the JSON this script writes to stdout, so it goes to stderr instead.
+const log = console.log;
+console.log = (...args: unknown[]) => console.error(...args);
 const { default: spec } = await import(
   pathToFileURL(path.join(ROOT, "public", "posts", id, "shotlist.ts")).href
 );
+console.log = log;
 const timeline = resolveTimeline(spec);
 
 console.log(

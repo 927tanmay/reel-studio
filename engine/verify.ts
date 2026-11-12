@@ -163,6 +163,26 @@ export const verifySpec = (spec: ReelSpec, timeline: Timeline): Finding[] => {
         findings.push({ level: "warn", message: `Shot ${index}'s ${what} is timed at ${at}s, after the shot has ended — it will never show.` });
       }
     };
+    // A block shrinks to fit `maxHeight`, so that is the most it can reach: check
+    // it clears the header above and the captions below.
+    {
+      const H = spec.frame.h;
+      const topEdge = (t.blocks.top - t.blocks.maxHeight / 2) * H;
+      const bottomEdge = (t.blocks.top + t.blocks.maxHeight / 2) * H;
+      if (shot.header && t.header) {
+        const hb = headerBottom(shot.header, t.header, H);
+        if (topEdge < hb) {
+          findings.push({ level: "warn", message: `Shot ${index}: a tall ${src.type} can reach up to ${Math.round(topEdge)}px, over the header, which ends about ${Math.round(hb)}px. Lower Tokens.blocks.maxHeight or move its top down.` });
+        }
+      }
+      if (willShowCaptions(spec, resolved)) {
+        const style = shot.captionStyle === "headline" && t.headline ? t.headline : t.caption;
+        const captionTop = extent(style).top * H;
+        if (bottomEdge > captionTop) {
+          findings.push({ level: "warn", message: `Shot ${index}: a tall ${src.type} can reach down to ${Math.round(bottomEdge)}px, over the captions, which start about ${Math.round(captionTop)}px. Lower Tokens.blocks.maxHeight or move its top up.` });
+        }
+      }
+    }
     if (src.type === "post" || src.type === "headline") {
       const text = src.type === "post" ? src.text : [src.title, src.dek ?? ""].join("\n");
       for (const phrase of missingPhrases(text, (src.highlights ?? []).map((h) => h.phrase))) {
@@ -929,6 +949,38 @@ export const verifySpec = (spec: ReelSpec, timeline: Timeline): Finding[] => {
           `${(GRID_SAFE * 100).toFixed(0)}–${((1 - GRID_SAFE) * 100).toFixed(0)}% a profile grid's ` +
           `3:4 crop keeps. Move Tokens.thumbnail.top closer to the middle.`,
       });
+    }
+
+    // On a faceless reel the middle of the frame is where the content is. A
+    // poster title there prints over a block's own text (found in a rehearsal:
+    // "Browsers ask first" across "$4.2M"); above the block it reads, and stays
+    // inside the grid crop.
+    const frozen = spec.shots[spec.thumbnail.shot];
+    const src = frozen && typeof frozen.src === "object" ? frozen.src : undefined;
+    if (src && t.blocks && ["post", "headline", "stat", "logos", "timeline"].includes(src.type)) {
+      // A block is centred on `blocks.top`, and its text fills the middle half
+      // of its space (a stat's number reaches the top of that half). A title
+      // reaching into that band is printed across the block.
+      const inner = t.blocks.maxHeight / 4;
+      if (spec.thumbnail.text && bottom > t.blocks.top - inner && top < t.blocks.top + inner) {
+        const suggested = Math.max(GRID_SAFE, t.blocks.top - inner - height - 0.01);
+        findings.push({
+          level: "warn",
+          message:
+            `The thumbnail freezes a ${src.type} and puts its title at ${(top * 100).toFixed(0)}% from the top, across the ${src.type}'s own text. ` +
+            `Set \`thumbnail.top\` to about ${suggested.toFixed(2)} so it sits above it, or leave \`text\` out.`,
+        });
+      }
+      // A stat frozen before it counts shows its starting figure.
+      if (src.type === "stat") {
+        const lands = (src.at ?? 0.2) + t.blocks.countFrames / spec.frame.fps;
+        if ((spec.thumbnail.at ?? 0) < lands) {
+          findings.push({
+            level: "warn",
+            message: `The thumbnail freezes the stat at ${spec.thumbnail.at ?? 0}s, before its count lands at ${lands.toFixed(2)}s, so it shows ${src.from ?? 0} instead of ${src.value}. Set \`thumbnail.at\` after ${lands.toFixed(2)}.`,
+          });
+        }
+      }
     }
   }
 

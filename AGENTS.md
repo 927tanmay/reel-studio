@@ -112,6 +112,10 @@ by hand, and resuming is expected and supported.
    Build the ranges with `pauses()`, `fillers()` or `tighten()` from
    `words.ts`, never by hand: they are derived from the same word timings the
    cuts are anchored to, so they survive a re-transcribe. Run
+   A cut made by `pauses()` or `fillers()` lands where the voice is near silent
+   and is inaudible (measured: the join is 13-33 dB below the speech around it);
+   a range cut by hand through the middle of a word clicks, because the engine's
+   volume changes per frame and cannot fade a join smoothly. Cut between words.
    `npm run tighten <post>` first to see what a threshold would actually
    remove, and propose it the way you propose transitions. Captions follow on
    their own.
@@ -417,7 +421,10 @@ by hand, and resuming is expected and supported.
    `pointer.silent` or a mark's `silent` opts out; omit a key in the look and
    that event is silent everywhere. Two clicks inside one zoom play its sound
    once. Any name in `public/assets/sfx` works (`tap`, `tick`, `switch`,
-   `snap`, `whoosh`); picking which sound fits an event is a look decision.
+   `snap`, `whoosh`, `beep`, `pop`, `riser`, `ding`, `shutter`, `type`); picking
+   which sound fits an event is a look decision. `riser` is a second of build
+   that ends where something lands, so its `at` is one second before that word
+   (`at: "four-1.0s"` in a format).
 
 37. **A beat can land physically: shake, flash, glitch.** `impacts: [{ kind,
    at?, frames?, strength? }]` on a shot hits the *picture* — `shake` jolts it
@@ -757,6 +764,22 @@ by hand, and resuming is expected and supported.
    watching it on a phone (rule 11). The page opens from disk; `--open` opens it.
    It is built from the same resolved timeline, `verifySpec` and
    `critiqueTimeline` the rest use, through `runWithShotlist` in `scripts/check.mjs`.
+
+55. **Takes are leveled, blocks fit, and a faceless thumbnail sits above.**
+   `npm run ingest` measures every clip's loudness (`media.json` `loudness`, LUFS)
+   and the renderer brings each take's sound to the median of the post's takes,
+   at most 9 dB either way (`engine/level.ts`; `ReelSpec.levelTakes: false` turns
+   it off; a post ingested before this plays as it did). Measured on a rehearsal
+   with one take recorded 9 dB quiet: every section of the output within 1 LU.
+   Every hot-topic block shrinks about its centre to the look's
+   `blocks.maxHeight` when taller, measured from layout (pictures in a post or
+   headline have a fixed height, so the size never waits on a load), and
+   `verify.ts` warns when a look's block space can reach a header or the captions.
+   A `stat` shows what it counts from the shot's start and lands its number on its
+   word. A thumbnail that freezes a block is warned about if its title would print
+   across the block (with the `top` that clears it) or if it freezes a stat before
+   its count lands. Anything a shotlist prints while it loads (`describePlan`) goes
+   to stderr in the scripts that read JSON from it, so it never breaks them.
 
 ## What stays human
 

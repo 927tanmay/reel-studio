@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- Take leveling: ingest measures each clip's loudness, and each take's sound is brought
+  to the median of the post's takes (capped at 9 dB); `levelTakes: false` turns it off.
+- Hot-topic blocks shrink to fit the look's new `blocks.maxHeight`, so a tall post no
+  longer runs under a header or the captions; `verify.ts` warns when a look's space can
+  reach either. A stat shows its label from the start and counts on its word.
+- Thumbnail checks for faceless reels: a title across a frozen block, and a stat frozen
+  before its count lands.
+- Five more default sounds: pop, riser, ding, shutter, type.
+- Fix: a shotlist that prints (a format's plan) no longer breaks thumbnail, critique,
+  beatcheck or export-timeline.
+- Measured and documented: cuts made by pauses()/fillers() are click-free; a hand-made
+  cut through a word clicks.
 - `npm run review <post>` (run at the end of every render; `--no-review` skips it):
   a storyboard page of the render — the video beside a track of the shots drawn
   from their own frames, an event lane coloured by loudness, the pacing numbers,
