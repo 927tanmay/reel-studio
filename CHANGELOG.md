@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Hinglish captions spelled as typed: `raw/<key>.txt` beside a take becomes its caption
+  text, timed by what Whisper heard (engine/scriptAlign.ts; 29 of 29 words matched on a
+  measured take). `post.json` `"language": "hinglish"` steers Whisper to Roman script and
+  romanizes any Devanagari (engine/translit.ts); `"spellings"` respells words; any other
+  `"language"` code stops Whisper guessing. Word anchors work on Devanagari words too.
 - Take leveling: ingest measures each clip's loudness, and each take's sound is brought
   to the median of the post's takes (capped at 9 dB); `levelTakes: false` turns it off.
 - Hot-topic blocks shrink to fit the look's new `blocks.maxHeight`, so a tall post no

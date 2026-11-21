@@ -8,11 +8,25 @@
  *
  *   npm run transcribe 001-first-cut
  *   npm run transcribe 001-first-cut -- --model mlx-community/whisper-small.en-mlx
+ *
+ * Captions exactly as typed: put what was said in `raw/<key>.txt` beside the
+ * take. Whisper is steered by that text and used only for *when* each word was
+ * said; the words themselves are the typed ones (engine/scriptAlign.ts). This
+ * is how a Hinglish line comes out as "16 gb mai kaise fit ho jaata hai" and not
+ * in Devanagari or in someone else's spelling.
+ *
+ * `post.json` can also say `"language": "hinglish"` (Hindi and English mixed,
+ * captioned in Roman letters: Whisper is told it is Hindi and steered to Roman
+ * script, and any Devanagari left is romanized, engine/translit.ts), or any
+ * Whisper language code ("hi", "en", "ta"…) to stop it guessing. `"spellings":
+ * { "mein": "mai" }` respells words the way you write them, in either script.
  */
 import path from "node:path";
 import { existsSync } from "node:fs";
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { ROOT, fmt, has, postDir, readJson, requireFfmpeg, requirePost, run, writeJson } from "./lib.mjs";
+import { alignScript } from "../engine/scriptAlign.ts";
+import { hasDevanagari, romanize } from "../engine/translit.ts";
 
 const id = requirePost(process.argv[2]);
 const modelFlag = process.argv.indexOf("--model");
@@ -56,7 +70,34 @@ if (!media) {
 // into words.json and lost.
 const config = (await readJson(path.join(dir, "post.json"), null)) ?? {};
 const vocabulary = Array.isArray(config.vocabulary) ? config.vocabulary : [];
-const initialPrompt = vocabulary.length > 0 ? `Vocabulary: ${vocabulary.join(", ")}.` : null;
+const vocabularyPrompt = vocabulary.length > 0 ? `Vocabulary: ${vocabulary.join(", ")}.` : null;
+
+// Hinglish is Hindi as far as the model is concerned, written in Roman letters
+// as far as the captions are. Told only "Hindi", Whisper writes Devanagari;
+// left to guess, it may translate into English. A prompt already in Roman
+// Hinglish is what steers its spelling (measured: auto and "hi" gave
+// Devanagari, "en" gave a wrong translation, "hi" with this prompt gave Roman).
+const hinglish = String(config.language ?? "").toLowerCase() === "hinglish";
+const whisperLanguage = hinglish ? "hi" : typeof config.language === "string" && config.language ? config.language : null;
+const HINGLISH_PROMPT = "Hinglish, Roman script mein: yeh kaise kaam karta hai, aur kyun zaroori hai, game load nahi hota.";
+const spellings = config.spellings && typeof config.spellings === "object" ? config.spellings : {};
+
+/** A word in the post's own spelling: Devanagari romanized (for Hinglish), then `spellings` applied. */
+const respell = (text) => {
+  let t = hinglish && hasDevanagari(text) ? romanize(text, spellings) : text;
+  const core = t.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "");
+  const own = spellings[core] ?? spellings[core.toLowerCase()];
+  if (core && own !== undefined) t = t.replace(core, own);
+  return t;
+};
+
+/** Whisper's initial prompt for one take: what was typed for it, or the Hinglish steer, plus the vocabulary. */
+const promptFor = (script) => {
+  // Whisper reads at most about 220 tokens of prompt; the start of the script is
+  // what sets the spelling for what follows.
+  const lead = script ? script.slice(0, 600) : hinglish ? HINGLISH_PROMPT : null;
+  return [vocabularyPrompt, lead].filter(Boolean).join(" ") || null;
+};
 
 const work = path.join(dir, ".transcribe");
 await mkdir(work, { recursive: true });
@@ -76,7 +117,13 @@ for (const entry of Object.values(media)) {
 
   await run("ffmpeg", ["-y", "-i", source, "-ac", "1", "-ar", "16000", "-c:a", "pcm_s16le", wav]);
 
-  fmt.ok(`${entry.key}: running whisper`);
+  // What the speaker typed for this take, if anything: then the captions are
+  // that text, timed by what Whisper hears.
+  const scriptFile = path.join(dir, "raw", `${entry.key}.txt`);
+  const script = existsSync(scriptFile) ? (await readFile(scriptFile, "utf8")).trim() : null;
+  const initialPrompt = promptFor(script);
+
+  fmt.ok(`${entry.key}: running whisper${whisperLanguage ? ` (${hinglish ? "hinglish" : whisperLanguage})` : ""}${script ? `, captions from raw/${entry.key}.txt` : ""}`);
   await run("uv", [
     "tool", "run", "--from", "mlx-whisper", "mlx_whisper",
     wav,
@@ -86,6 +133,7 @@ for (const entry of Object.values(media)) {
     "--output-dir", work,
     "--verbose", "False",
     ...(initialPrompt ? ["--initial-prompt", initialPrompt] : []),
+    ...(whisperLanguage ? ["--language", whisperLanguage] : []),
   ]);
 
   const produced = path.join(work, `${entry.key}.json`);
@@ -122,10 +170,27 @@ for (const entry of Object.values(media)) {
     }
   }
 
-  existing[entry.key] = words;
-  const spoken = words.length;
   const seconds = entry.seconds || 1;
-  fmt.ok(`${entry.key}: ${spoken} words, ${Math.round((spoken / seconds) * 60)} wpm`);
+  if (script) {
+    const aligned = alignScript(script, words, seconds * 1000);
+    // Exactly as typed: no romanizing, no respelling. What was typed is the point.
+    existing[entry.key] = aligned.words;
+    const share = aligned.total ? aligned.matched / aligned.total : 1;
+    fmt.ok(`${entry.key}: ${aligned.total} typed words, ${aligned.matched} matched to what was heard`);
+    if (share < 0.7) {
+      fmt.warn(
+        `${entry.key}: only ${Math.round(share * 100)}% of raw/${entry.key}.txt was heard where expected. What was said may differ ` +
+          `from what was typed; the unheard words are placed between their neighbours. Check transcript.md, or fix the .txt.`,
+      );
+    }
+  } else {
+    existing[entry.key] = words.map((w) => ({ ...w, text: respell(w.text) }));
+    const left = existing[entry.key].filter((w) => hasDevanagari(w.text)).length;
+    fmt.ok(`${entry.key}: ${words.length} words, ${Math.round((words.length / seconds) * 60)} wpm`);
+    if (!hinglish && left > 0) {
+      fmt.warn(`${entry.key}: ${left} words came back in Devanagari. For Roman captions set "language": "hinglish" in post.json, or type the line into raw/${entry.key}.txt.`);
+    }
+  }
 }
 
 await rm(work, { recursive: true, force: true });

@@ -15,7 +15,7 @@
     "snap": "node scripts/snap.mjs",
     "logo": "node scripts/logo.mjs",
     "beats": "node scripts/beats.mjs",
-    "transcribe": "node scripts/transcribe.mjs",
+    "transcribe": "node --experimental-strip-types --experimental-loader ./scripts/ts-resolve-hook.mjs --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/transcribe.mjs",
     "tighten": "node --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/tighten.mjs",
     "align": "node scripts/align.mjs",
     "beatcheck": "node scripts/beatcheck.mjs",

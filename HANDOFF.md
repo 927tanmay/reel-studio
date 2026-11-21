@@ -431,6 +431,14 @@ candidates from the transcript for you to approve. For a reel with nobody on
 screen you can also give them **a colour group**: "TLS in cyan; network and
 encrypted in orange" — the words take that colour wherever they appear.
 
+**Hinglish (or any language) captions spelled your way.** The captions use the
+script exactly as you write it, so write each line the way it should read on
+screen — "16 gb mai kaise fit ho jaata hai" — and say it as written. Each take's
+line goes into a text file beside the recording (`hook.txt` beside `hook.wav`). If
+you improvise, update the text to what you actually said; words that were not
+said still appear, but timed by guesswork. Say in the brief that the reel is
+Hinglish, and list any words you always spell a particular way.
+
 **Reels with nobody on screen (voice only).** If you record only the voice,
 the whole reel is generated clips under it. Say so in the brief, and structure
 it as **sections**: for each, a short label ("TOOL 02", or a comment like

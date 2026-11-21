@@ -781,6 +781,29 @@ by hand, and resuming is expected and supported.
    its count lands. Anything a shotlist prints while it loads (`describePlan`) goes
    to stderr in the scripts that read JSON from it, so it never breaks them.
 
+56. **Hinglish captions are spelled as typed.** A transcriber picks its own
+   spelling, and Hinglish has no right one ("mai", "mein", "me"); told nothing,
+   Whisper writes a Hinglish take in Devanagari, and told it is English, it
+   translates it wrongly (measured on one take: auto and `hi` gave Devanagari, `en`
+   a wrong translation, `hi` plus a Roman Hinglish prompt gave Roman letters in
+   its own spelling). So: put exactly what was said, typed the way it should read,
+   in `raw/<key>.txt` beside the take. `npm run transcribe` then steers Whisper
+   with that text and uses it only for *when* each word was said; the captions,
+   `words.json` and `transcript.md` hold the typed words
+   (`engine/scriptAlign.ts`: a global alignment that tolerates spelling variants,
+   a misheard word, an extra "um", an unsaid typed word — placed between its
+   neighbours — and "256GB" against "256 gb"). It reports how many typed words it
+   matched, and warns under 70%, which means what was said differs from the
+   `.txt`. On the measured take: 29 of 29, each word lit on the moment it was
+   said. Without a `.txt`, `post.json` `"language": "hinglish"` tells Whisper it
+   is Hindi, steers it to Roman script and romanizes any Devanagari left
+   (`engine/translit.ts`, everyday spelling: "jaata", "nahi", "zaroori"), and
+   `"spellings": { "mein": "mai" }` respells words your way (never in a typed
+   script); any other `"language"` code stops Whisper guessing. Anchors and
+   phrases work on words in any script, Devanagari included: `normalise` keeps
+   every letter and vowel sign, not just a-z. Devanagari *captions* need a look
+   with a Devanagari font (none ships yet).
+
 ## What stays human
 
 Take selection, where a cut lands emotionally, whether a crop reads at phone
@@ -831,6 +854,8 @@ engine/          the moves and the contract — general, never show-specific
                  shared by the renderer, the timeline and verify.ts
   scale.ts       crop-then-scale, and size tokens that survive a frame change
   words.ts       word anchoring, and the pauses/fillers a cut removes
+  scriptAlign.ts captions spelled as typed: a typed script timed by what was heard
+  translit.ts    Devanagari to everyday Roman Hinglish
   colour.ts      matching one clip's colour to another's
   verify.ts      gates that need no render
   moves/         punch · blend · push · captions · title · badge · marks · pointer · bed · hits

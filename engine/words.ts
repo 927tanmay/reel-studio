@@ -25,8 +25,13 @@ export type WordsFile = {
   words: Word[];
 };
 
-/** Case- and punctuation-insensitive matching, shared with caption emphasis. */
-export const normalise = (s: string) => s.toLowerCase().replace(/[^a-z0-9']/g, "");
+/**
+ * Case- and punctuation-insensitive matching, shared with caption emphasis. Any
+ * script's letters count — a Hindi word in Devanagari keeps its letters and its
+ * vowel signs (Unicode marks) — so an anchor on "चाहिए" works the same as one
+ * on "memory". Latin text matches exactly as it always did.
+ */
+export const normalise = (s: string) => s.toLowerCase().replace(/[^\p{L}\p{M}\p{N}']/gu, "");
 
 export class MissingWordError extends Error {}
 
