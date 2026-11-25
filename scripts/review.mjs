@@ -20,7 +20,7 @@ import path from "node:path";
 import { existsSync } from "node:fs";
 import { mkdir, readdir, rm, writeFile } from "node:fs/promises";
 import { spawn } from "node:child_process";
-import { ROOT, fmt, requireFfmpeg, requirePost, run } from "./lib.mjs";
+import { ROOT, fmt, postDir, readJson, requireFfmpeg, requirePost, run } from "./lib.mjs";
 import { runWithShotlist } from "./check.mjs";
 
 const id = requirePost(process.argv[2]);
@@ -68,6 +68,7 @@ const BODY = `
       words,
       events,
       note: s.note ?? null,
+      soundKey: key ?? null,
     };
   });
   emit({
@@ -92,6 +93,9 @@ try {
   fmt.fail(`Could not load the shotlist: ${e.message}`);
   process.exit(1);
 }
+
+// Where each take's caption text came from, as transcribe recorded it.
+data.captionSources = (await readJson(path.join(postDir(id), "captions.json"), {})) ?? {};
 
 const outDir = path.join(ROOT, "out", id, "review");
 await mkdir(outDir, { recursive: true });
@@ -348,6 +352,8 @@ h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: 
     s.events.forEach(function (e) { var key = e.kind + "|" + e.loud; counts[key] = (counts[key] || 0) + 1; });
     Object.keys(counts).forEach(function (k) { var p = k.split("|"); add(p[0] + (counts[k] > 1 ? " ×" + counts[k] : ""), p[1]); });
     if (!s.captions) add("no captions");
+    var cs = s.soundKey && D.captionSources[s.soundKey];
+    if (s.captions && cs) add(cs.source === "transcript" ? "captions: as transcribed" : "captions: typed (" + (cs.source === "txt" ? s.soundKey + ".txt" : "brief") + ", " + cs.matched + "/" + cs.total + ")", cs.source === "transcript" ? "" : "medium");
     body.appendChild(chips);
     if (s.header) body.appendChild(el("div", "label", "header: " + s.header));
     if (s.title) body.appendChild(el("div", "label", "title: " + s.title));

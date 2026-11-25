@@ -9,8 +9,10 @@
  *   npm run transcribe 001-first-cut
  *   npm run transcribe 001-first-cut -- --model mlx-community/whisper-small.en-mlx
  *
- * Captions exactly as typed: put what was said in `raw/<key>.txt` beside the
- * take. Whisper is steered by that text and used only for *when* each word was
+ * Captions exactly as typed: when the brief says so (`Language: Hinglish` or
+ * `Captions: from script` in its Delivery), each take's quoted line under its
+ * `### <key>.mov` heading in `## Script` is the caption text; `raw/<key>.txt`
+ * beside a take overrides it (an improvised take). Whisper is steered by that text and used only for *when* each word was
  * said; the words themselves are the typed ones (engine/scriptAlign.ts). This
  * is how a Hinglish line comes out as "16 gb mai kaise fit ho jaata hai" and not
  * in Devanagari or in someone else's spelling.
@@ -27,6 +29,7 @@ import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { ROOT, fmt, has, postDir, readJson, requireFfmpeg, requirePost, run, writeJson } from "./lib.mjs";
 import { alignScript } from "../engine/scriptAlign.ts";
 import { hasDevanagari, romanize } from "../engine/translit.ts";
+import { parseBrief } from "../engine/brief.ts";
 
 const id = requirePost(process.argv[2]);
 const modelFlag = process.argv.indexOf("--model");
@@ -77,7 +80,13 @@ const vocabularyPrompt = vocabulary.length > 0 ? `Vocabulary: ${vocabulary.join(
 // left to guess, it may translate into English. A prompt already in Roman
 // Hinglish is what steers its spelling (measured: auto and "hi" gave
 // Devanagari, "en" gave a wrong translation, "hi" with this prompt gave Roman).
-const hinglish = String(config.language ?? "").toLowerCase() === "hinglish";
+// The brief's own script: each take's quoted line, used as its typed captions
+// when the brief says the reel's captions come from its script.
+const briefFile = path.join(dir, "brief.md");
+const brief = existsSync(briefFile) ? parseBrief(await readFile(briefFile, "utf8")) : { fromScript: false, because: null, hinglish: false, lines: {} };
+
+const hinglish =
+  String(config.language ?? "").toLowerCase() === "hinglish" || (config.language === undefined && brief.hinglish);
 const whisperLanguage = hinglish ? "hi" : typeof config.language === "string" && config.language ? config.language : null;
 const HINGLISH_PROMPT = "Hinglish, Roman script mein: yeh kaise kaam karta hai, aur kyun zaroori hai, game load nahi hota.";
 const spellings = config.spellings && typeof config.spellings === "object" ? config.spellings : {};
@@ -107,6 +116,10 @@ const only = process.argv.slice(3).filter((a) => !a.startsWith("--") && a !== MO
 
 fmt.head(`Transcribing ${id} with ${MODEL}`);
 
+/** Where each take's caption text came from: "txt", "brief" or "transcript". */
+const sources = (await readJson(path.join(dir, "captions.json"), {})) ?? {};
+if (brief.fromScript) fmt.ok(`Captions from the brief's script (${brief.because})`);
+
 for (const entry of Object.values(media)) {
   if (!entry.hasAudio && !entry.cleanAudio) continue;
   if (only.length > 0 && !only.includes(entry.key)) continue;
@@ -119,11 +132,18 @@ for (const entry of Object.values(media)) {
 
   // What the speaker typed for this take, if anything: then the captions are
   // that text, timed by what Whisper hears.
+  // Precedence: a .txt beside the take (an improvised take, corrected by hand),
+  // else the brief's line when the brief opts in, else Whisper's own spelling.
   const scriptFile = path.join(dir, "raw", `${entry.key}.txt`);
-  const script = existsSync(scriptFile) ? (await readFile(scriptFile, "utf8")).trim() : null;
+  const fromBrief = brief.fromScript ? brief.lines[entry.key] : undefined;
+  const captionSource = existsSync(scriptFile) ? "txt" : fromBrief ? "brief" : "transcript";
+  const script = captionSource === "txt" ? (await readFile(scriptFile, "utf8")).trim() : captionSource === "brief" ? fromBrief : null;
+  if (brief.fromScript && captionSource === "transcript") {
+    fmt.warn(`${entry.key}: brief.md has no "### ${entry.key}.mov" line under ## Script, so its captions use the transcriber's own spelling.`);
+  }
   const initialPrompt = promptFor(script);
 
-  fmt.ok(`${entry.key}: running whisper${whisperLanguage ? ` (${hinglish ? "hinglish" : whisperLanguage})` : ""}${script ? `, captions from raw/${entry.key}.txt` : ""}`);
+  fmt.ok(`${entry.key}: running whisper${whisperLanguage ? ` (${hinglish ? "hinglish" : whisperLanguage})` : ""}${script ? `, captions from ${captionSource === "txt" ? `raw/${entry.key}.txt` : "brief.md"}` : ""}`);
   await run("uv", [
     "tool", "run", "--from", "mlx-whisper", "mlx_whisper",
     wav,
@@ -173,18 +193,21 @@ for (const entry of Object.values(media)) {
   const seconds = entry.seconds || 1;
   if (script) {
     const aligned = alignScript(script, words, seconds * 1000);
+    sources[entry.key] = { source: captionSource, matched: aligned.matched, total: aligned.total };
     // Exactly as typed: no romanizing, no respelling. What was typed is the point.
     existing[entry.key] = aligned.words;
     const share = aligned.total ? aligned.matched / aligned.total : 1;
     fmt.ok(`${entry.key}: ${aligned.total} typed words, ${aligned.matched} matched to what was heard`);
     if (share < 0.7) {
       fmt.warn(
-        `${entry.key}: only ${Math.round(share * 100)}% of raw/${entry.key}.txt was heard where expected. What was said may differ ` +
-          `from what was typed; the unheard words are placed between their neighbours. Check transcript.md, or fix the .txt.`,
+        `${entry.key}: only ${Math.round(share * 100)}% of ${captionSource === "txt" ? `raw/${entry.key}.txt` : "its line in brief.md"} was heard where expected. ` +
+          `What was said may differ from what was typed; the unheard words are placed between their neighbours. ` +
+          `Check transcript.md, and put what was actually said in raw/${entry.key}.txt to override.`,
       );
     }
   } else {
     existing[entry.key] = words.map((w) => ({ ...w, text: respell(w.text) }));
+    sources[entry.key] = { source: "transcript" };
     const left = existing[entry.key].filter((w) => hasDevanagari(w.text)).length;
     fmt.ok(`${entry.key}: ${words.length} words, ${Math.round((words.length / seconds) * 60)} wpm`);
     if (!hinglish && left > 0) {
@@ -195,6 +218,14 @@ for (const entry of Object.values(media)) {
 
 await rm(work, { recursive: true, force: true });
 await writeJson(path.join(dir, "words.json"), existing);
+await writeJson(path.join(dir, "captions.json"), sources);
+
+// A line in the brief with no take to go with it is worth knowing before a render.
+if (brief.fromScript) {
+  for (const key of Object.keys(brief.lines)) {
+    if (!media[key]) fmt.warn(`brief.md has a line for "${key}", but there is no take called that in raw/.`);
+  }
+}
 
 /**
  * A compact, readable rendering of the same data.
@@ -211,6 +242,15 @@ for (const [key, words] of Object.entries(existing)) {
   const seconds = words[words.length - 1].endMs / 1000;
   const wpm = Math.round((words.length / Math.max(seconds, 0.1)) * 60);
   lines.push(`## ${key}  —  ${seconds.toFixed(2)}s, ${words.length} words, ${wpm} wpm`, "");
+  const from = sources[key];
+  if (from) {
+    lines.push(
+      from.source === "transcript"
+        ? "Captions: as transcribed."
+        : `Captions: as typed in ${from.source === "txt" ? `raw/${key}.txt` : "brief.md"} (${from.matched} of ${from.total} words matched to what was heard).`,
+      "",
+    );
+  }
 
   let out = "";
   words.forEach((w, i) => {

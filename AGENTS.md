@@ -786,8 +786,17 @@ by hand, and resuming is expected and supported.
    Whisper writes a Hinglish take in Devanagari, and told it is English, it
    translates it wrongly (measured on one take: auto and `hi` gave Devanagari, `en`
    a wrong translation, `hi` plus a Roman Hinglish prompt gave Roman letters in
-   its own spelling). So: put exactly what was said, typed the way it should read,
-   in `raw/<key>.txt` beside the take. `npm run transcribe` then steers Whisper
+   its own spelling). So the typed line is the text. When the brief's Delivery
+   says `Language: Hinglish` (or `Captions: from script`, for any reel), each
+   take's quoted line under its `### <key>.mov` heading in `## Script` is that
+   take's text (`engine/brief.ts`; only the quoted paragraph directly under the
+   heading, so a note after it never leaks in; the file name maps to a key the way
+   ingest keys it). `raw/<key>.txt` beside a take overrides the brief (an
+   improvised take); with neither, the transcriber's spelling. English briefs that
+   do not opt in are read but not used. Each take's source (`txt`, `brief`,
+   `transcript`) is logged, written to `captions.json`, noted in `transcript.md`
+   and shown on its shot in the review page; a take with no heading, and a heading
+   with no take, are warned about, never failed. `npm run transcribe` then steers Whisper
    with that text and uses it only for *when* each word was said; the captions,
    `words.json` and `transcript.md` hold the typed words
    (`engine/scriptAlign.ts`: a global alignment that tolerates spelling variants,
@@ -855,6 +864,7 @@ engine/          the moves and the contract — general, never show-specific
   scale.ts       crop-then-scale, and size tokens that survive a frame change
   words.ts       word anchoring, and the pauses/fillers a cut removes
   scriptAlign.ts captions spelled as typed: a typed script timed by what was heard
+  brief.ts       each take's typed line, read from the brief's Script
   translit.ts    Devanagari to everyday Roman Hinglish
   colour.ts      matching one clip's colour to another's
   verify.ts      gates that need no render

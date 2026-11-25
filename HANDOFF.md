@@ -431,13 +431,19 @@ candidates from the transcript for you to approve. For a reel with nobody on
 screen you can also give them **a colour group**: "TLS in cyan; network and
 encrypted in orange" — the words take that colour wherever they appear.
 
-**Hinglish (or any language) captions spelled your way.** The captions use the
-script exactly as you write it, so write each line the way it should read on
-screen — "16 gb mai kaise fit ho jaata hai" — and say it as written. Each take's
-line goes into a text file beside the recording (`hook.txt` beside `hook.wav`). If
-you improvise, update the text to what you actually said; words that were not
-said still appear, but timed by guesswork. Say in the brief that the reel is
-Hinglish, and list any words you always spell a particular way.
+**Hinglish (or any language) captions spelled your way.** Put `Language:
+Hinglish` in the brief's Delivery (or, for any other reel, `Captions: from
+script`), and the captions are your script lines exactly as written in the
+brief — each take's quoted line under its `### hook.mov` heading — timed to the
+moment you say each word. Nothing needs copying anywhere: the editor reads them
+from the brief. So write each line the way it should read on screen — "16 gb mai
+kaise fit ho jaata hai 256 gb ka game", "srcset", "4K" — and say it as written.
+If you improvise a take, a text file beside the recording (`hook.txt` beside
+`hook.mov`) holding what you actually said overrides the brief for that take;
+without one, words you didn't say still appear, timed by guesswork. A take with
+no line in the brief is captioned in the transcriber's own spelling, and the
+editor will say so. List any words you always spell a particular way. English
+reels keep captioning what was actually said unless the brief opts in.
 
 **Reels with nobody on screen (voice only).** If you record only the voice,
 the whole reel is generated clips under it. Say so in the brief, and structure
@@ -524,6 +530,7 @@ Anything unticked will come back as a question before the cut starts.
 Frame: 1080x1920 at 30fps
 Ceiling: 40s
 Speaking budget: 30s of speech → 70 words at 140wpm
+Language: <English | Hinglish>   (Hinglish: the captions are the script lines below, exactly as typed)
 
 ## The reel
 Promise: <one sentence — what the viewer gets>
@@ -594,6 +601,7 @@ whole edit from it; you never give seconds.
 Frame: 1080x1920 at 30fps
 Ceiling: 40s
 Voice: I record it myself, one take per section (or one take, sections marked below)
+Language: <English | Hinglish>   (Hinglish: the captions are the script lines, exactly as typed)
 
 ## The reel
 Topic: <the news or claim, one line>

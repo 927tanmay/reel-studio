@@ -165,11 +165,13 @@ Grouped by how loud they are (see §4). Each line is a thing a brief can say.
 - **Punchy captions.** Two words a card, uppercase, each word popping in as it is
   said, the spoken word boxed in colour. A look choice for fast hot-topic reels.
 
-- **Hinglish captions, spelled exactly as you type them.** Type each take's line
-  the way it should appear ("16 gb mai kaise fit ho jaata hai 256 gb ka game") and
-  the captions use your words, each lit on the moment you say it. Without typed
-  lines, Hinglish is still captioned in Roman letters, in the transcriber's own
-  spelling.
+- **Hinglish captions, spelled exactly as you type them.** With `Language:
+  Hinglish` (or `Captions: from script`) in the brief's Delivery, the captions are
+  the brief's script lines as written ("16 gb mai kaise fit ho jaata hai 256 gb ka
+  game", "srcset", "4K"), each lit on the moment you say it. They are read from the
+  brief automatically; a text file beside a take is only needed to override an
+  improvised one. A take without a line is captioned in Roman letters, in the
+  transcriber's own spelling.
 
 ### Loud — a beat that should hurt. Two or three in a 30-second reel
 - **Key-word slam** — one to three words land huge in the middle of the frame on

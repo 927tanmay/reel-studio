@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Typed captions come from the brief: with `Language: Hinglish` or `Captions: from script`
+  in its Delivery, each take's quoted line under its `### <take>.mov` heading is its
+  caption text (engine/brief.ts). `raw/<take>.txt` still overrides; otherwise the
+  transcriber's spelling. Each take's source is logged, written to `captions.json`,
+  noted in `transcript.md` and shown on its shot in the review page. A take with no
+  heading, and a heading with no take, are warned about.
 - Hinglish captions spelled as typed: `raw/<key>.txt` beside a take becomes its caption
   text, timed by what Whisper heard (engine/scriptAlign.ts; 29 of 29 words matched on a
   measured take). `post.json` `"language": "hinglish"` steers Whisper to Roman script and
