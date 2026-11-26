@@ -165,6 +165,11 @@ Grouped by how loud they are (see §4). Each line is a thing a brief can say.
 - **Punchy captions.** Two words a card, uppercase, each word popping in as it is
   said, the spoken word boxed in colour. A look choice for fast hot-topic reels.
 
+- **One shape that never cuts.** A pill that becomes a card, a terminal typing, a
+  chart growing, a toggle switching on, a progress bar, a "Posted" toast — one
+  object morphing on each word, with a cursor clicking and dragging it. For "here
+  is what you do" over your voice. It can sit in a panel beside you on your own
+  footage instead of cutting away, and fast moves can be motion-blurred.
 - **Real sound effects.** Sounds are recordings (a CC0 library of 110: whooshes,
   pops, clicks, ticks, dings, risers, impacts, glitches, typing, room tone), not
   beeps. The look places them by itself: a whoosh just ahead of each transition,

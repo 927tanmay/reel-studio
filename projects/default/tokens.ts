@@ -269,6 +269,30 @@ export const tokens: Tokens = {
     tilt: { x: 6, y: -16, perspective: 1800, settleFrames: 22, parallax: 3 },
   },
 
+  // One shape that never cuts: white on the dark ground, the way a product's own
+  // interface would sit, with the accent for what is on, done or growing.
+  morph: {
+    top: 0.45,
+    fill: "#F4F6F8",
+    ink: "#0F1419",
+    muted: "#5B6672",
+    accent: "accent",
+    skeleton: "rgba(15,20,25,0.12)",
+    shadow: { color: "rgba(0,0,0,0.45)", blur: 60, y: 22 },
+    terminal: { fill: "#0D1117", text: "#E6EDF3", prompt: "#4FD1C5" },
+    cursor: { fill: "#0F1419", stroke: "#FFFFFF", size: 54 },
+    sizes: { label: 44, title: 46, body: 32, mono: 30 },
+    shapes: {
+      pill: { width: 560, height: 128, radius: 64 },
+      card: { width: 880, height: 600, radius: 40 },
+      terminal: { width: 920, height: 560, radius: 28 },
+      chart: { width: 880, height: 640, radius: 40 },
+      toast: { width: 680, height: 140, radius: 70 },
+      toggle: { width: 600, height: 150, radius: 75 },
+      progress: { width: 820, height: 190, radius: 48 },
+    },
+  },
+
   // The hot-topic blocks: a post, a headline, a big number, a logo wall, a
   // timeline. One family, centred a little above the middle so a header fits
   // over them and captions under them. The highlighter is a warm yellow at a

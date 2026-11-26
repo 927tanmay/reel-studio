@@ -377,6 +377,12 @@ screenshots it and shows it in a browser window, scrolling down it if it is long
 > to one thing marked per shot. The marked words have to be on the screenshot:
 > you cannot ask for a mark on something that only appears after a click.
 
+**A morphing shape** — for a sequence of steps over your voice. List the states
+in order: which shape (pill, card, terminal, chart, toast, toggle, progress), what
+it says (exact copy; leave a card's lines blank for placeholder bars rather than
+invent text), and the word each lands on. Say where the cursor clicks, and whether
+it should sit in a panel beside you on your own footage or fill the frame.
+
 **Hot-topic pieces** — say which, and give the content exactly:
 > **Post:** the author's name and handle, the post's text as written, the time,
 > the platform (as words), any picture, the counts, and a reply if one matters.

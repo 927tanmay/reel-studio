@@ -575,6 +575,32 @@ export type Highlight = {
   color?: string;
 };
 
+/** What a `morph` shape shows in one state, by the shape it takes. */
+export type MorphContent =
+  | { shape: "pill"; label: string; icon?: SceneKind }
+  | { shape: "card"; title: string; lines?: string[]; icon?: SceneKind }
+  | { shape: "terminal"; lines: string[]; title?: string }
+  | { shape: "chart"; bars: { label: string; value: number }[]; title?: string }
+  | { shape: "toast"; text: string; icon?: SceneKind }
+  | { shape: "toggle"; label: string }
+  | { shape: "progress"; label: string; value: number };
+
+/**
+ * One state of a `morph`: the shape it becomes and when. Size, corner, fill and
+ * camera spring from the state before, so the shape never cuts; content swaps
+ * with a short blur. Sizes are design pixels (the look's `morph.shapes` give
+ * defaults per shape); `zoom` pushes the camera in (1 is none).
+ */
+export type MorphState = MorphContent & {
+  at: number;
+  width?: number;
+  height?: number;
+  radius?: number;
+  /** A palette name or CSS colour. Defaults to the look's. */
+  fill?: string;
+  zoom?: number;
+};
+
 /** Who wrote a `post` or a reply to one. */
 export type PostAuthor = {
   name: string;
@@ -587,6 +613,25 @@ export type PostAuthor = {
 };
 
 export type GenSpec =
+  | {
+      /**
+       * One shape that never cuts: a pill that becomes a card that becomes a
+       * terminal, a chart, a toast — each state landing on its word, its size,
+       * corners, colour and camera springing from the last so the eye follows
+       * one object through the whole idea. A cursor can drive it: a path of
+       * points (fractions of the frame) it glides along with a human arc,
+       * clicks that press the shape, drags that hold. For "what you do, step by
+       * step" over a voice — the motion-B-roll style. Look: `Tokens.morph`.
+       */
+      type: "morph";
+      states: MorphState[];
+      cursor?: {
+        path: { at: number; x: number; y: number }[];
+        clicks?: { at: number }[];
+        drags?: { at: number; until: number }[];
+      };
+      seconds?: number;
+    }
   | {
       /**
        * A social post, rebuilt: who wrote it, what it says, a picture, its counts,
@@ -1166,6 +1211,34 @@ export type Shot = {
    * the look defines a `marks` style.
    */
   marks?: Mark[];
+  /**
+   * A generated clip laid over this shot's picture in a region of the frame,
+   * its background transparent — a morph, a stat or a row list in the empty
+   * space beside a speaker instead of cutting away from them. `region` is
+   * fractions of the frame (default the whole frame); `at` and `until` are
+   * seconds into the shot. It fades in and out over a few frames. Captions and
+   * titles stay above it.
+   */
+  overlay?: {
+    src: GenSpec;
+    region?: Rect;
+    at?: number;
+    until?: number;
+    /**
+     * A plate behind the panel: the look's own ground, translucent, blurring
+     * the picture under it, so light type reads over bright footage. Default
+     * true; false lays the clip straight onto the picture.
+     */
+    backing?: boolean;
+  };
+  /**
+   * Motion blur on this shot's picture, by rendering several moments inside
+   * each frame and blending them (a `shutter` of 180 is the film default; more
+   * `samples` is smoother and slower — the shot renders that many times). For
+   * fast generated motion: a morph, a whip, a zoom-through. Text overlays stay
+   * sharp.
+   */
+  motionBlur?: { samples?: number; shutter?: number };
   /**
    * A pointer, click rings and optional spotlight over the picture — see
    * `Pointer`. Like `marks`, it points at something *in* the frame, so the
@@ -2071,6 +2144,10 @@ export const resolveTimeline = (spec: ReelSpec): Timeline => {
       if (overlaps(shot.enter) && !("hit" in shot.enter && shot.enter.hit)) fire("transition", startFrame, true);
       // Things landing inside a generated clip, from the same arrival rules the
       // generator draws with.
+      if (shot.overlay) {
+        const offset = Math.round((shot.overlay.at ?? 0) * fps);
+        for (const c of clipCues(shot.overlay.src, spec.style, fps)) fire(c.kind, startFrame + offset + Math.round(c.at * fps));
+      }
       if (typeof shot.src === "object") {
         for (const c of clipCues(shot.src, spec.style, fps)) {
           // The first frames belong to the transition's own sound.

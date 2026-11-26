@@ -210,6 +210,47 @@ export const verifySpec = (spec: ReelSpec, timeline: Timeline): Finding[] => {
     }
   }
 
+  // A morph, an overlay panel and motion blur each have something that can be
+  // asked for and silently not happen.
+  for (const resolved of timeline.shots) {
+    const { shot, index, durationInFrames } = resolved;
+    const fps = spec.frame.fps;
+    const after = (at: number) => Math.round(at * fps) >= durationInFrames;
+    const morphs = [shot.src, shot.overlay?.src].filter((g): g is Extract<NonNullable<typeof g>, { type: "morph" }> => typeof g === "object" && g !== null && g.type === "morph");
+    for (const m of morphs) {
+      if (!t.morph) findings.push({ level: "fail", message: `Shot ${index} uses a morph, but the look defines no \`morph\` style. Add one to the look's tokens.` });
+      if (m.states.length === 0) findings.push({ level: "fail", message: `Shot ${index}'s morph has no states.` });
+      m.states.forEach((st, i) => {
+        if (after(st.at)) findings.push({ level: "warn", message: `Shot ${index}'s morph state ${i} (${st.shape}) lands at ${st.at}s, after the shot has ended — it will never show.` });
+        if (st.shape === "chart" && st.bars.length === 0) findings.push({ level: "fail", message: `Shot ${index}'s morph state ${i} is a chart with no bars.` });
+      });
+      for (const c of m.cursor?.clicks ?? []) {
+        if (after(c.at)) findings.push({ level: "warn", message: `Shot ${index}'s morph cursor clicks at ${c.at}s, after the shot has ended.` });
+      }
+    }
+    if (shot.overlay) {
+      const r = shot.overlay.region;
+      if (r && (r.x < 0 || r.y < 0 || r.w <= 0 || r.h <= 0 || r.x + r.w > 1.0001 || r.y + r.h > 1.0001)) {
+        findings.push({ level: "fail", message: `Shot ${index}'s overlay region (x ${r.x}, y ${r.y}, w ${r.w}, h ${r.h}) is outside the frame; it is fractions of the frame, 0 to 1.` });
+      }
+      if (after(shot.overlay.at ?? 0)) findings.push({ level: "warn", message: `Shot ${index}'s overlay starts at ${shot.overlay.at}s, after the shot has ended — it will never show.` });
+      if (r && willShowCaptions(spec, resolved)) {
+        const style = shot.captionStyle === "headline" && t.headline ? t.headline : t.caption;
+        const { top: capTop, bottom: capBottom } = extent(style);
+        if (r.y < capBottom && r.y + r.h > capTop) {
+          findings.push({ level: "warn", message: `Shot ${index}'s overlay reaches the caption band (${Math.round(capTop * 100)}–${Math.round(capBottom * 100)}% down); the captions sit above it, but they will share the space.` });
+        }
+      }
+    }
+    if (shot.motionBlur) {
+      if (typeof shot.src !== "object" || shot.bands) {
+        findings.push({ level: "warn", message: `Shot ${index} asks for motion blur on footage. It only applies to a generated picture (footage would replay its sound once per sample), so it is ignored here.` });
+      } else if ((shot.motionBlur.samples ?? 6) > 12) {
+        findings.push({ level: "warn", message: `Shot ${index}'s motion blur takes ${shot.motionBlur.samples} samples: the shot renders that many times over. 6 to 8 is usually enough.` });
+      }
+    }
+  }
+
   // A screenshot in a browser window, and the marks drawn on it. Marks here are
   // in fractions of the *picture*, not the frame, so the frame-based check
   // above does not cover them.

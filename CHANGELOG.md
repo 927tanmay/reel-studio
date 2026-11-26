@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- `morph`: one shape that never cuts — pill, card, terminal, chart, toast, toggle and
+  progress states on spring tracks (engine/spring.ts, closed-form, one spring summed per
+  change), a cursor with a human arc, clicks and drags. After Barty-Bart/motion-graphics.
+- `Shot.overlay`: any generated clip over a shot's picture in a region, transparent, on a
+  frosted plate by default. `Shot.motionBlur`: sub-frame motion blur on a generated
+  picture (@remotion/motion-blur).
 - A CC0 library of 110 recorded sound effects (public/assets/sfx/lib, from
   Barty-Bart/motion-graphics, MIT), named by path ("kit/whoosh"); the default look now
   uses recordings, not generated tones. Looks can sound `transition` (a whoosh leading

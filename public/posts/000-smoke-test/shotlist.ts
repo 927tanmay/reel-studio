@@ -345,5 +345,35 @@ export default reel({
         seconds: 3,
       },
     },
+    {
+      // One shape that never cuts: a pill becomes a card, a terminal, a chart and
+      // a toast, a cursor clicking it on, with motion blur on the fast moves.
+      src: {
+        type: "morph",
+        states: [
+          { at: 0.1, shape: "pill", icon: "sparkle", label: "New reel" },
+          { at: 1.1, shape: "card", icon: "document", title: "The brief", lines: ["Voice: Hinglish", "", ""] },
+          { at: 2.3, shape: "terminal", title: "reel-studio", lines: ["$ npm run render 000", "rendering 1745 frames"] },
+          { at: 3.7, shape: "chart", title: "Retention", bars: [{ label: "cut", value: 41 }, { label: "edited", value: 68 }] },
+          { at: 5.0, shape: "toast", text: "Posted" },
+        ],
+        cursor: {
+          path: [{ at: 0.3, x: 0.75, y: 0.62 }, { at: 0.85, x: 0.55, y: 0.46 }, { at: 4.6, x: 0.55, y: 0.46 }, { at: 5.6, x: 0.72, y: 0.6 }],
+          clicks: [{ at: 0.95 }],
+        },
+        seconds: 6,
+      },
+      motionBlur: { samples: 6 },
+    },
+    {
+      // An overlay panel: a generated clip over a picture, its background
+      // transparent, in a region of the frame — here a number over a page.
+      src: { type: "image", src: "assets/images/sample-page.png", seconds: 3 },
+      overlay: {
+        src: { type: "stat", value: 68, suffix: "%", label: "watched to the end", at: 0.3 },
+        region: { x: 0.06, y: 0.5, w: 0.88, h: 0.34 },
+        at: 0.4,
+      },
+    },
   ],
 });

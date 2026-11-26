@@ -4,9 +4,14 @@
   "private": true,
   "description": "A general-purpose short-form video editor driven by a coding agent: footage and a brief in, a verified vertical video out.",
   "license": "MIT",
-  "repository": { "type": "git", "url": "git+https://github.com/927tanmay/reel-studio.git" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/927tanmay/reel-studio.git"
+  },
   "homepage": "https://github.com/927tanmay/reel-studio#readme",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "doctor": "node scripts/doctor.mjs",
     "studio": "remotion studio",
@@ -32,22 +37,27 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@react-three/fiber": "^9.8.2",
     "@remotion/captions": "^4.0.523",
     "@remotion/cli": "^4.0.523",
     "@remotion/fonts": "^4.0.523",
     "@remotion/layout-utils": "^4.0.523",
     "@remotion/lottie": "^4.0.523",
     "@remotion/media-utils": "^4.0.523",
+    "@remotion/motion-blur": "^4.0.523",
     "@remotion/paths": "^4.0.523",
     "@remotion/rough-notation": "^4.0.523",
     "@remotion/shapes": "^4.0.523",
+    "@remotion/three": "^4.0.523",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "remotion": "^4.0.523",
-    "shiki": "^4.5.0"
+    "shiki": "^4.5.0",
+    "three": "^0.186.1"
   },
   "devDependencies": {
     "@types/react": "^19.0.0",
+    "@types/three": "^0.186.0",
     "esbuild": "^0.28.1",
     "typescript": "^5.7.0"
   }

@@ -14,7 +14,7 @@ import { arrivals } from "./blocks";
  * quarter-second are one beat to the ear, and three pops would be a rattle.
  * Pure.
  */
-export type Cue = { at: number; kind: "appear" | "count" };
+export type Cue = { at: number; kind: "appear" | "count" | "click" };
 
 export const clipCues = (src: GenSpec, tokens: Tokens, fps: number, mergeSeconds = 0.12): Cue[] => {
   const out: Cue[] = [];
@@ -42,6 +42,11 @@ export const clipCues = (src: GenSpec, tokens: Tokens, fps: number, mergeSeconds
       break;
     case "scene":
       src.items.forEach((item) => appear(item.at ?? 0));
+      break;
+    case "morph":
+      // Each state the shape lands in, and each click of its cursor.
+      src.states.forEach((s) => appear(s.at));
+      (src.cursor?.clicks ?? []).forEach((c) => out.push({ at: c.at, kind: "click" }));
       break;
     case "chat":
       src.messages.forEach((m) => appear(m.at ?? 0));

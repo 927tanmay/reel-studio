@@ -18,6 +18,7 @@ import { Headline } from "./Headline";
 import { Stat } from "./Stat";
 import { Logos } from "./Logos";
 import { Timeline } from "./Timeline";
+import { Morph } from "./Morph";
 import type { WordTiming } from "../spec";
 
 /**
@@ -83,6 +84,8 @@ export const Generated: React.FC<GenProps> = ({ spec, reel, durationInFrames, wo
       return <Chat spec={spec} reel={reel} durationInFrames={durationInFrames} />;
     case "page":
       return <Page spec={spec} reel={reel} durationInFrames={durationInFrames} />;
+    case "morph":
+      return <Morph spec={spec} reel={reel} durationInFrames={durationInFrames} accent={accent} />;
     case "post":
       return <Post spec={spec} reel={reel} durationInFrames={durationInFrames} accent={accent} />;
     case "headline":

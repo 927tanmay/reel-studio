@@ -27,6 +27,7 @@ import { Slams } from "./moves/Slams";
 import { Backdrop } from "./moves/Backdrop";
 import { Header } from "./moves/Header";
 import { BackdropContext, Generated, generatedSize } from "./generators";
+import { CameraMotionBlur } from "@remotion/motion-blur";
 import { gradeFilter, needsMatrix } from "./colour";
 import { rampPieces } from "./ramp";
 import { cardBox, cardTilt, tiltAt } from "./card";
@@ -555,6 +556,11 @@ export const ShotView: React.FC<{
   const zoomBlur = transitionBlur(frame, resolved.durationInFrames, shot.enter, resolved.effectiveExit, spec.frame.w / spec.style.designWidth);
   const zoomBlurFilter = zoomBlur > 0.3 ? `blur(${zoomBlur.toFixed(2)}px)` : null;
 
+  // Motion blur renders the picture several times per frame, so it is for a
+  // generated picture only: footage carrying its own sound would play it again
+  // with every sample (verify.ts warns when asked for on footage).
+  const blurred = Boolean(shot.motionBlur) && typeof shot.src === "object" && !shot.bands;
+
   const filter =
     [gradeFilterValue, hasBlur ? `url(#${blurId})` : null, glitchOn ? `url(#${glitchId})` : null, zoomBlurFilter, extraFilter ?? null]
       .filter(Boolean)
@@ -649,6 +655,7 @@ export const ShotView: React.FC<{
         </svg>
       ) : null}
 
+      <BlurredIf on={blurred} samples={shot.motionBlur?.samples ?? 6} shutter={shot.motionBlur?.shutter ?? 180}>
       <AbsoluteFill style={{ transform: pictureTransform, transformOrigin: "center center", filter }}>
         {shot.bands ? (
           <Bands spec={spec} resolved={resolved} bandAudioVolume={audioVolume} />
@@ -686,6 +693,9 @@ export const ShotView: React.FC<{
           </Zoomed>
         )}
       </AbsoluteFill>
+      </BlurredIf>
+
+      {shot.overlay ? <OverlayPanel spec={spec} resolved={resolved} overlay={shot.overlay} /> : null}
 
       {impact?.flash ? (
         <AbsoluteFill style={{ backgroundColor: impact.flash.color, opacity: impact.flash.opacity, pointerEvents: "none" }} />
@@ -717,4 +727,72 @@ export const ShotView: React.FC<{
       ) : null}
     </AbsoluteFill>
   );
+};
+
+/** Motion blur around the picture when asked for; otherwise the picture as it is. */
+const BlurredIf: React.FC<{ on: boolean; samples: number; shutter: number; children: React.ReactNode }> = ({ on, samples, shutter, children }) =>
+  on ? (
+    <CameraMotionBlur samples={Math.max(2, Math.round(samples))} shutterAngle={shutter}>
+      {children}
+    </CameraMotionBlur>
+  ) : (
+    <>{children}</>
+  );
+
+/**
+ * A generated clip laid over the shot's picture in a region of the frame, with
+ * its background transparent: the generator draws at the region's size, as the
+ * floating card's picture does, and fades in and out over a few frames.
+ */
+const OverlayPanel: React.FC<{ spec: ReelSpec; resolved: ResolvedShot; overlay: NonNullable<Shot["overlay"]> }> = ({ spec, resolved, overlay }) => {
+  const { fps, w, h } = spec.frame;
+  const from = Math.max(0, Math.round((overlay.at ?? 0) * fps));
+  const until = overlay.until !== undefined ? Math.round(overlay.until * fps) : resolved.durationInFrames;
+  const frames = Math.max(1, Math.min(resolved.durationInFrames, until) - from);
+  const region = overlay.region ?? { x: 0, y: 0, w: 1, h: 1 };
+  return (
+    <Sequence from={from} durationInFrames={frames} layout="none" name="overlay">
+      <PanelFade frames={frames}>
+        <div
+          style={{
+            position: "absolute",
+            left: region.x * w,
+            top: region.y * h,
+            width: region.w * w,
+            height: region.h * h,
+            overflow: "hidden",
+            ...(overlay.backing !== false ? backing(spec) : {}),
+          }}
+        >
+          <BackdropContext.Provider value={true}>
+            <Generated
+              spec={overlay.src}
+              reel={{ ...spec, frame: { ...spec.frame, w: region.w * w, h: region.h * h } }}
+              durationInFrames={frames}
+              accent={resolved.shot.accent}
+            />
+          </BackdropContext.Provider>
+        </div>
+      </PanelFade>
+    </Sequence>
+  );
+};
+
+/** The overlay's plate: the look's ground, translucent, blurring what is under it. */
+const backing = (spec: ReelSpec): React.CSSProperties => {
+  const u = (n: number) => px(spec.style, spec.frame, n);
+  const bg = spec.style.bg;
+  return {
+    backgroundColor: /^#[0-9a-fA-F]{6}$/.test(bg) ? `${bg}C2` : bg,
+    backdropFilter: `blur(${u(24)}px)`,
+    WebkitBackdropFilter: `blur(${u(24)}px)`,
+    borderRadius: u(36),
+  };
+};
+
+const PanelFade: React.FC<{ frames: number; children: React.ReactNode }> = ({ frames, children }) => {
+  const frame = useCurrentFrame();
+  const fade = 6;
+  const opacity = Math.min(1, frame / fade, (frames - 1 - frame) / fade + 1);
+  return <AbsoluteFill style={{ opacity: Math.max(0, Math.min(1, opacity)), pointerEvents: "none" }}>{children}</AbsoluteFill>;
 };

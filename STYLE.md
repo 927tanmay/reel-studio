@@ -23,6 +23,7 @@ this file is wrong. Offer the comparison; do not choose for them.
 |---|---|---|
 | **Quiet** — always fine | captions, cuts, matched-zoom punches, blends, pushes and wipes, audio crossfades, J/L-cuts, titles, badges, lower thirds | Use freely. This is the texture of the reel. |
 | **Medium** — earns its place | `marks`, `pointer` (rings, spotlight), click `zoom`, `card`, ribbon, section headers and glows, diagram steps, travelling dots, code morphs, speed ramps, lottie icons, chat mockups, the hidden-text page reveal, the hot-topic blocks (post, headline, stat, logo wall, timeline) and their highlights | One at a time. Each should answer "where do I look?" |
+| **Medium** — the morph | a `morph` shape changing state, and an `overlay` panel arriving | One idea per state; three to five states a shot. |
 | **Loud** — a beat that should hurt | `slams`, `impacts` (shake, flash, glitch), the orb, a zoom-through or whip | **Two or three in a 30-second reel.** Never two at once, unless they are one beat (see §2). |
 
 If you can't say what a moment would lose without the effect, it didn't need it.
@@ -123,6 +124,11 @@ visibly weaker*, not merely plainer.
 - **A pop per thing landing, quiet.** The default look's `appear` sound is a
   small pop at a third of full volume; a reel landing a dozen rows hears a
   dozen. For a calm or serious reel, take `appear` out of the look.
+- **A morph is one idea moving.** Each state is one step of what the voice says
+  ("you write the brief" card, "it renders" terminal, "and it's posted" toast).
+  A morph with every shape in it is a demo of the engine, not of your idea.
+- **Motion blur only where things move fast.** A morph changing state, a whip:
+  yes. A still card: no — it only costs render time.
 - **Silence is an effect.** The event sounds are deliberately small. A reel with
   a sound on every beat has none; let some moments land in near-quiet.
 - **A slow stretch is allowed.** The pacing numbers in `critique` are rules of

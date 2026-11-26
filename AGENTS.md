@@ -837,6 +837,29 @@ by hand, and resuming is expected and supported.
    export's true peak (warns above -1 dBTP) and its mono fold-down (warns when
    more than 3 LU quieter: something out of phase vanishes on one speaker).
 
+58. **One shape that never cuts, a panel over the picture, and motion blur.**
+   `src: { type: "morph", states, cursor? }` is the motion-B-roll style (after
+   Barty-Bart/motion-graphics, MIT): one shape that becomes a `pill` (icon and
+   label), a `card` (title and lines — an empty line is a skeleton bar, never
+   invented copy), a `terminal` (lines typed in), a `chart` (bars that grow), a
+   `toast`, a `toggle` that switches on, or a `progress` bar, each state on its
+   word (`at`). Its width, height, corners, fill and camera (`zoom`) each follow a
+   spring track (`engine/spring.ts`: closed-form springs, one summed per change of
+   target, so a state arriving mid-move carries the motion on instead of
+   restarting); the content of each state is laid out at that state's own size and
+   swapped with a short blur. `cursor` glides through `path` points (fractions of
+   the frame) with a human arc, `clicks` press the shape and the cursor, `drags`
+   hold. The look is `Tokens.morph` (colours, sizes, the default size of each
+   shape); clicks and states sound as `click` and `appear`. `Shot.overlay: { src,
+   region?, at?, until?, backing? }` lays any generated clip over a shot's picture
+   in a region of the frame (a morph, a stat, rows beside a speaker), its
+   background transparent, on a frosted plate of the look's ground unless
+   `backing: false` (measured: without it, light type over a bright page was
+   unreadable); captions stay above it; its cues sound too. `Shot.motionBlur: {
+   samples?, shutter? }` renders a generated picture several times per frame and
+   blends them (`@remotion/motion-blur`); it costs that many renders of the shot,
+   is ignored on footage (its sound would replay), and `verify.ts` says so.
+
 ## What stays human
 
 Take selection, where a cut lands emotionally, whether a crop reads at phone
@@ -882,6 +905,7 @@ engine/          the moves and the contract — general, never show-specific
   transition.ts  zoom-through and wipe, as pure functions of the frame
   chunks.ts      caption cards of n words, and a word popping in
   cues.ts        when things land in a generated clip, for the look's sounds
+  spring.ts      closed-form springs and tracks, the pointer's arc and press, for the morph
   sfx.ts         where a sound effect's file is, from its name
   window.ts      where a screenshot sits in its browser window, and how far it has scrolled
   formats.ts     sections, listicle, how-it-works: structured content + a voice → a shotlist
@@ -896,7 +920,7 @@ engine/          the moves and the contract — general, never show-specific
   verify.ts      gates that need no render
   moves/         punch · blend · push · captions · title · badge · marks · pointer · bed · hits
   generators/    diagram · code · terminal · compare · data · callout · chat · page · rows · scene · lottie · orb ·
-                 post · headline · stat · logos · timeline (blockKit.tsx is what the last five share)
+                 post · headline · stat · logos · timeline (blockKit.tsx is what the last five share) · morph
 projects/        one look per channel; copy default/ and change everything
                  (explainer/ is the default plus a glow-and-header, box-caption style)
                  (pay/ is a bright ultramarine-and-yellow look for faceless explainers)

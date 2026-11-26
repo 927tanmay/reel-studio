@@ -632,6 +632,26 @@ export type CardStyle = {
   };
 };
 
+/** The look of a `morph`: one shape that changes state without cutting. */
+export type MorphStyle = {
+  /** Vertical centre of the shape, a fraction of frame height. */
+  top: number;
+  /** The shape's colour, a palette name or CSS colour; a state's `fill` overrides it. */
+  fill: string;
+  ink: string;
+  muted: string;
+  /** Ticks, switches turned on, bars and progress. A palette name, a CSS colour, or "accent". */
+  accent: string;
+  /** Skeleton lines standing in for text not yet supplied. */
+  skeleton: string;
+  shadow?: { color: string; blur: number; y: number };
+  terminal: { fill: string; text: string; prompt: string };
+  cursor: { fill: string; stroke: string; size: number };
+  sizes: { label: number; title: number; body: number; mono: number };
+  /** Default size and corner of each shape, design pixels. */
+  shapes: Record<"pill" | "card" | "terminal" | "chart" | "toast" | "toggle" | "progress", { width: number; height: number; radius: number }>;
+};
+
 /**
  * The hot-topic blocks: `post`, `headline`, `stat`, `logos`, `timeline`. One
  * style for all five, because they sit in the same place and should read as one
@@ -858,6 +878,8 @@ export type Tokens = {
   card?: CardStyle;
   /** A screenshot in a browser window. Omit and an `image` clip cannot use `window`. */
   window?: WindowStyle;
+  /** One shape that morphs between states. Omit and a `morph` cannot be shown. */
+  morph?: MorphStyle;
   /** The hot-topic blocks (post, headline, stat, logos, timeline). Omit and none can be shown. */
   blocks?: BlocksStyle;
   /** The look of shake, flash and glitch. Omit and a shot cannot use them. */
