@@ -50,7 +50,7 @@
     "@remotion/shapes": "^4.0.523",
     "@remotion/three": "^4.0.523",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0",
+    "react-dom": "^19.3.1",
     "remotion": "^4.0.523",
     "shiki": "^4.5.0",
     "three": "^0.186.1"
