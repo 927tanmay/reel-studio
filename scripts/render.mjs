@@ -47,7 +47,8 @@ const shell = (cmd, cmdArgs) =>
 if (stillAt !== null) {
   const out = path.join(outDir, "cover.jpg");
   fmt.head(`Still at ${stillAt}s`);
-  await shell("npx", ["remotion", "still", id, out, "--frame", String(Math.round(stillAt * 30))]);
+  const { gl } = await check(id).catch(() => ({ gl: null }));
+  await shell("npx", ["remotion", "still", id, out, "--frame", String(Math.round(stillAt * 30)), ...(gl ? [`--gl=${gl}`] : [])]);
   fmt.ok(out);
   process.exit(0);
 }
@@ -55,6 +56,9 @@ if (stillAt !== null) {
 // The shotlist's own gates, before the minutes a render costs: two things
 // printed over each other, a phrase that is not spoken, a look missing a style.
 // Warnings print and carry on; a failure stops here. `--no-check` skips it.
+// A 3D clip needs WebGL, which headless Chrome only has when given a backend.
+// Passed only for a reel that has one, so every other reel renders as it did.
+let gl = null;
 if (!skipCheck) {
   fmt.head(`Checking ${id}`);
   const result = await check(id).catch((e) => {
@@ -62,6 +66,7 @@ if (!skipCheck) {
     process.exit(1);
   });
   const failures = report(result);
+  gl = result.gl ?? null;
   // The recordings this reel uses, with their creators and licences: optional
   // for CC0, handy for a video description, and proof of where a sound came from.
   const manifestFile = path.join(ROOT, "public", "assets", "sfx", "lib", "manifest.json");
@@ -83,7 +88,9 @@ const raw = path.join(outDir, "reel.raw.mp4");
 const final = path.join(outDir, "reel.mp4");
 
 fmt.head(`Rendering ${id}`);
-await shell("npx", ["remotion", "render", id, raw, ...forwardArgs]);
+if (skipCheck) gl = (await check(id).catch(() => ({ gl: null }))).gl ?? null;
+const glArgs = gl && !forwardArgs.some((a) => a.startsWith("--gl")) ? [`--gl=${gl}`] : [];
+await shell("npx", ["remotion", "render", id, raw, ...glArgs, ...forwardArgs]);
 
 const info = await probe(raw);
 

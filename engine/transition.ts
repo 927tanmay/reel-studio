@@ -73,3 +73,24 @@ export const wipeClip = (frame: number, frames: number, direction: "left" | "rig
 
 /** Where the wipe's edge is, as a fraction of the frame along its travel (0 at the start, 1 at the end). */
 export const wipeEdge = (frame: number, frames: number): number => inOut(t01(frame, frames));
+
+/**
+ * An iris: a circle opens from a point (`x`, `y`, fractions of the frame) and
+ * the new picture is uncovered inside it, until it reaches the farthest corner
+ * and the whole frame is the new shot. Eased in and out, so it starts as a
+ * pinpoint that blooms rather than a disc that pops. Returned as a CSS
+ * `circle()` clip in frame pixels for a `w` × `h` frame.
+ */
+export const irisClip = (frame: number, frames: number, x: number, y: number, w: number, h: number): string => {
+  const r = irisRadius(frame, frames, x, y, w, h);
+  return `circle(${r.toFixed(2)}px at ${(x * w).toFixed(2)}px ${(y * h).toFixed(2)}px)`;
+};
+
+/** The iris's radius in frame pixels: 0 at the start, the distance to the farthest corner at the end. */
+export const irisRadius = (frame: number, frames: number, x: number, y: number, w: number, h: number): number => {
+  const cx = x * w;
+  const cy = y * h;
+  const far = Math.max(Math.hypot(cx, cy), Math.hypot(w - cx, cy), Math.hypot(cx, h - cy), Math.hypot(w - cx, h - cy));
+  // A hair past the corner, so anti-aliasing never leaves a sliver of the old shot.
+  return inOut(t01(frame, frames)) * (far + 2);
+};

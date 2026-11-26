@@ -860,6 +860,40 @@ by hand, and resuming is expected and supported.
    blends them (`@remotion/motion-blur`); it costs that many renders of the shot,
    is ignored on footage (its sound would replay), and `verify.ts` says so.
 
+59. **Three clips are real 3D, drawn with three.js.** `src: { type: "globe",
+   points, arcs?, focus? }` is a dotted globe: `points` are places (`lat`, `lon`,
+   a mono `label`, an `at` when each lights), `arcs` fly between two point ids
+   along a lifted great circle with a dot at the head, `focus` springs the globe
+   round to face a place. `src: { type: "device", kind: "phone" | "laptop", src,
+   turns?, scroll? }` puts a picture (a `npm run snap` capture, an app still) on
+   a 3D phone or laptop that rises in and swings flat from the look's angle, a
+   laptop's lid opening as it arrives; `turns` re-angle it on cue, `scroll` runs a
+   tall picture down its screen. `src: { type: "extrude", icon | svg, label?, at? }`
+   is a mark: a built-in icon as glowing tubes drawn on in its own stroke order,
+   or a *filled* SVG (a logo) extruded with a bevel, keeping its colours, each
+   later SVG layer a little in front; it turns from an angle to face the camera
+   on `at`. Labels are DOM type over the canvas (rule 9 holds). Everything is a
+   function of the frame (`engine/three.ts`, tested: lat/lon, arcs, facing,
+   swing, camera distance for a size, screen cover, stroke prefix). Headless
+   Chrome has no WebGL by default, so `npm run render`, `--still` and
+   `npm run thumbnail` pass `--gl=angle` (Mac) or `--gl=swangle` (elsewhere,
+   software) — only for a reel that has one of these clips, so every other reel
+   renders exactly as before; `npm run check` reports which. Look:
+   `Tokens.three` (`globe`, `device`, `extrude`); `verify.ts` fails a missing
+   part, an arc to an unknown point, a bad lat/lon, an extrude with neither or
+   both of `icon`/`svg`, or an `svg` that is not an .svg. 3D is a *medium*
+   move: one a section, for the line that is about a place, a device or a mark.
+
+60. **An iris opens from a point.** `enter: iris({ frames, x?, y?, hit? })`
+   uncovers the incoming shot inside a circle that blooms from (`x`, `y`,
+   fractions of the frame, default the centre) to past the farthest corner,
+   eased, the old shot standing still round it. It overlaps like a wipe
+   (crossfaded sound, the look's transition whoosh unless it carries its own
+   `hit`). Use it where the next shot *comes from* something on screen — the
+   button just pressed, the logo, the face on one side — and measure the point
+   on a still. `engine/transition.ts` `irisClip`; `verify.ts` fails a point
+   outside the frame.
+
 ## What stays human
 
 Take selection, where a cut lands emotionally, whether a crop reads at phone
@@ -881,7 +915,8 @@ size, and final playback. Offer comparisons and measurements; never choose.
   subject and should feel like one continuous idea, `push` between two that
   are more clearly separate beats, `punch` when a talking-head take was split
   for a jump-cut fix, a plain `cut` at every A-roll-to-B-roll boundary,
-  `wipe` between two items of a list, and at most one or two `zoomThrough`s
+  `wipe` between two items of a list, `iris` where the next shot comes out of
+  something on screen, and at most one or two `zoomThrough`s
   a reel, where a section changes. Show
   the shotlist with these filled in and let the user override any of them —
   propose, do not silently decide and hide the choice.
@@ -902,10 +937,11 @@ engine/          the moves and the contract — general, never show-specific
   icons.ts       the built-in icons as drawable path segments
   codeMorph.ts   code as positioned tokens, and how one version becomes the next
   blocks.ts      numbers, count-ups, highlight runs and logo-wall columns for the hot-topic blocks
-  transition.ts  zoom-through and wipe, as pure functions of the frame
+  transition.ts  zoom-through, wipe and iris, as pure functions of the frame
   chunks.ts      caption cards of n words, and a word popping in
   cues.ts        when things land in a generated clip, for the look's sounds
   spring.ts      closed-form springs and tracks, the pointer's arc and press, for the morph
+  three.ts       the 3D clips' geometry: lat/lon, arcs, facing, swing, camera distance, screen cover
   sfx.ts         where a sound effect's file is, from its name
   window.ts      where a screenshot sits in its browser window, and how far it has scrolled
   formats.ts     sections, listicle, how-it-works: structured content + a voice → a shotlist
@@ -920,7 +956,8 @@ engine/          the moves and the contract — general, never show-specific
   verify.ts      gates that need no render
   moves/         punch · blend · push · captions · title · badge · marks · pointer · bed · hits
   generators/    diagram · code · terminal · compare · data · callout · chat · page · rows · scene · lottie · orb ·
-                 post · headline · stat · logos · timeline (blockKit.tsx is what the last five share) · morph
+                 post · headline · stat · logos · timeline (blockKit.tsx is what the last five share) · morph ·
+                 globe · device · extrude (real 3D, three.js)
 projects/        one look per channel; copy default/ and change everything
                  (explainer/ is the default plus a glow-and-header, box-caption style)
                  (pay/ is a bright ultramarine-and-yellow look for faceless explainers)

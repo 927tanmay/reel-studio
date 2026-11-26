@@ -9,6 +9,7 @@ import { rowStarts } from "./rows";
 import { cardBox, cardTilt } from "./card";
 import { coverRegion } from "./scale";
 import { missingPhrases } from "./blocks";
+import { ICONS } from "./icons";
 
 /** Mirrors ShotView's own decision, so this gate can't drift from what renders. */
 const willShowCaptions = (spec: ReelSpec, resolved: ResolvedShot): boolean => {
@@ -248,6 +249,51 @@ export const verifySpec = (spec: ReelSpec, timeline: Timeline): Finding[] => {
       } else if ((shot.motionBlur.samples ?? 6) > 12) {
         findings.push({ level: "warn", message: `Shot ${index}'s motion blur takes ${shot.motionBlur.samples} samples: the shot renders that many times over. 6 to 8 is usually enough.` });
       }
+    }
+  }
+
+  // An iris opens from a point in the frame; outside it, it opens from nowhere visible.
+  for (const { shot, index } of timeline.shots) {
+    if (shot.enter?.kind !== "iris") continue;
+    const { x = 0.5, y = 0.5 } = shot.enter;
+    if (x < 0 || x > 1 || y < 0 || y > 1) {
+      findings.push({ level: "fail", message: `Shot ${index}'s iris opens from (${x}, ${y}), outside the frame; x and y are fractions of the frame, 0 to 1.` });
+    }
+  }
+
+  // The 3D clips: the look's part, the places an arc names, the mark to extrude,
+  // and anything timed past the end of the shot.
+  for (const resolved of timeline.shots) {
+    const { shot, index, durationInFrames } = resolved;
+    const after = (at: number | undefined) => at !== undefined && Math.round(at * spec.frame.fps) >= durationInFrames;
+    for (const g of [shot.src, shot.overlay?.src]) {
+      if (typeof g !== "object" || g === null) continue;
+      if (g.type === "globe") {
+        if (!t.three?.globe) findings.push({ level: "fail", message: `Shot ${index} is a globe, but the look defines no \`three.globe\` style.` });
+        const ids = new Set((g.points ?? []).map((p) => p.id));
+        if (ids.size !== (g.points ?? []).length) findings.push({ level: "fail", message: `Shot ${index}'s globe uses a point id twice.` });
+        for (const a of g.arcs ?? []) {
+          for (const end of [a.from, a.to]) {
+            if (!ids.has(end)) findings.push({ level: "fail", message: `Shot ${index}'s globe has an arc to "${end}", which is not one of its points (${[...ids].join(", ") || "none"}).` });
+          }
+          if (after(a.at)) findings.push({ level: "warn", message: `Shot ${index}'s globe arc ${a.from} → ${a.to} starts at ${a.at}s, after the shot has ended.` });
+        }
+        for (const p of g.points ?? []) {
+          if (Math.abs(p.lat) > 90 || Math.abs(p.lon) > 180) findings.push({ level: "fail", message: `Shot ${index}'s globe point "${p.id}" is at ${p.lat}, ${p.lon}: latitude runs -90 to 90 and longitude -180 to 180.` });
+          if (after(p.at)) findings.push({ level: "warn", message: `Shot ${index}'s globe point "${p.id}" lights at ${p.at}s, after the shot has ended.` });
+        }
+      }
+      if (g.type === "device" && !t.three?.device) findings.push({ level: "fail", message: `Shot ${index} is a device, but the look defines no \`three.device\` style.` });
+      if (g.type === "extrude") {
+        if (!t.three?.extrude) findings.push({ level: "fail", message: `Shot ${index} is an extrude, but the look defines no \`three.extrude\` style.` });
+        if (!g.icon === !g.svg) findings.push({ level: "fail", message: `Shot ${index}'s extrude needs exactly one of \`icon\` (a built-in) or \`svg\` (a filled SVG file).` });
+        if (g.icon && !(g.icon in ICONS)) findings.push({ level: "fail", message: `Shot ${index}'s extrude names the icon "${g.icon}", which is not a built-in.` });
+        if (g.svg && !/\.svg$/i.test(g.svg)) findings.push({ level: "fail", message: `Shot ${index}'s extrude \`svg\` is "${g.svg}"; it must be an .svg file (a PNG has no shapes to extrude).` });
+        if (after(g.at)) findings.push({ level: "warn", message: `Shot ${index}'s extrude turns to face the camera at ${g.at}s, after the shot has ended.` });
+      }
+    }
+    if (shot.motionBlur && typeof shot.src === "object" && ["globe", "device", "extrude"].includes(shot.src.type)) {
+      findings.push({ level: "warn", message: `Shot ${index} asks for motion blur on a 3D clip: each sample is a full WebGL render, and these move slowly enough not to need it.` });
     }
   }
 

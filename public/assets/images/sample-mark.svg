@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <!-- A sample mark drawn for the smoke test (MIT, this repository): a rounded tile with a play triangle cut out of it. -->
+  <path fill="#4FD1C5" fill-rule="evenodd" d="M28 8 H92 A20 20 0 0 1 112 28 V92 A20 20 0 0 1 92 112 H28 A20 20 0 0 1 8 92 V28 A20 20 0 0 1 28 8 Z M48 38 V82 L84 60 Z"/>
+  <circle fill="#FFD166" cx="96" cy="24" r="10"/>
+</svg>

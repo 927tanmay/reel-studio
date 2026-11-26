@@ -1,8 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { wipeClip, wipeEdge, zoomEnter, zoomExit, ZOOM_BLUR, ZOOM_TO } from "../engine/transition";
+import { irisClip, irisRadius, wipeClip, wipeEdge, zoomEnter, zoomExit, ZOOM_BLUR, ZOOM_TO } from "../engine/transition";
 import { chunkCards, popState } from "../engine/chunks";
-import { overlaps, reel, resolveTimeline, whip, wipe, zoomThrough } from "../engine/spec";
+import { iris, overlaps, reel, resolveTimeline, whip, wipe, zoomThrough } from "../engine/spec";
 import tokens from "../projects/default/tokens";
 
 const near = (a: number, b: number, eps = 1e-6) => assert.ok(Math.abs(a - b) < eps, `${a} vs ${b}`);
@@ -95,4 +95,22 @@ test("a popping word is hidden before it starts, overshoots, and rests at exactl
   const mid = popState(1000 + 120, 1000, 6, 30, 0.6);
   assert.ok(mid.scale > 1, "overshoots past 1 on the way in");
   assert.ok(popState(1010, 1000, 6, 30, 0.6).scale < 1);
+});
+
+test("an iris opens from its point to past the farthest corner, eased", () => {
+  near(irisRadius(0, 12, 0.5, 0.5, 1080, 1920), 0);
+  // From the centre, the farthest corner is half the diagonal.
+  assert.ok(irisRadius(12, 12, 0.5, 0.5, 1080, 1920) > Math.hypot(540, 960));
+  // From a point near the top-left, it has to reach the bottom-right corner.
+  assert.ok(irisRadius(12, 12, 0.1, 0.1, 1080, 1920) > Math.hypot(1080 * 0.9, 1920 * 0.9));
+  assert.ok(irisRadius(2, 12, 0.5, 0.5, 1080, 1920) < 0.1 * Math.hypot(540, 960), "a pinpoint at first");
+  assert.equal(irisClip(0, 12, 0.25, 0.75, 1080, 1920), "circle(0.00px at 270.00px 1440.00px)");
+  assert.ok(overlaps(iris({ frames: 12 })));
+  const gen = (s: number) => ({ type: "data" as const, style: "counter" as const, items: [], seconds: s });
+  const t = resolveTimeline(
+    reel({ id: "t", frame: { w: 1080, h: 1920, fps: 30 }, style: tokens, shots: [{ src: gen(3) }, { src: gen(3), enter: iris({ frames: 12, x: 0.3, hit: "tick" }) }] }),
+  );
+  assert.equal(t.shots[1].startFrame, 90 - 12);
+  assert.equal(t.shots[0].effectiveExit, undefined, "the old shot stands still round the opening circle");
+  assert.ok(t.hits.some((h) => h.sfx === "tick" && h.frame === 78));
 });

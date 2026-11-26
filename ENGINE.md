@@ -162,6 +162,12 @@ Grouped by how loud they are (see §4). Each line is a thing a brief can say.
   list moving on or a before and after), a **zoom-through** (the picture flies into
   the camera and the next settles out of the blur, for a new section) and a **whip**
   (a fast smeared slide). Any transition can carry a sound, usually a whoosh.
+- **An iris.** The next shot opens out of a circle from a point you choose — the
+  button just pressed, the logo, your face — so it reads as "and from this, that".
+- **Real 3D.** A dotted globe that lights places on your words and flies arcs
+  between them; your screenshot on a 3D phone or laptop that swings in and comes
+  flat (and scrolls); a built-in icon as glowing tubes, or your logo extruded
+  in 3D, turning to face the camera on its name.
 - **Punchy captions.** Two words a card, uppercase, each word popping in as it is
   said, the spoken word boxed in colour. A look choice for fast hot-topic reels.
 

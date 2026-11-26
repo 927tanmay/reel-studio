@@ -43,6 +43,13 @@ export const clipCues = (src: GenSpec, tokens: Tokens, fps: number, mergeSeconds
     case "scene":
       src.items.forEach((item) => appear(item.at ?? 0));
       break;
+    case "globe":
+      // Each place lighting up; an arc's landing is usually a place lighting too.
+      (src.points ?? []).forEach((p) => appear(p.at));
+      break;
+    case "extrude":
+      appear(src.at ?? 0.3);
+      break;
     case "morph":
       // Each state the shape lands in, and each click of its cursor.
       src.states.forEach((s) => appear(s.at));

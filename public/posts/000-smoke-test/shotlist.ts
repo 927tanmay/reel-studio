@@ -1,4 +1,4 @@
-import { blend, exitPunch, push, punch, reel, whip, wipe, zoomThrough } from "../../../engine/spec";
+import { blend, exitPunch, iris, push, punch, reel, whip, wipe, zoomThrough } from "../../../engine/spec";
 import tokens from "../../../projects/default/tokens";
 import config from "./post.json";
 
@@ -374,6 +374,38 @@ export default reel({
         region: { x: 0.06, y: 0.5, w: 0.88, h: 0.34 },
         at: 0.4,
       },
+    },
+    {
+      // A globe in real 3D: places light on their words, an arc flies between
+      // them, and the globe turns to face where it lands.
+      src: {
+        type: "globe",
+        points: [
+          { id: "blr", lat: 12.97, lon: 77.59, label: "BENGALURU", at: 0.3 },
+          { id: "sfo", lat: 37.77, lon: -122.42, label: "SAN FRANCISCO", at: 1.6 },
+          { id: "fra", lat: 50.11, lon: 8.68, label: "FRANKFURT", at: 2.6 },
+        ],
+        arcs: [
+          { from: "blr", to: "fra", at: 1.0, seconds: 1.3 },
+          { from: "fra", to: "sfo", at: 2.8, seconds: 1.4 },
+        ],
+        focus: [{ at: 0.2, lat: 20, lon: 60 }, { at: 2.6, lat: 35, lon: -30 }],
+        seconds: 5,
+      },
+    },
+    {
+      // A phone in real 3D, swinging flat, its screen scrolling a page.
+      src: { type: "device", kind: "phone", src: "assets/images/sample-page.png", scroll: { to: 1 }, seconds: 4 },
+    },
+    {
+      // A built-in icon as glowing 3D tubes, drawing on and turning to face us.
+      src: { type: "extrude", icon: "lock", label: "Locked down", at: 1.2, seconds: 3.5 },
+    },
+    {
+      // A filled SVG (a logo) extruded with a bevel, keeping its own colours.
+      src: { type: "extrude", svg: "assets/images/sample-mark.svg", at: 0.8, seconds: 2.5 },
+      // An iris opening from where the lock sat: this came from that.
+      enter: iris({ frames: 14, x: 0.5, y: 0.42 }),
     },
   ],
 });

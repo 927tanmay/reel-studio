@@ -632,6 +632,67 @@ export type CardStyle = {
   };
 };
 
+/** A line of type over a 3D clip. */
+export type ThreeLabel = { size: number; color: string; weight?: number; mono?: boolean };
+
+/**
+ * The look of the 3D clips. Each part is optional; a clip whose part is missing
+ * cannot be shown, and verify.ts says so. Colours are palette names, CSS
+ * colours, or "accent". `top` is the vertical centre, `size` the width the
+ * object fills, both fractions of the frame.
+ */
+export type ThreeStyle = {
+  globe?: {
+    top: number;
+    size: number;
+    /** How many dots make up the surface. */
+    dots: number;
+    /** A dot's radius, as a fraction of the globe's. */
+    dotSize: number;
+    dot: string;
+    /** The solid sphere inside the dots: it hides the far side, mostly. */
+    core: string;
+    coreOpacity: number;
+    /** A soft halo behind the globe, or none. */
+    glow?: string;
+    arc: string;
+    /** An arc's thickness, as a fraction of the globe's radius. */
+    arcWidth: number;
+    point: string;
+    /** Degrees a second the globe turns on its own before the first `focus`. */
+    spin: number;
+    /** Degrees the globe leans toward the camera. */
+    tilt: number;
+    label: ThreeLabel;
+  };
+  device?: {
+    top: number;
+    size: number;
+    body: string;
+    /** The thin rim round the body. */
+    edge: string;
+    /** Degrees it starts turned, about x and y, when no `turns` say otherwise. */
+    from: { x: number; y: number };
+    /** A soft shadow on the ground under it, or none. */
+    shadow?: string;
+  };
+  extrude?: {
+    top: number;
+    size: number;
+    color: string;
+    /** Extrusion depth of an SVG, as a fraction of its width. */
+    depth: number;
+    /** Tube radius of an icon's strokes, in the icon's 48-unit grid. */
+    tube: number;
+    metalness: number;
+    roughness: number;
+    from: { x: number; y: number };
+    /** A soft halo behind it, or none. */
+    glow?: string;
+    label: ThreeLabel;
+  };
+};
+
 /** The look of a `morph`: one shape that changes state without cutting. */
 export type MorphStyle = {
   /** Vertical centre of the shape, a fraction of frame height. */
@@ -878,6 +939,8 @@ export type Tokens = {
   card?: CardStyle;
   /** A screenshot in a browser window. Omit and an `image` clip cannot use `window`. */
   window?: WindowStyle;
+  /** The 3D clips: globe, device, extrude. Omit and none can be shown. */
+  three?: ThreeStyle;
   /** One shape that morphs between states. Omit and a `morph` cannot be shown. */
   morph?: MorphStyle;
   /** The hot-topic blocks (post, headline, stat, logos, timeline). Omit and none can be shown. */

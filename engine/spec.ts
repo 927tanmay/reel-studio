@@ -139,7 +139,23 @@ export type Wipe = {
   hitVolume?: number;
 };
 
-export type Enter = Punch | Cut | BandsOpen | Blend | Push | ZoomThrough | Wipe;
+/**
+ * An iris: a circle opens from a point and the new shot is uncovered inside
+ * it, the old one standing still around it. A transition that *comes from
+ * somewhere* — the button that was just pressed, the face on the left, the
+ * logo — so it says "and from this, that". `x` and `y` are fractions of the
+ * frame (default its centre); measure them on a still, as for a mark.
+ */
+export type Iris = {
+  kind: "iris";
+  frames: number;
+  x?: number;
+  y?: number;
+  hit?: string;
+  hitVolume?: number;
+};
+
+export type Enter = Punch | Cut | BandsOpen | Blend | Push | ZoomThrough | Wipe | Iris;
 
 export const punch = (o: Omit<Punch, "kind">): Punch => ({ kind: "punch", ...o });
 export const cut = (): Cut => ({ kind: "cut" });
@@ -148,6 +164,7 @@ export const blend = (o: Omit<Blend, "kind">): Blend => ({ kind: "blend", ...o }
 export const push = (o: Omit<Push, "kind">): Push => ({ kind: "push", ...o });
 export const zoomThrough = (o: Omit<ZoomThrough, "kind">): ZoomThrough => ({ kind: "zoom", ...o });
 export const wipe = (o: Omit<Wipe, "kind">): Wipe => ({ kind: "wipe", ...o });
+export const iris = (o: Omit<Iris, "kind">): Iris => ({ kind: "iris", ...o });
 /**
  * A whip pan: a push that is fast, eased at both ends and heavily blurred, so
  * the frame smears across. Not for a shot carrying text that must stay legible
@@ -162,8 +179,8 @@ export const whip = (o: Omit<Push, "kind" | "frames"> & { frames?: number }): Pu
 });
 
 /** Every enter that overlaps the shot before it rather than cutting. */
-export const overlaps = (enter?: Enter): enter is Blend | Push | ZoomThrough | Wipe =>
-  enter?.kind === "blend" || enter?.kind === "push" || enter?.kind === "zoom" || enter?.kind === "wipe";
+export const overlaps = (enter?: Enter): enter is Blend | Push | ZoomThrough | Wipe | Iris =>
+  enter?.kind === "blend" || enter?.kind === "push" || enter?.kind === "zoom" || enter?.kind === "wipe" || enter?.kind === "iris";
 
 /** An exit ramp on the outgoing shot. Pair with an enter punch for a full swap. */
 export type Exit = {
@@ -612,7 +629,53 @@ export type PostAuthor = {
   verified?: boolean;
 };
 
+/** A place on a `globe`: where it is, a short mono label, and when it lights. */
+export type GlobePoint = { id: string; lat: number; lon: number; label?: string; at?: number; tone?: string };
+
 export type GenSpec =
+  | {
+      /**
+       * A dotted globe in real 3D (three.js): it turns slowly, places light up
+       * on their words, and arcs fly between them with a dot riding the head —
+       * the request crossing the world, the data leaving the country. `focus`
+       * turns it to face a place. Labels are type, drawn over the picture, so
+       * they stay sharp. Look: `Tokens.three.globe`.
+       */
+      type: "globe";
+      points?: GlobePoint[];
+      arcs?: { from: string; to: string; at: number; seconds?: number; tone?: string }[];
+      focus?: { at: number; lat: number; lon: number }[];
+      seconds?: number;
+    }
+  | {
+      /**
+       * A phone or a laptop in real 3D with a picture on its screen (a
+       * screenshot from `npm run snap`, a still of an app), swinging in from an
+       * angle and coming flat, or turning on cue (`turns`, degrees). The screen
+       * can scroll a tall picture (`scroll`, fractions as on a window). Look:
+       * `Tokens.three.device`.
+       */
+      type: "device";
+      kind: "phone" | "laptop";
+      src: string;
+      turns?: { at: number; x?: number; y?: number }[];
+      scroll?: { from?: number; to?: number };
+      seconds?: number;
+    }
+  | {
+      /**
+       * A mark in real 3D: a built-in icon as glowing tubes, or a filled SVG (a
+       * logo) extruded with depth, turning gently and coming to face the camera
+       * on its word (`at`). `label` is a line of type under it. Look:
+       * `Tokens.three.extrude`.
+       */
+      type: "extrude";
+      icon?: SceneKind;
+      svg?: string;
+      label?: string;
+      at?: number;
+      seconds?: number;
+    }
   | {
       /**
        * One shape that never cuts: a pill that becomes a card that becomes a

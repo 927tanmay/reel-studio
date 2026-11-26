@@ -604,7 +604,7 @@ export const ShotView: React.FC<{
   return (
     // A wipe uncovers the whole incoming shot — picture and text together — the
     // way a push moves both together, so nothing of it shows ahead of the edge.
-    <AbsoluteFill style={{ opacity, transform: `translate(${translate.x}px, ${translate.y}px)`, clipPath: enterClip(frame, shot.enter) }}>
+    <AbsoluteFill style={{ opacity, transform: `translate(${translate.x}px, ${translate.y}px)`, clipPath: enterClip(frame, shot.enter, spec.frame) }}>
       {needsMatrix(shot.grade) && gain ? (
         <svg width={0} height={0} style={{ position: "absolute" }}>
           <defs>

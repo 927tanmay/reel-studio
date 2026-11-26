@@ -1,6 +1,6 @@
 import { Easing as RemotionEasing, interpolate } from "remotion";
 import type { Easing, Enter, Exit, Push } from "../spec";
-import { wipeClip, zoomEnter } from "../transition";
+import { irisClip, wipeClip, zoomEnter } from "../transition";
 
 // Standard overshoot/exponential formulas (Penner-style), not Remotion
 // built-ins — `interpolate`'s `easing` only needs to be a `t => number`
@@ -180,7 +180,7 @@ export const pushMotionBlur = (
  * quick audio crossfade under a hard visual cut to avoid a pop.
  */
 export const enterAudioFade = (frame: number, enter?: Enter): number => {
-  if (!enter || (enter.kind !== "blend" && enter.kind !== "push" && enter.kind !== "zoom" && enter.kind !== "wipe")) return 1;
+  if (!enter || (enter.kind !== "blend" && enter.kind !== "push" && enter.kind !== "zoom" && enter.kind !== "wipe" && enter.kind !== "iris")) return 1;
   return interpolate(frame, [0, enter.frames], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
@@ -213,9 +213,12 @@ export const transitionBlur = (
   return (incoming + outgoing) * scale;
 };
 
-/** The incoming picture's clip during a wipe, or undefined for every other enter. */
-export const enterClip = (frame: number, enter?: Enter): string | undefined =>
-  enter?.kind === "wipe" && frame < enter.frames ? wipeClip(frame, enter.frames, enter.direction) : undefined;
+/** The incoming picture's clip during a wipe or an iris, or undefined for every other enter. */
+export const enterClip = (frame: number, enter: Enter | undefined, size: { w: number; h: number }): string | undefined => {
+  if (enter?.kind === "wipe" && frame < enter.frames) return wipeClip(frame, enter.frames, enter.direction);
+  if (enter?.kind === "iris" && frame < enter.frames) return irisClip(frame, enter.frames, enter.x ?? 0.5, enter.y ?? 0.5, size.w, size.h);
+  return undefined;
+};
 
 /**
  * The mirror of `enterAudioFade`, applied to the shot being overlapped rather

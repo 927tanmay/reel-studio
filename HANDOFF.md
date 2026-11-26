@@ -100,7 +100,8 @@ Bad: `On the word "the", cut to the screen recording.`
 The beats you can ask for at a moment are: a plain cut, a sharp punch, a quiet
 punch, a **blend** (two shots overlap and zoom together instead of meeting at a
 hard edge), a **slide** (one shot sweeps in and covers the other, no zoom), a
-**wipe**, a **zoom-through**, a **whip**, a band opening, or a dip in the music.
+**wipe**, a **zoom-through**, a **whip**, an **iris** (opening from a point you
+name: "from the Pay button"), a band opening, or a dip in the music.
 The overlapping ones crossfade their own audio automatically, even if the picture
 doesn't. Any of them can carry a sound, and a sound can sit on any word. The ones
 that exist are recordings in these kinds: **whoosh**, **transition**, **pop**
@@ -382,6 +383,14 @@ in order: which shape (pill, card, terminal, chart, toast, toggle, progress), wh
 it says (exact copy; leave a card's lines blank for placeholder bars rather than
 invent text), and the word each lands on. Say where the cursor clicks, and whether
 it should sit in a panel beside you on your own footage or fill the frame.
+
+**3D** — say which, and give the facts:
+- **Globe**: the places (city names; coordinates are looked up), the word each
+  lights on, and which arcs fly from where to where on which word.
+- **Device**: phone or laptop, and the picture on its screen (a page to snap, or
+  a screenshot you supply), and whether it scrolls.
+- **Mark**: a built-in icon, or your logo as a *filled* SVG (a PNG cannot be
+  extruded), the word it turns to face the camera on, and a short label.
 
 **Hot-topic pieces** — say which, and give the content exactly:
 > **Post:** the author's name and handle, the post's text as written, the time,

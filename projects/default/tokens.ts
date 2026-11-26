@@ -269,6 +269,47 @@ export const tokens: Tokens = {
     tilt: { x: 6, y: -16, perspective: 1800, settleFrames: 22, parallax: 3 },
   },
 
+  // The 3D clips: glowing, unlit wireframe-and-dot objects in the accent, so
+  // they sit with the scenes and diagrams rather than looking rendered elsewhere.
+  three: {
+    globe: {
+      top: 0.45,
+      size: 0.78,
+      dots: 2200,
+      dotSize: 0.0065,
+      dot: "accent",
+      core: "#0A1A24",
+      coreOpacity: 0.88,
+      glow: "rgba(79,209,197,0.16)",
+      arc: "#FFD166",
+      arcWidth: 0.006,
+      point: "#FFFFFF",
+      spin: 12,
+      tilt: 18,
+      label: { size: 30, color: "#FFFFFF", weight: 700, mono: true },
+    },
+    device: {
+      top: 0.46,
+      size: 0.56,
+      body: "#1B2229",
+      edge: "#3A4652",
+      from: { x: 14, y: -32 },
+      shadow: "rgba(0,0,0,0.55)",
+    },
+    extrude: {
+      top: 0.42,
+      size: 0.46,
+      color: "accent",
+      depth: 0.18,
+      tube: 1.6,
+      metalness: 0.35,
+      roughness: 0.3,
+      from: { x: 10, y: -40 },
+      glow: "rgba(79,209,197,0.2)",
+      label: { size: 54, color: "#FFFFFF", weight: 800 },
+    },
+  },
+
   // One shape that never cuts: white on the dark ground, the way a product's own
   // interface would sit, with the accent for what is on, done or growing.
   morph: {

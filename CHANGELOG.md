@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Real 3D clips with three.js and @remotion/three: `globe` (dotted, places, arcs,
+  focus), `device` (phone or laptop with a picture on its screen, swinging flat,
+  scrolling), `extrude` (an icon as tubes or a filled SVG extruded). Pure geometry in
+  engine/three.ts. Renders pass `--gl` only for reels that use one.
+- `iris` transition: a circle opening from a point.
 - `morph`: one shape that never cuts — pill, card, terminal, chart, toast, toggle and
   progress states on spring tracks (engine/spring.ts, closed-form, one spring summed per
   change), a cursor with a human arc, clicks and drags. After Barty-Bart/motion-graphics.

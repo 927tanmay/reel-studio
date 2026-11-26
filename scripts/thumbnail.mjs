@@ -13,6 +13,7 @@
 import path from "node:path";
 import { spawn } from "node:child_process";
 import { ROOT, fmt, requirePost } from "./lib.mjs";
+import { check } from "./check.mjs";
 
 const id = requirePost(process.argv[2]);
 
@@ -53,5 +54,7 @@ fmt.head(`Thumbnail for ${id}`);
 console.log(`  Shot ${info.shot} (${info.label}) at ${info.at}s${info.text ? ` — "${info.text}"` : ""}`);
 
 const out = path.join(ROOT, "out", id, "thumbnail.jpg");
-await shell("npx", ["remotion", "still", `${id}-thumbnail`, out, "--frame=0"]);
+// A frozen 3D clip needs WebGL, as its render did.
+const { gl } = await check(id).catch(() => ({ gl: null }));
+await shell("npx", ["remotion", "still", `${id}-thumbnail`, out, "--frame=0", ...(gl ? [`--gl=${gl}`] : [])]);
 fmt.ok(out);

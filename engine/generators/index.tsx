@@ -19,6 +19,9 @@ import { Stat } from "./Stat";
 import { Logos } from "./Logos";
 import { Timeline } from "./Timeline";
 import { Morph } from "./Morph";
+import { Globe } from "./Globe";
+import { Device } from "./Device";
+import { Extrude } from "./Extrude";
 import type { WordTiming } from "../spec";
 
 /**
@@ -84,6 +87,12 @@ export const Generated: React.FC<GenProps> = ({ spec, reel, durationInFrames, wo
       return <Chat spec={spec} reel={reel} durationInFrames={durationInFrames} />;
     case "page":
       return <Page spec={spec} reel={reel} durationInFrames={durationInFrames} />;
+    case "device":
+      return <Device spec={spec} reel={reel} durationInFrames={durationInFrames} accent={accent} />;
+    case "extrude":
+      return <Extrude spec={spec} reel={reel} durationInFrames={durationInFrames} accent={accent} />;
+    case "globe":
+      return <Globe spec={spec} reel={reel} durationInFrames={durationInFrames} accent={accent} />;
     case "morph":
       return <Morph spec={spec} reel={reel} durationInFrames={durationInFrames} accent={accent} />;
     case "post":
