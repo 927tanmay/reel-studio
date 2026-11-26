@@ -1,3 +1,4 @@
+import { sfxPath } from "../sfx";
 import React from "react";
 import { Audio, Sequence, staticFile } from "remotion";
 import type { ReelSpec, ResolvedHit } from "../spec";
@@ -15,7 +16,7 @@ export const Hits: React.FC<{ spec: ReelSpec; hits: ResolvedHit[] }> = ({ spec, 
     <>
       {hits.map((hit, i) => (
         <Sequence key={`${hit.sfx}-${hit.frame}-${i}`} from={hit.frame} name={`hit ${hit.sfx}`}>
-          <Audio src={staticFile(`assets/sfx/${hit.sfx}.wav`)} volume={hit.volume} />
+          <Audio src={staticFile(sfxPath(hit.sfx))} volume={hit.volume} />
         </Sequence>
       ))}
     </>

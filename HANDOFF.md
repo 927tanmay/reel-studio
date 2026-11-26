@@ -103,10 +103,13 @@ hard edge), a **slide** (one shot sweeps in and covers the other, no zoom), a
 **wipe**, a **zoom-through**, a **whip**, a band opening, or a dip in the music.
 The overlapping ones crossfade their own audio automatically, even if the picture
 doesn't. Any of them can carry a sound, and a sound can sit on any word. The ones
-that exist are **snap**, **whoosh**, **tick**, **tap**, **switch**, **beep**,
-**pop** (something small landing), **riser** (one second of build that ends where
-something big lands), **ding** (a notification), **shutter** (a screenshot) and
-**type** (one key). Ask for any other sound and someone has to go find it first.
+that exist are recordings in these kinds: **whoosh**, **transition**, **pop**
+(something small landing), **click**, **tick**, **ui blip**, **ding** (a
+notification), **riser** (a build that ends where something big lands),
+**impact**, **glitch**, **typing** and **room tone**. The editor already puts a
+whoosh on transitions and a quiet pop on things landing; name a sound only where
+you want something specific. Ask for any other sound and someone has to go find
+it first.
 
 **Blend is for B-roll, not for two takes of you talking.** Ask for it between
 two B-roll moments that share a subject and should feel like one continuous

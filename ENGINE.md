@@ -165,6 +165,11 @@ Grouped by how loud they are (see §4). Each line is a thing a brief can say.
 - **Punchy captions.** Two words a card, uppercase, each word popping in as it is
   said, the spoken word boxed in colour. A look choice for fast hot-topic reels.
 
+- **Real sound effects.** Sounds are recordings (a CC0 library of 110: whooshes,
+  pops, clicks, ticks, dings, risers, impacts, glitches, typing, room tone), not
+  beeps. The look places them by itself: a whoosh just ahead of each transition,
+  a quiet pop as each thing lands, an impact as a number lands. You can ask for a
+  specific kind on any word ("a riser into the reveal", "a ding on the reply").
 - **Hinglish captions, spelled exactly as you type them.** With `Language:
   Hinglish` (or `Captions: from script`) in the brief's Delivery, the captions are
   the brief's script lines as written ("16 gb mai kaise fit ho jaata hai 256 gb ka

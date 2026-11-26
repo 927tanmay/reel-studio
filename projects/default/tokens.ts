@@ -329,18 +329,29 @@ export const tokens: Tokens = {
   // Sounds the engine plays by itself on screen events, so a shotlist never
   // has to name them. Small and quiet: a tap on a click, a tick as a mark
   // draws, a soft whoosh as the picture pushes toward a click.
+  // Recorded sounds from the CC0 library (public/assets/sfx/lib, kit/ is the
+  // default kit), not tones synthesized in code: a real whoosh, click and pop
+  // read as an editor's sound pass where generated beeps read as cheap.
   sounds: {
-    click: { sfx: "tap", volume: 0.75 },
-    mark: { sfx: "tick", volume: 0.4 },
-    zoom: { sfx: "whoosh", volume: 0.3 },
-    // An impact is a heavier event than a click: the shake gets the punch
-    // sound and does duck the music, the flash a whoosh, the glitch a switch.
-    shake: { sfx: "snap", volume: 0.8, duck: true },
-    flash: { sfx: "whoosh", volume: 0.45 },
-    glitch: { sfx: "switch", volume: 0.5 },
-    // A slam is the loudest thing a reel does on screen, so it gets the punch
-    // sound and ducks the music.
-    slam: { sfx: "snap", volume: 0.8, duck: true },
+    // Any overlapping transition without its own sound gets a whoosh two
+    // frames ahead of the move, the way a sound editor would place it.
+    transition: { sfx: "kit/whoosh", volume: 0.4, lead: 2 },
+    // Something landing in a generated clip: a small pop, kept quiet, since a
+    // reel can land a dozen things.
+    appear: { sfx: "kit/pop", volume: 0.3 },
+    // A stat's number finishing its count: the reveal, the one heavier sound.
+    count: { sfx: "kit/impact", volume: 0.45 },
+    click: { sfx: "kit/click", volume: 0.7 },
+    mark: { sfx: "kit/tick", volume: 0.45 },
+    zoom: { sfx: "kit/whoosh", volume: 0.28, lead: 2 },
+    // An impact is a heavier event than a click: the shake gets the impact
+    // and ducks the music, the flash a whoosh, the glitch a glitch.
+    shake: { sfx: "kit/impact", volume: 0.8, duck: true },
+    flash: { sfx: "kit/whoosh", volume: 0.45 },
+    glitch: { sfx: "glitch/kenney-interface-glitch-002", volume: 0.5 },
+    // A slam is the loudest thing a reel does on screen, so it gets the impact
+    // and ducks the music.
+    slam: { sfx: "kit/impact", volume: 0.85, duck: true },
   },
 
   // A key word landing big in the middle of the frame. 230 is the size a short

@@ -81,9 +81,37 @@ if (info.hasAudio && targetLufs !== null) {
       `Loud   ${measured.toFixed(1)} LUFS, off target ${targetLufs} by ${Math.abs(measured - targetLufs).toFixed(1)}`,
     );
   }
-} else if (targetLufs === null) {
+}
+
+// True peak and the mono fold-down, measured on the file itself (a sound pass
+// measures the export, never the mix before encoding). Peaks above -1 dBTP can
+// clip once a platform re-encodes or a phone speaker plays it; a mono fold-down
+// much quieter than the stereo means something is out of phase and vanishes on
+// a single speaker. Both are warnings: a reel can choose to be loud.
+if (info.hasAudio) {
+  const ebur = async (extra) => {
+    const { stderr } = await run("ffmpeg", ["-nostats", "-i", file, ...extra, "-af", "ebur128=peak=true", "-f", "null", "-"]);
+    const summary = stderr.slice(stderr.lastIndexOf("Summary:"));
+    const i = /I:\s*(-?[\d.]+) LUFS/.exec(summary);
+    const p = /Peak:\s*(-?[\d.]+|-inf) dBFS/.exec(summary);
+    return { lufs: i ? Number(i[1]) : null, peak: p && p[1] !== "-inf" ? Number(p[1]) : null };
+  };
+  const stereo = await ebur([]);
+  const mono = await ebur(["-ac", "1"]);
+  if (stereo.peak !== null) {
+    if (stereo.peak > -1) fmt.warn(`Peak   ${stereo.peak.toFixed(1)} dBTP, above -1: may clip after a platform re-encodes it`);
+    else fmt.ok(`Peak   ${stereo.peak.toFixed(1)} dBTP`);
+  }
+  if (stereo.lufs !== null && mono.lufs !== null) {
+    const drop = stereo.lufs - mono.lufs;
+    if (drop > 3) fmt.warn(`Mono   ${drop.toFixed(1)} LU quieter folded to mono: something is out of phase and thins on one speaker`);
+    else fmt.ok(`Mono   ${mono.lufs.toFixed(1)} LUFS folded down (${drop >= 0 ? "-" : "+"}${Math.abs(drop).toFixed(1)} LU)`);
+  }
+}
+
+if (targetLufs === null) {
   fmt.warn("Loud   not checked (targetLufs is null in post.json)");
-} else {
+} else if (!info.hasAudio) {
   fmt.warn("Audio  none");
 }
 

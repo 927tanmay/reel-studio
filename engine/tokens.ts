@@ -751,7 +751,14 @@ export type ImpactStyle = {
 };
 
 /** A sound effect the look plays on an event, rather than a shotlist naming it each time. */
-export type EventSound = { sfx: string; volume?: number; duck?: boolean };
+export type EventSound = {
+  /** A generated sound by name ("tick"), or a recording from the library by its path ("kit/whoosh"). */
+  sfx: string;
+  volume?: number;
+  duck?: boolean;
+  /** Frames early: a whoosh starts a little before the move it sells. */
+  lead?: number;
+};
 
 /**
  * Sounds the engine plays by itself when something happens on screen, so a
@@ -760,6 +767,12 @@ export type EventSound = { sfx: string; volume?: number; duck?: boolean };
  * `duck` defaults to false: these are small sounds that sit fine on the music.
  */
 export type EventSounds = {
+  /** Any transition that overlaps (blend, push, zoom-through, wipe) without its own `hit`. */
+  transition?: EventSound;
+  /** Something landing in a generated clip: a row, a logo, a timeline event, a post, a scene item, a chat bubble. */
+  appear?: EventSound;
+  /** A stat's number finishing its count. */
+  count?: EventSound;
   click?: EventSound;
   mark?: EventSound;
   zoom?: EventSound;

@@ -40,8 +40,9 @@ export const runWithShotlist = async (id, body, name = "check") => {
         import * as spec_ from ${at("engine", "spec.ts")};
         import * as verify_ from ${at("engine", "verify.ts")};
         import * as critique_ from ${at("engine", "critique.ts")};
+        import * as sfx_ from ${at("engine", "sfx.ts")};
         import spec from ${JSON.stringify(path.join(postDir(id), "shotlist.ts"))};
-        const engine = { ...spec_, ...verify_, ...critique_ };
+        const engine = { ...spec_, ...verify_, ...critique_, ...sfx_ };
         const emit = (value) => console.log(${JSON.stringify(MARK)} + JSON.stringify(value));
         ${body}
       `,
@@ -76,8 +77,17 @@ export const check = (id) =>
   runWithShotlist(
     id,
     `const timeline = engine.resolveTimeline(spec);
-     emit({ warnings: timeline.warnings, findings: engine.verifySpec(spec, timeline) });`,
-  );
+     const sounds = [...new Set(timeline.hits.map((h) => h.sfx))].map((name) => ({ name, path: engine.sfxPath(name) }));
+     emit({ warnings: timeline.warnings, findings: engine.verifySpec(spec, timeline), sounds });`,
+  ).then((result) => {
+    // A sound named but not on disk would render as silence, with nothing to say so.
+    for (const s of result.sounds) {
+      if (!existsSync(path.join(ROOT, "public", s.path))) {
+        result.findings.push({ level: "fail", message: `The sound "${s.name}" is used but public/${s.path} does not exist. Check the name against public/assets/sfx/lib/manifest.json.` });
+      }
+    }
+    return result;
+  });
 
 /** Prints a result the way the rest of the pipeline does. Returns the failure count. */
 export const report = ({ warnings, findings }) => {

@@ -420,9 +420,10 @@ by hand, and resuming is expected and supported.
    sit fine on music, and a run of them would otherwise pump the bed. A shot's
    `pointer.silent` or a mark's `silent` opts out; omit a key in the look and
    that event is silent everywhere. Two clicks inside one zoom play its sound
-   once. Any name in `public/assets/sfx` works (`tap`, `tick`, `switch`,
-   `snap`, `whoosh`, `beep`, `pop`, `riser`, `ding`, `shutter`, `type`); picking
-   which sound fits an event is a look decision. `riser` is a second of build
+   once. A plain name is a sound generated in code (`tap`, `tick`, `switch`,
+   `snap`, `whoosh`, `beep`, `pop`, `riser`, `ding`, `shutter`, `type`); a name
+   with a slash is a recorded CC0 sound from the library (rule 57), which the
+   default look now uses; picking which sound fits an event is a look decision. `riser` is a second of build
    that ends where something lands, so its `at` is one second before that word
    (`at: "four-1.0s"` in a format).
 
@@ -813,6 +814,29 @@ by hand, and resuming is expected and supported.
    every letter and vowel sign, not just a-z. Devanagari *captions* need a look
    with a Devanagari font (none ships yet).
 
+57. **Sounds are recordings, and the look places them on every event.**
+   `public/assets/sfx/lib` is a CC0 library of 110 recorded sounds (Freesound and
+   Kenney, selected and normalised by Barty-Bart/motion-graphics, MIT): categories
+   whoosh, transition, pop, click, tick, ui-blip, ding, riser, impact, glitch,
+   typing and ambience, with a default kit in `lib/kit/` (whoosh, click, pop,
+   tick, riser, impact, typing). A sound name with a slash is one of them
+   (`"kit/whoosh"`, `"pop/fs527522"`; `engine/sfx.ts` resolves it), a plain name
+   is a generated .wav, a name with an extension a path. `manifest.json` gives
+   every file's creator, source and licence; `LICENSES.md` lists them; only CC0
+   may be added. Generated tones read as cheap beeps: prefer recordings. Besides
+   click, mark, zoom and the impacts, a look can sound three more events:
+   `transition` (any overlapping enter without its own `hit`, `lead` frames early —
+   a whoosh two frames ahead of the move), `appear` (something landing in a
+   generated clip — a row, a logo, a timeline event, a post or its reply, a
+   headline, a scene item, a chat bubble — from the same arrival rules the
+   generator draws with, `engine/cues.ts`, merged when closer than 0.12 s) and
+   `count` (a stat's number landing). The default look plays all of them, quietly;
+   omit `appear` in a calmer look. `npm run check` fails a sound name that has no
+   file (it would render as silence); `npm run render` writes
+   `out/<post>/CREDITS.txt` naming every recording used; verify reports the
+   export's true peak (warns above -1 dBTP) and its mono fold-down (warns when
+   more than 3 LU quieter: something out of phase vanishes on one speaker).
+
 ## What stays human
 
 Take selection, where a cut lands emotionally, whether a crop reads at phone
@@ -857,6 +881,8 @@ engine/          the moves and the contract — general, never show-specific
   blocks.ts      numbers, count-ups, highlight runs and logo-wall columns for the hot-topic blocks
   transition.ts  zoom-through and wipe, as pure functions of the frame
   chunks.ts      caption cards of n words, and a word popping in
+  cues.ts        when things land in a generated clip, for the look's sounds
+  sfx.ts         where a sound effect's file is, from its name
   window.ts      where a screenshot sits in its browser window, and how far it has scrolled
   formats.ts     sections, listicle, how-it-works: structured content + a voice → a shotlist
   scene.ts · rows.ts · header.ts · backdrop.ts · emphasis.ts · card.ts · zoom.ts · ramp.ts · impact.ts · packet.ts   pure geometry for cards, click zooms, speed ramps and impacts,

@@ -7,6 +7,7 @@
  */
 
 import type { Tokens } from "./tokens";
+import { clipCues } from "./cues";
 import { nearestBeat, type BeatGrid } from "./beats";
 import { rampDuration, rampSource, type RampPoint } from "./ramp";
 import { zoomStartFrame, zoomTarget } from "./zoom";
@@ -2056,12 +2057,27 @@ export const resolveTimeline = (spec: ReelSpec): Timeline => {
     // and on a click in the shot's first moments that is before frame 0.
     const events = spec.style.sounds;
     if (events) {
-      const fire = (kind: keyof typeof events, atFrame: number) => {
+      const fire = (kind: keyof typeof events, atFrame: number, early = false) => {
         const e = events[kind];
         if (!e) return;
-        const frame = Math.min(startFrame + durationInFrames - 1, Math.max(startFrame, atFrame));
+        const at = atFrame - Math.round(e.lead ?? 0);
+        // A transition's sound may start before its shot does (that is what lead
+        // is for); everything else stays inside its shot.
+        const frame = Math.min(startFrame + durationInFrames - 1, Math.max(early ? 0 : startFrame, at));
         hits.push({ frame, sfx: e.sfx, volume: e.volume ?? 1, duck: e.duck ?? false });
       };
+      // A transition the shot did not give its own sound: the look's whoosh, a
+      // couple of frames ahead of the move.
+      if (overlaps(shot.enter) && !("hit" in shot.enter && shot.enter.hit)) fire("transition", startFrame, true);
+      // Things landing inside a generated clip, from the same arrival rules the
+      // generator draws with.
+      if (typeof shot.src === "object") {
+        for (const c of clipCues(shot.src, spec.style, fps)) {
+          // The first frames belong to the transition's own sound.
+          if (c.kind === "appear" && c.at < 3 / fps && overlaps(shot.enter)) continue;
+          fire(c.kind, startFrame + Math.round(c.at * fps));
+        }
+      }
       if (shot.pointer && !shot.pointer.silent) {
         const zoomStyle = spec.style.pointer?.zoom;
         const zooming = spec.style.pointer ? zoomTarget(shot.pointer, spec.style.pointer) !== null : false;

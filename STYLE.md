@@ -120,6 +120,9 @@ visibly weaker*, not merely plainer.
   push; the rest are cuts. A reel of nothing but transitions has no transitions.
 - **Alternate card tilt direction**, and don't tilt every card — a card that
   swings in every time stops being an arrival.
+- **A pop per thing landing, quiet.** The default look's `appear` sound is a
+  small pop at a third of full volume; a reel landing a dozen rows hears a
+  dozen. For a calm or serious reel, take `appear` out of the look.
 - **Silence is an effect.** The event sounds are deliberately small. A reel with
   a sound on every beat has none; let some moments land in near-quiet.
 - **A slow stretch is allowed.** The pacing numbers in `critique` are rules of

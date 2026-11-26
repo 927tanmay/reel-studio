@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- A CC0 library of 110 recorded sound effects (public/assets/sfx/lib, from
+  Barty-Bart/motion-graphics, MIT), named by path ("kit/whoosh"); the default look now
+  uses recordings, not generated tones. Looks can sound `transition` (a whoosh leading
+  any overlapping transition), `appear` (a pop as things land in a generated clip) and
+  `count` (a stat landing). check fails a missing sound; render writes CREDITS.txt;
+  verify reports true peak and the mono fold-down.
 - Typed captions come from the brief: with `Language: Hinglish` or `Captions: from script`
   in its Delivery, each take's quoted line under its `### <take>.mov` heading is its
   caption text (engine/brief.ts). `raw/<take>.txt` still overrides; otherwise the

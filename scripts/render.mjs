@@ -62,6 +62,17 @@ if (!skipCheck) {
     process.exit(1);
   });
   const failures = report(result);
+  // The recordings this reel uses, with their creators and licences: optional
+  // for CC0, handy for a video description, and proof of where a sound came from.
+  const manifestFile = path.join(ROOT, "public", "assets", "sfx", "lib", "manifest.json");
+  if (existsSync(manifestFile) && result.sounds?.length) {
+    const lib = JSON.parse(await (await import("node:fs/promises")).readFile(manifestFile, "utf8")).sounds;
+    const used = result.sounds.map((s) => lib.find((e) => e.name === s.name)).filter(Boolean);
+    if (used.length) {
+      const lines = ["Sound effects (all CC0 1.0, credit optional):", ...used.map((e) => `- ${e.title ? `"${e.title}" ` : ""}${e.creator ? `by ${e.creator} ` : ""}${e.source_url}`)];
+      await (await import("node:fs/promises")).writeFile(path.join(outDir, "CREDITS.txt"), lines.join("\n") + "\n");
+    }
+  }
   if (failures > 0) {
     console.error(`\n${failures} failure${failures === 1 ? "" : "s"} in the shotlist, so nothing was rendered. Fix it, or pass --no-check to render anyway.`);
     process.exit(1);
