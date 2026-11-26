@@ -22,11 +22,14 @@
 import path from "node:path";
 import { spawn } from "node:child_process";
 import { existsSync } from "node:fs";
+import { writeFile } from "node:fs/promises";
 import { ROOT, fmt, requireFfmpeg, writeJson } from "./lib.mjs";
+import { beatsBetween, kickCheck, nearestBeat } from "../engine/beats.ts";
 
 const name = process.argv[2];
+const applyShift = process.argv.includes("--shift");
 if (!name) {
-  console.error("Usage: npm run beats <file in public/assets/music>");
+  console.error("Usage: npm run beats <file in public/assets/music> [--shift]");
   process.exit(1);
 }
 
@@ -139,11 +142,126 @@ for (let p = 0; p < periodFrames; p++) {
   }
 }
 const periodSec = 60 / bpm;
-const firstBeatSec = ((bestPhase / frameRate) % periodSec + periodSec) % periodSec;
+const detectedFirstBeat = ((bestPhase / frameRate) % periodSec + periodSec) % periodSec;
 
-fmt.ok(`${bpm.toFixed(1)} BPM, first beat at ${firstBeatSec.toFixed(3)}s`);
+fmt.ok(`${bpm.toFixed(1)} BPM, first beat at ${detectedFirstBeat.toFixed(3)}s`);
 const confidenceWord = confidence > 3 ? "clear" : confidence > 2 ? "workable" : "weak — likely no hard beat to sync to";
 fmt.ok(`confidence ${confidence.toFixed(2)} (${confidenceWord})`);
+
+// Is the grid on the kick, or on the off-beat? The tempo above can be right and
+// the phase still lock onto the hi-hat between kicks, which puts every onBeat
+// hit half a beat wrong. Keep only what sits below about 120 Hz (two passes of a
+// second-order low-pass), and find where that bass energy *rises* — the attack
+// of each kick, not its peak, which a low note reaches 10-20 ms later — then
+// compare those with the grid. After Barty-Bart/motion-graphics' sound pass.
+const lowpass = (x, cutoff) => {
+  const w0 = (2 * Math.PI * cutoff) / SR;
+  const alpha = Math.sin(w0) / (2 * Math.SQRT1_2);
+  const a0 = 1 + alpha;
+  const b0 = (1 - Math.cos(w0)) / 2 / a0;
+  const b1 = (1 - Math.cos(w0)) / a0;
+  const a1 = (-2 * Math.cos(w0)) / a0;
+  const a2 = (1 - alpha) / a0;
+  const y = new Float32Array(x.length);
+  let x1 = 0, x2 = 0, y1 = 0, y2 = 0;
+  for (let i = 0; i < x.length; i++) {
+    const v = b0 * x[i] + b1 * x1 + b0 * x2 - a1 * y1 - a2 * y2;
+    x2 = x1; x1 = x[i]; y2 = y1; y1 = v; y[i] = v;
+  }
+  return y;
+};
+const low = lowpass(lowpass(samples, 120), 120);
+const KHOP = 110; // 5 ms
+const nK = Math.floor(low.length / KHOP);
+const kEnv = new Float32Array(nK);
+for (let i = 0; i < nK; i++) {
+  let m = 0;
+  for (let j = 0; j < KHOP; j++) m = Math.max(m, Math.abs(low[i * KHOP + j]));
+  kEnv[i] = m;
+}
+const kRate = SR / KHOP;
+// Smooth over ~15 ms, then the rise of it.
+const kSmooth = new Float32Array(nK);
+for (let i = 0; i < nK; i++) {
+  let s = 0, n = 0;
+  for (let j = Math.max(0, i - 1); j <= Math.min(nK - 1, i + 1); j++) { s += kEnv[j]; n++; }
+  kSmooth[i] = s / n;
+}
+const kRise = new Float32Array(nK);
+for (let i = 1; i < nK; i++) kRise[i] = Math.max(0, kSmooth[i] - kSmooth[i - 1]);
+const sortedRise = [...kRise].sort((a, b) => a - b);
+const riseFloor = sortedRise[Math.floor(sortedRise.length * 0.99)] * 0.4;
+const minGap = Math.round(periodSec * 0.6 * kRate);
+const kicks = [];
+for (let i = 1; i < nK - 1; i++) {
+  if (kRise[i] < riseFloor || kRise[i] < kRise[i - 1] || kRise[i] < kRise[i + 1]) continue;
+  const last = kicks.length ? kicks[kicks.length - 1] : null;
+  if (last && i - last.i < minGap) {
+    if (kRise[i] > last.v) kicks[kicks.length - 1] = { i, v: kRise[i] };
+    continue;
+  }
+  kicks.push({ i, v: kRise[i] });
+}
+const kickTimes = kicks.map((k) => k.i / kRate);
+const detected = { bpm, firstBeatSeconds: detectedFirstBeat, periodSeconds: periodSec };
+const kc = kickCheck(detected, kickTimes);
+const ms = (s) => `${s >= 0 ? "+" : ""}${Math.round(s * 1000)} ms`;
+let firstBeatSec = detectedFirstBeat;
+let finalPeriod = periodSec;
+let finalBpm = bpm;
+const drift = `${ms(kc.offsetSeconds)} at the first kick, ${ms(kc.driftSeconds)} at the last`;
+if (kickTimes.length < 8) {
+  fmt.warn(`kick check: only ${kickTimes.length} kicks found below 120 Hz — no steady kick to check the grid against`);
+} else if (!kc.steady) {
+  fmt.warn(
+    `kick check: ${kickTimes.length} bass hits, only ${kc.matched} on one steady grid (spread ${Math.round(kc.spreadSeconds * 1000)} ms) — ` +
+      "no steady kick here; check the graph before trusting onBeat",
+  );
+} else if (!kc.shift) {
+  fmt.ok(`kick check: grid sits on the kick (${drift}; ${kc.matched} kicks)`);
+} else {
+  const what = kc.offBeat ? "the grid is on the OFF-beat" : "the grid is off the kick";
+  if (applyShift) {
+    firstBeatSec = kc.corrected.firstBeatSeconds;
+    finalPeriod = kc.corrected.periodSeconds;
+    finalBpm = kc.corrected.bpm;
+    fmt.warn(`kick check: ${what} (${drift}) — fitted to the kicks (--shift): ${finalBpm.toFixed(2)} BPM, first beat ${firstBeatSec.toFixed(3)}s`);
+  } else {
+    fmt.warn(
+      `kick check: ${what} (${drift}; ${kc.matched} kicks). Fitted to the kicks it is ${kc.corrected.bpm.toFixed(2)} BPM, ` +
+        `first beat ${kc.corrected.firstBeatSeconds.toFixed(3)}s. Not changed: re-run with --shift to use it.\n` +
+        "    A post that already imports this grid moves its onBeat hits when it is next rendered.",
+    );
+  }
+}
+
+// The graph: the first four bars of bass energy, the detected beats in red, the
+// kicks as dots, and (when they differ) the checked grid in green. Open it.
+const svgFile = `${file}.beatgrid.svg`;
+{
+  const W = 1200, H = 220, pad = 24;
+  const from = Math.max(0, (kickTimes[0] ?? detectedFirstBeat) - periodSec / 2);
+  const to = Math.min(seconds, from + 16 * periodSec);
+  const x = (t) => (pad + ((t - from) / (to - from)) * (W - 2 * pad)).toFixed(1);
+  const i0 = Math.floor(from * kRate), i1 = Math.min(nK - 1, Math.ceil(to * kRate));
+  let peak = 1e-9;
+  for (let i = i0; i <= i1; i++) peak = Math.max(peak, kSmooth[i]);
+  const pts = [];
+  for (let i = i0; i <= i1; i++) pts.push(`${x(i / kRate)},${(H - pad - (kSmooth[i] / peak) * (H - 2 * pad)).toFixed(1)}`);
+  const line = (t, colour, y0, y1, dash) => `<line x1="${x(t)}" x2="${x(t)}" y1="${y0}" y2="${y1}" stroke="${colour}" stroke-width="1.5"${dash ? ' stroke-dasharray="4 3"' : ""}/>`;
+  const parts = [
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" font-family="ui-monospace,monospace" font-size="11">`,
+    `<rect width="${W}" height="${H}" fill="#0B0D12"/>`,
+    ...beatsBetween(detected, from, to).map((t) => line(t, "#F2555A", pad, H - pad)),
+    ...(kc.shift ? beatsBetween(kc.corrected, from, to).map((t) => line(t, "#3DBE83", pad, H - pad, true)) : []),
+    `<polyline fill="none" stroke="#9AA3B5" stroke-width="1" points="${pts.join(" ")}"/>`,
+    ...kickTimes.filter((t) => t >= from && t <= to).map((t) => `<circle cx="${x(t)}" cy="${pad - 8}" r="3.5" fill="#E3A33B"/>`),
+    `<text x="${pad}" y="${H - 6}" fill="#9AA3B5">${name}: bass below 120 Hz, first 4 bars. red = detected beats, orange = kicks${kc.shift ? ", green dashed = checked grid" : ""}. ${drift}</text>`,
+    "</svg>",
+  ];
+  await writeFile(svgFile, parts.join("\n"));
+  fmt.ok(`graph: public/assets/music/${path.basename(svgFile)}`);
+}
 
 // Section energy: a coarse envelope, to find where the track actually lifts
 // rather than just how fast it ticks.
@@ -242,7 +360,7 @@ for (let i = 1; i < nCoarse - HOLD; i++) {
   for (let j = 0; j < HOLD; j++) if (coarseEnv[i + j] < threshold) holds = false;
   if (holds) {
     const t = (i * COARSE) / frameRate;
-    candidates.push({ atSeconds: Number(localBeat(t).toFixed(3)), rawSeconds: Number(t.toFixed(2)) });
+    candidates.push({ atSeconds: Number((applyShift && kc.shift ? nearestBeat(kc.corrected, t) : localBeat(t)).toFixed(3)), rawSeconds: Number(t.toFixed(2)) });
   }
 }
 
@@ -260,11 +378,22 @@ if (candidates.length === 0) {
 const out = {
   file: name,
   seconds: Number(seconds.toFixed(2)),
-  bpm: Number(bpm.toFixed(2)),
+  bpm: Number(finalBpm.toFixed(2)),
   confidence: Number(confidence.toFixed(2)),
   firstBeatSeconds: Number(firstBeatSec.toFixed(3)),
-  periodSeconds: Number(periodSec.toFixed(4)),
+  periodSeconds: Number(finalPeriod.toFixed(applyShift && kc.shift ? 6 : 4)),
   candidateStarts: candidates.map((c) => c.atSeconds),
+  kickCheck: {
+    kicks: kickTimes.length,
+    matched: kc.matched,
+    offsetMs: Math.round(kc.offsetSeconds * 1000),
+    driftMs: Math.round(kc.driftSeconds * 1000),
+    steady: kc.steady,
+    spreadMs: Math.round(kc.spreadSeconds * 1000),
+    offBeat: kc.offBeat,
+    shifted: applyShift && kc.shift,
+    detectedFirstBeatSeconds: Number(detectedFirstBeat.toFixed(3)),
+  },
 };
 await writeJson(`${file}.beats.json`, out);
 

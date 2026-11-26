@@ -79,6 +79,7 @@ const BODY = `
     shots,
     hits: timeline.hits.map((h) => ({ at: +(h.frame / fps).toFixed(3), sfx: h.sfx })),
     findings: engine.verifySpec(spec, timeline),
+    listen: engine.listenList(spec, timeline),
     critique: engine.critiqueTimeline(spec, timeline, { coalesceSeconds: 0.25, hookSeconds: 3, deadAirSeconds: 0.5 }),
   });
 `;
@@ -136,6 +137,10 @@ const fails = data.findings.filter((f) => f.level === "fail").length;
 const warns = data.findings.length - fails;
 fmt.ok(`out/${id}/review/index.html  ${data.shots.length} shots, ${data.duration.toFixed(1)}s, ${fails} failure${fails === 1 ? "" : "s"}, ${warns} warning${warns === 1 ? "" : "s"}`);
 if (rendered) fmt.ok(`out/${id}/review/sheet.jpg  every shot's middle frame, in order`);
+if (data.listen.length) {
+  fmt.head("Listen to these with headphones (nothing here hears the mix)");
+  for (const m of data.listen) console.log(`  ${m.at.toFixed(2)}s  ${m.why.join("; ")}`);
+}
 if (open) spawn(process.platform === "darwin" ? "open" : "xdg-open", [path.join(outDir, "index.html")], { stdio: "ignore", detached: true }).unref();
 
 // ---------------------------------------------------------------------------
@@ -190,6 +195,7 @@ h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: 
 .stat b { display: block; font: 600 18px var(--mono); font-variant-numeric: tabular-nums; }
 .stat small { color: var(--ink-2); }
 .stat.flag b { color: var(--warn); }
+.finding.listen { cursor: pointer; } .finding.listen .lvl { color: var(--medium); font-variant-numeric: tabular-nums; }
 .finding { display: flex; gap: 8px; padding: 6px 0; border-top: 1px solid var(--line); font-size: 13px; }
 .finding:first-of-type { border-top: 0; }
 .finding .lvl { font: 700 11px var(--mono); flex: none; padding-top: 2px; }
@@ -240,6 +246,11 @@ h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: 
     <section>
       <h2>Pacing</h2>
       <div class="stats" id="stats"></div>
+    </section>
+    <section>
+      <h2>Listen to these</h2>
+      <div class="label">Nothing here hears the mix. These are the moments most likely to sound wrong: check them with headphones.</div>
+      <div id="listen"></div>
     </section>
     <section id="findingsBox">
       <h2>Findings</h2>
@@ -316,6 +327,15 @@ h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: 
   }
   stats.forEach(function (s) {
     var d = el("div", "stat" + (s[2] ? " flag" : "")); d.appendChild(el("b", null, s[1])); d.appendChild(el("small", null, s[0])); $("stats").appendChild(d);
+  });
+
+  // What to hear: the riskiest moments, each a button that jumps the video there.
+  if (!D.listen.length) $("listen").appendChild(el("div", "label", "No sound here stands out as risky."));
+  D.listen.forEach(function (m) {
+    var row = el("div", "finding listen"); row.appendChild(el("span", "lvl", t(m.at)));
+    var why = el("span"); m.why.forEach(function (w, i) { if (i) why.appendChild(el("br")); why.appendChild(document.createTextNode(w)); }); row.appendChild(why);
+    row.addEventListener("click", function () { seek(Math.max(0, m.at - 1)); if (video) video.play(); });
+    $("listen").appendChild(row);
   });
 
   // Findings: those about one shot go on its card; the rest are listed here.

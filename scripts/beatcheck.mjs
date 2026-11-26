@@ -108,6 +108,28 @@ if (report.dips.length > 0) {
   for (const d of report.dips) row("dip", d);
 }
 
+const fit = report.fit;
+if (fit && fit.moments.length > 0) {
+  fmt.head("Where the music could start so the hard moments land on beats");
+  const sum = (k) => fit.moments.reduce((a, m) => a + m[k], 0);
+  const before = sum("beforeMs");
+  const after = sum("afterMs");
+  for (const m of fit.moments) {
+    const line = `${m.what} at ${m.seconds.toFixed(2)}s: ${m.beforeMs} ms off now` + (fit.trackIn !== report.trackIn ? `, ${m.afterMs} ms with the fit` : "");
+    if (m.beforeMs <= 1000 / report.fps * ON_BEAT) fmt.ok(line);
+    else console.log(`  · ${line}`);
+  }
+  if (fit.trackIn === report.trackIn || before - after < Math.max(10, before * 0.1)) {
+    fmt.ok(`trackIn ${report.trackIn}s is already the best phase for these (${before} ms off in all). Nothing to change.`);
+  } else {
+    fmt.warn(
+      `trackIn ${fit.trackIn}s (now ${report.trackIn}s) puts them ${after} ms off in all instead of ${before} ms. ` +
+        "It only slides the music by part of a beat, so the same section plays. Suggested, not written: " +
+        "change bed.trackIn yourself if the music is meant to drive these cuts.",
+    );
+  }
+}
+
 fmt.head("Using it in a shotlist");
 console.log(
   "  A hit or dip that's off: add `onBeat: true` and resolveTimeline snaps it\n" +

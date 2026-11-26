@@ -11,7 +11,8 @@ import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { resolveTimeline, shotLabel } from "../engine/spec.ts";
-import { nearestBeat, type BeatGrid } from "../engine/beats.ts";
+import { fitTrackIn, nearestBeat, type BeatGrid } from "../engine/beats.ts";
+import { hardMoments } from "../engine/listen.ts";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const id = process.argv[2];
@@ -84,9 +85,24 @@ const dips = timeline.dips.map((d) => ({
   ...annotate(d.frame),
 }));
 
+// Where to start reading the track so the hard moments (cuts, slams, impacts)
+// land on beats: only slides the phase, within half a beat of the current trackIn.
+const moments = hardMoments(timeline, fps).filter((m) => m.frame >= bedStartFrame);
+const fitted = fitTrackIn(grid, moments.map((m) => (m.frame - bedStartFrame) / fps), trackIn);
+const fit = {
+  trackIn: fitted.trackIn,
+  moments: moments.map((m, i) => ({
+    what: m.what,
+    seconds: Number((m.frame / fps).toFixed(3)),
+    beforeMs: Math.round(fitted.before[i] * 1000),
+    afterMs: Math.round(fitted.after[i] * 1000),
+  })),
+};
+
 console.log(
   JSON.stringify(
     {
+      fit,
       fps,
       bpm: grid.bpm,
       confidence: grid.confidence,

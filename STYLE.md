@@ -137,6 +137,11 @@ visibly weaker*, not merely plainer.
   shot; an iris from the dead centre of an empty frame is just a slow cut.
 - **Silence is an effect.** The event sounds are deliberately small. A reel with
   a sound on every beat has none; let some moments land in near-quiet.
+- **Cut on the beat only where the music is the point.** A montage, a reveal,
+  a list moving on: fit the music's start so those cuts land (`npm run
+  beatcheck`). A cut that serves a sentence follows the voice; dragging it to a
+  beat clips a word. And only on a track whose kick check is steady: a track
+  with no steady kick has no beat to land on.
 - **A slow stretch is allowed.** The pacing numbers in `critique` are rules of
   thumb; a deliberate hold on one face is a choice, not a defect. Say so in the
   shotlist and leave it.
@@ -153,3 +158,6 @@ another one. Then:
    a wrong effect rarely rescues it.
 3. Show the user the shotlist with each loud effect and the word it lands on
    named, so overriding one costs a sentence.
+4. Hand the user the review's **Listen to these** list (also printed after every
+   render): the five moments most likely to sound wrong, to check with
+   headphones. Never say a mix sounds good: nothing here can hear it.

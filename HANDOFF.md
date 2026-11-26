@@ -523,6 +523,8 @@ A brief is ready to hand over when every one of these is true.
 - [ ] Every name, tool and filename you will speak is listed as it should
       print, or there are none
 - [ ] Music mood is stated, or explicitly none
+- [ ] If the cuts should land on the music's beat, Delivery says "cut on the beat"
+      (otherwise cuts follow the voice and the music only starts on a beat)
 - [ ] The ending is decided: freeze on the last frame, a generated close, or
       just ending on the last word (the default if you don't say)
 

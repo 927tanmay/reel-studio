@@ -42,8 +42,9 @@ export const runWithShotlist = async (id, body, name = "check") => {
         import * as critique_ from ${at("engine", "critique.ts")};
         import * as sfx_ from ${at("engine", "sfx.ts")};
         import * as three_ from ${at("engine", "three.ts")};
+        import * as listen_ from ${at("engine", "listen.ts")};
         import spec from ${JSON.stringify(path.join(postDir(id), "shotlist.ts"))};
-        const engine = { ...spec_, ...verify_, ...critique_, ...sfx_, ...three_ };
+        const engine = { ...spec_, ...verify_, ...critique_, ...sfx_, ...three_, ...listen_ };
         const emit = (value) => console.log(${JSON.stringify(MARK)} + JSON.stringify(value));
         ${body}
       `,

@@ -70,7 +70,9 @@ Grouped by how loud they are (see §4). Each line is a thing a brief can say.
   three words across the reel rendered bigger and in a second colour wherever
   they appear.
 - **Music** — say the mood, or none. It ducks under speech by itself, and can
-  start on a real beat of the track.
+  start on a real beat of the track. Say "cut on the beat" if the music should
+  drive the cuts: the start point in the track is then fitted so the hard cuts
+  and slams land on beats (checked against the track's actual kick drum).
 - **Ending** — freeze on the last frame, a generated close, or just end on the
   last word (the default).
 
@@ -181,6 +183,9 @@ Grouped by how loud they are (see §4). Each line is a thing a brief can say.
   beeps. The look places them by itself: a whoosh just ahead of each transition,
   a quiet pop as each thing lands, an impact as a number lands. You can ask for a
   specific kind on any word ("a riser into the reveal", "a ding on the reply").
+  Every review names the five moments most likely to sound wrong (a riser's
+  landing, a ducked impact, two sounds stacked, a cut off the beat), to check
+  with headphones: nothing here can hear the mix.
 - **Hinglish captions, spelled exactly as you type them.** With `Language:
   Hinglish` (or `Captions: from script`) in the brief's Delivery, the captions are
   the brief's script lines as written ("16 gb mai kaise fit ho jaata hai 256 gb ka

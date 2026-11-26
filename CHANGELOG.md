@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Sound sync: `npm run beats` checks the grid against the track's kick drum (bass
+  below 120 Hz), fits phase and tempo to the kicks, reports off-beat locks and drift,
+  and draws `<track>.beatgrid.svg`; `-- --shift` applies the fit. `npm run beatcheck`
+  suggests a `bed.trackIn` within half a beat that lands the cuts, slams and impacts on
+  beats, with per-moment errors in ms. Every review lists five moments to check with
+  headphones. After Barty-Bart/motion-graphics' sound pass (credit Vox).
 - Real 3D clips with three.js and @remotion/three: `globe` (dotted, places, arcs,
   focus), `device` (phone or laptop with a picture on its screen, swinging flat,
   scrolling), `extrude` (an icon as tubes or a filled SVG extruded). Pure geometry in

@@ -894,6 +894,30 @@ by hand, and resuming is expected and supported.
    on a still. `engine/transition.ts` `irisClip`; `verify.ts` fails a point
    outside the frame.
 
+61. **Check the beat grid against the kick, fit the music to the cuts, and say
+   what to listen to.** Beat detection can find the right tempo and still lock
+   onto the off-beat, and a tempo a fraction of a percent out drifts a third of a
+   beat over a track; either puts every `onBeat` hit wrong silently. `npm run
+   beats <track>` now keeps only the bass below 120 Hz, finds each kick's attack,
+   fits the grid to them (phase, then tempo, by least squares), and says whether
+   the detected grid sits on the kick, how far off it is at the first and last
+   kick, or that there is no steady kick to check against; it writes
+   `<track>.beatgrid.svg` (four bars: bass, detected beats, kicks, fitted grid) —
+   look at it. It changes nothing unless you pass `-- --shift`, because a post
+   that imports the grid would move its `onBeat` hits on its next render: never
+   shift the grid of a track a finished post uses. `npm run beatcheck <post>`
+   now also fits `bed.trackIn` within half a beat of where it is (the same part
+   of the track plays) so the hard moments — cuts, slams, impacts — land on
+   beats, and prints each one's error now and with the fit, in ms; it suggests,
+   never writes. Only use it where the music should drive the cuts (STYLE.md).
+   Every review prints, and its page lists, **Listen to these**: the five
+   moments most likely to sound wrong — long sounds (a riser, typing), sounds
+   that duck the music, the loudest, two sounds within 0.15 s, cuts more than
+   60 ms off the beat — each with why. Hand them to the user to check with
+   headphones; never say a mix sounds good. `engine/beats.ts` (`kickCheck`,
+   `fitTrackIn`) and `engine/listen.ts`, tested. After Barty-Bart/motion-graphics'
+   sound pass (MIT), which credits Vox (@Voxyz_ai).
+
 ## What stays human
 
 Take selection, where a cut lands emotionally, whether a crop reads at phone
@@ -943,6 +967,8 @@ engine/          the moves and the contract — general, never show-specific
   spring.ts      closed-form springs and tracks, the pointer's arc and press, for the morph
   three.ts       the 3D clips' geometry: lat/lon, arcs, facing, swing, camera distance, screen cover
   sfx.ts         where a sound effect's file is, from its name
+  beats.ts       the beat grid: nearest beat, the kick check, fitting trackIn to the cuts
+  listen.ts      the moments of a mix most worth hearing, for a person with headphones
   window.ts      where a screenshot sits in its browser window, and how far it has scrolled
   formats.ts     sections, listicle, how-it-works: structured content + a voice → a shotlist
   scene.ts · rows.ts · header.ts · backdrop.ts · emphasis.ts · card.ts · zoom.ts · ramp.ts · impact.ts · packet.ts   pure geometry for cards, click zooms, speed ramps and impacts,
@@ -1006,8 +1032,8 @@ npm run typecheck
 npm test                     # unit tests for the pure maths, no render
 node scripts/make-sfx.mjs    # regenerate the default sound effects
 node scripts/make-music.mjs  # write the default music bed (not committed)
-npm run beats <track>        # tempo, confidence, real start points for a music file
-npm run beatcheck 001-my-reel  # how far every cut, hit and dip sits from the beat grid
+npm run beats <track>        # tempo, confidence, kick check and graph, real start points for a music file
+npm run beatcheck 001-my-reel  # how far every cut, hit and dip sits from the beat grid, and a trackIn that fits
 npm run critique 001-my-reel   # pacing: first change, longest gap, speech coverage, dead air
 npm run snap 001-my-reel https://example.com/post -- --full   # screenshot a page into raw/
 npm run logo 001-my-reel vercel.com   # a site's own icon into raw/, for a logo wall
